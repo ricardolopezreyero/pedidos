@@ -326,6 +326,14 @@ button.tag.click{cursor:pointer}button.tag.click:hover{border-style:dashed;borde
 .line.mh{border-left:4px solid #c98a00;padding-left:8px}.line.mm{border-left:4px solid #1d4ed8;padding-left:8px}
 .kn em.harina,.kl em.h{background:#FFE3A0;color:#7a4f00;border-radius:6px;padding:1px 6px}.kn em.maiz,.kl em.m{background:#DBEAFE;color:#1d4ed8;border-radius:6px;padding:1px 6px}
 .bar i.h{background:#c98a00}.bar i.m{background:#1d4ed8}
+/* demo */
+.demo-sw{display:flex;align-items:center;gap:8px;margin-top:8px;cursor:pointer;font-size:12.5px;color:#ddd;font-weight:800}
+.demo-sw input{display:none}
+.demo-sw .sw{width:36px;height:20px;border-radius:999px;background:#555;position:relative;flex:none;transition:.15s}
+.demo-sw .sw::after{content:"";position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:.15s}
+.demo-sw input:checked+.sw{background:#E4322B}.demo-sw input:checked+.sw::after{left:19px}
+.demo-banner{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:50;background:#E4322B;color:#fff;font-weight:900;font-size:12px;letter-spacing:.06em;padding:5px 14px;border-radius:0 0 12px 12px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+@media(max-width:820px){.demo-sw{margin:0;padding:6px 8px}.demo-sw .t{display:none}}
 /* acceso */
 .gate{position:fixed;inset:0;background:var(--ink);display:grid;place-items:center;z-index:99;padding:20px}
 .gate form{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:360px;text-align:center}
@@ -343,9 +351,10 @@ button.tag.click{cursor:pointer}button.tag.click:hover{border-style:dashed;borde
   <aside>
     <div class="logo">🐸 <span>Ranitas</span> <small>Admin</small></div>
     <nav class="nav" id="nav"></nav>
-    <div class="side-foot"><span class="dot" id="dot"></span><span id="conn">conectando…</span><b id="who"></b><button id="salir" title="Cerrar sesión">⏻ <span class="t">Cerrar sesión</span></button></div>
+    <div class="side-foot"><span class="dot" id="dot"></span><span id="conn">conectando…</span><b id="who"></b><label class="demo-sw" title="Ver el sistema lleno con datos ficticios y movimiento (no toca nada real)"><input type="checkbox" id="demoSw"><span class="sw"></span><span class="t">Datos demo</span></label><button id="salir" title="Cerrar sesión">⏻ <span class="t">Cerrar sesión</span></button></div>
   </aside>
   <main id="main"></main>
+  <div class="demo-banner" id="demoBanner" hidden>🎬 MODO DEMO · datos ficticios con movimiento · nada de esto es real ni se guarda</div>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -426,21 +435,86 @@ const QS=new URLSearchParams(location.search);
 let tableros={}, anfitriones={}, catalogo={}, menu={}, online=false, prev={}, first=true, flash={}, q="";
 let vista=QS.get("v")||"panorama", fSuc=QS.get("suc")||"", fTab=QS.get("t")||"", pSuc=QS.get("suc")||"vinedos";
 if(!VISTAS.some(v=>v.id===vista)) vista="panorama";
-firebase.initializeApp(FIREBASE_CONFIG); const db=firebase.database();
+firebase.initializeApp(FIREBASE_CONFIG); let db=firebase.database(); const realDb=db; let demoOn=false;
 db.ref(".info/connected").on("value",s=>{ online=!!s.val(); $("#dot").className="dot"+(online?" on":""); $("#conn").textContent=online?"en vivo":"sin conexión"; });
-db.ref(ROOT+"/sucursales").on("value",s=>{ aplicarSucursales(s.val()); if(!SUCURSALES.some(x=>x.id===pSuc)) pSuc=(SUCURSALES[0]||{}).id||pSuc; render(); });
-db.ref(ROOT+"/anfitriones").on("value",s=>{ anfitriones=s.val()||{}; render(); });
-db.ref(ROOT+"/tableros").on("value",s=>{ tableros=s.val()||{}; if(QS.get("ped")&&!pos._auto){ const [sl,id]=QS.get("ped").split("/"); if(tableros[sl]&&tableros[sl].pedidos&&tableros[sl].pedidos[id]){ pos._auto=1; abrirEnMostrador(sl,id); return; } } render(); });
-db.ref(ROOT+"/catalogo").on("value",s=>{ catalogo=s.val()||{}; render(); });
-db.ref(ROOT+"/menu").on("value",s=>{ menu=s.val()||{}; render(); });
-let cocineros={}; db.ref(ROOT+"/cocina").on("value",s=>{ cocineros=s.val()||{}; render(); });
-db.ref(ROOT+"/admin/usuarios").on("value",s=>{ usuarios=s.val()||{}; refrescarYo(); });
+db.ref(ROOT+"/sucursales").on("value",s=>{ if(demoOn) return; aplicarSucursales(s.val()); if(!SUCURSALES.some(x=>x.id===pSuc)) pSuc=(SUCURSALES[0]||{}).id||pSuc; render(); });
+db.ref(ROOT+"/anfitriones").on("value",s=>{ if(demoOn) return; anfitriones=s.val()||{}; render(); });
+db.ref(ROOT+"/tableros").on("value",s=>{ if(demoOn) return; tableros=s.val()||{}; if(QS.get("ped")&&!pos._auto){ const [sl,id]=QS.get("ped").split("/"); if(tableros[sl]&&tableros[sl].pedidos&&tableros[sl].pedidos[id]){ pos._auto=1; abrirEnMostrador(sl,id); return; } } render(); });
+db.ref(ROOT+"/catalogo").on("value",s=>{ if(demoOn) return; catalogo=s.val()||{}; render(); });
+db.ref(ROOT+"/menu").on("value",s=>{ if(demoOn) return; menu=s.val()||{}; render(); });
+let cocineros={}; db.ref(ROOT+"/cocina").on("value",s=>{ if(demoOn) return; cocineros=s.val()||{}; render(); });
+db.ref(ROOT+"/admin/usuarios").on("value",s=>{ if(demoOn) return; usuarios=s.val()||{}; refrescarYo(); });
 setInterval(render,30000);
 function allCards(){ const out=[]; Object.keys(tableros).forEach(sl=>{ const t=tableros[sl]||{}; const cfg=t.config||{}; Object.keys(t.pedidos||{}).forEach(id=>{ const c=t.pedidos[id]; if(!c) return; out.push(Object.assign({},c,{id,slug:sl,personas:toArr(c.personas),sucursal:c.sucursal||cfg.sucursal||"",tablero:(anfitriones[sl]||{}).nombre||sl})); }); }); return out; }
 function filtradas(){ return allCards().filter(c=>(!fSuc||c.sucursal===fSuc)&&(!fTab||c.slug===fTab)); }
 function apagados(suc){ const c=catalogo[suc]||{}; return Object.keys(c).filter(k=>c[k]&&c[k].on===false); }
 function nombreItem(k){ for(const g of CATALOGO) for(const i of g.items) if(catKey(g.c,i)===k) return i; return k; }
 function syncUrl(){ const q=new URLSearchParams(); q.set("v",vista); if(vista==="pedidos"||vista==="panorama"){ if(fSuc) q.set("suc",fSuc); if(fTab) q.set("t",fTab); } if(vista==="productos"||vista==="precios") q.set("suc",pSuc); history.replaceState(null,"",location.pathname+"?"+q); }
+
+/* ---------- MODO DEMO: base ficticia en memoria + simulador de movimiento. Nunca escribe en Firebase — RLR ---------- */
+let DEMO=null, demoTimer=null, demoReal=null, demoTick=0;
+const dfix=v=>{ if(v&&typeof v==="object"){ if(v[".sv"]==="timestamp") return Date.now(); const o=Array.isArray(v)?[]:{}; Object.keys(v).forEach(k=>{ const x=dfix(v[k]); if(x!==undefined) o[k]=x; }); return o; } return v; };
+function demoRef(path){ const segs=String(path).replace(/^\/+|\/+$/g,"").split("/").slice(1);
+  const get=()=>segs.reduce((o,k)=>(o==null?undefined:o[k]),DEMO);
+  const setAt=(val)=>{ let o=DEMO; for(let i=0;i<segs.length-1;i++){ if(o[segs[i]]==null||typeof o[segs[i]]!=="object") o[segs[i]]={}; o=o[segs[i]]; } const last=segs[segs.length-1]; if(val==null) delete o[last]; else o[last]=val; };
+  const api={ set:v=>{ setAt(dfix(v)); demoSync(); return Promise.resolve(); }, update:p=>{ Object.entries(p||{}).forEach(([k,v])=>demoRef(path+"/"+k)._raw(v)); demoSync(); return Promise.resolve(); }, remove:()=>{ setAt(null); demoSync(); return Promise.resolve(); },
+    push:v=>{ const k="-D"+Date.now().toString(36)+Math.random().toString(36).slice(2,5); demoRef(path+"/"+k)._raw(v); demoSync(); return Promise.resolve({key:k}); },
+    transaction:(fn,cb)=>{ const cur=get(); const nv=fn(cur==null?cur:JSON.parse(JSON.stringify(cur))); if(nv===undefined){ if(cb) cb(null,false); } else { setAt(dfix(nv)); demoSync(); if(cb) cb(null,true,{val:()=>nv}); } return Promise.resolve(); },
+    once:(ev,cb)=>{ const snap={val:()=>{ const v=get(); return v==null?null:JSON.parse(JSON.stringify(v)); }}; if(cb) cb(snap); return Promise.resolve(snap); }, on:()=>{}, off:()=>{}, onDisconnect:()=>({remove:()=>{}}), orderByKey:()=>api, limitToLast:()=>api, endAt:()=>api, child:k=>demoRef(path+"/"+k), _raw:v=>{ setAt(v==null?null:dfix(v)); } };
+  return api; }
+function demoSync(){ if(!DEMO) return; tableros=DEMO.tableros||{}; anfitriones=DEMO.anfitriones||{}; catalogo=DEMO.catalogo||{}; menu=DEMO.menu||{}; cocineros=DEMO.cocina||{}; usuarios=(DEMO.admin||{}).usuarios||{}; aplicarSucursales(DEMO.sucursales);
+  const nuevos=Object.keys(DEMO.bitacora||{}).filter(k=>!bitLog[k]); bitLog=Object.assign({},DEMO.bitacora||{}); nuevos.forEach(k=>{ if(bitLoadedOnce){ bitNew.add(k); setTimeout(()=>bitNew.delete(k),1500); } }); bitLoadedOnce=true; bitOn=true; render(); }
+const R=(a)=>a[Math.floor(Math.random()*a.length)], RI=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+function demoBase(){ const now=Date.now(), H=3600e3, M=60e3; const G=CATALOGO[0].items; let uid=1; const id=()=>"d"+(uid++).toString(36).padStart(4,"0");
+  const FAM=["Garza","Cruz Frías","Ramos","Ibarra","Villarreal","Treviño","Montemayor","Salinas","Elizondo","De la Garza","Cantú","Zambrano","Sada","Fernández","Lozano","Aguirre"];
+  const NOM={papa:["Pablo","Daniel","Luis","Jorge","Beto","Toño"],mama:["Marifer","Lorena","Ana","Paty","Claudia","Sofía"],hijo:["Santi","Diego","Emilio","Mateo"],hija:["Regina","Cata","Camila","Valeria","Romina"]};
+  const per=(rol,i)=>{ const p={id:"p"+i,rol,nombre:R(NOM[rol]),masa:"harina",gorditas:[],bebidas:[],postres:[],chilaquiles:null}; const k=RI(1,3); for(let j=0;j<k;j++) p.gorditas.push({guiso:R(G.filter(x=>x!=="Combinada")),masa:Math.random()<.65?"harina":"maiz",cant:RI(1,2),detalle:""}); if(Math.random()<.3) p.chilaquiles={salsa:R(SALSAS),queso:R(QUESOS),extras:Math.random()<.5?["Huevo estrellado"]:[],guiso:"",cant:1}; if(Math.random()<.5) p.bebidas.push({nombre:R(CATALOGO[5].items.filter(x=>x!=="Refresco")),cant:1,detalle:""}); if(Math.random()<.3) p.postres.push({nombre:R(CATALOGO[6].items),cant:1}); return p; };
+  const personas=()=>{ const roles=["papa","mama"]; if(Math.random()<.7) roles.push("hijo"); if(Math.random()<.6) roles.push("hija"); return roles.map((r,i)=>per(r,i+1)); };
+  const sucs={}; SUC_BASE.forEach((x,i)=>sucs[x.id]={n:x.n,tels:x.tels,direccion:"",activa:true,orden:i+1,creado:now-30*24*H}); const SUCS=Object.keys(sucs);
+  const anf={}, tab={}, cocina={}, cat={}, bita={}; const bit_=(o)=>{ bita["-D"+(1e12+ (o.ts||now)).toString(36)+Math.random().toString(36).slice(2,4)]=Object.assign({app:"demo"},o); };
+  const boards=[["familia-lopez-acosta","Familia López Acosta","ibero","8712778426"],["familia-garza","Familia Garza","vinedos","8711111111"],["familia-ramos","Familia Ramos","juarez","8712222222"],["oficina-superleads","Oficina SuperLeads","sanatorio","8713333333"],["familia-trevino","Familia Treviño","vinedos","8714444444"]];
+  boards.forEach(([sl,nm,suc,tel])=>{ anf[sl]={nombre:nm,tel,slug:sl,creado:now-20*24*H}; tab[sl]={config:{sucursal:suc,telIdx:0,anfitrion:nm.replace("Familia ",""),telAnfitrion:tel,direccion:R(["Otates 65, Real del Nogalar","Paseo del Tecnológico 1200","Blvd. Independencia 3500","Calle Juárez 810, Centro","Av. Universidad 2050"]),entrega:R(["","8:30 pm","2:30 pm","lo antes posible"]),pago:R(["efectivo","transferencia","tarjeta"]),pagoCon:"500",sms:false},pedidos:{}}; });
+  SUCS.forEach(suc=>{ const sn=sucs[suc].n; for(let m=1;m<=6;m++){ const sl="mesa-"+suc+"-"+m; anf[sl]={nombre:"Mesa "+m+" · "+sn,tel:"",slug:sl,mesa:true,sucursal:suc,numero:m,activa:true,creado:now-10*24*H}; tab[sl]={config:{sucursal:suc,anfitrion:"Mesa "+m,mesa:true,direccion:"En mesa "+m},pedidos:{}}; } anf["mostrador-"+suc]={nombre:"Mostrador "+sn,tel:"",slug:"mostrador-"+suc,mostrador:true,creado:now-10*24*H}; tab["mostrador-"+suc]={config:{sucursal:suc,anfitrion:"Mostrador "+sn,direccion:"En sucursal"},pedidos:{}};
+    cocina[suc]={cocineros:{}}; [["lupe","Lupe"],["pepe","Pepe"],["mary","Mary"]].slice(0,RI(2,3)).forEach(([k,v])=>cocina[suc].cocineros[k+"-"+suc]={nombre:v,creado:now-5*24*H});
+    cat[suc]={}; CATALOGO.forEach(g=>g.items.forEach(it=>{ cat[suc][catKey(g.c,it)]={on:true,precio:g.c==="g"?RI(28,36):g.c==="ch"?95:g.c==="b"?RI(22,35):RI(30,45),precioM:g.c==="g"?RI(26,34):null}; })); });
+  cat.vinedos["g_picadillo"].on=false; cat.juarez["g_barbacoa"].offM=true; cat.sanatorio["b_jugo-de-naranja"].on=false;
+  const card=(sl,suc,fam,estado,etapa,ageMin,extra)=>{ const c=Object.assign({id:id(),familia:fam,estado,listo:estado!=="armando",creado:now-ageMin*M,actualizado:now-RI(0,Math.max(1,ageMin))*M,personas:personas(),notas:R(["","","Sin cebolla","Salsa aparte","Salsa extra 🌶",""]),sucursal:suc,_w:"demo"},extra||{});
+    if(estado!=="armando") c.listoEn=c.creado+5*M; if(["pedido","entregado","archivado"].includes(estado)){ c.pedidoEn=c.creado+8*M; c.etapa=etapa||"proceso"; if(etapa&&etapa!=="proceso"){ c.cocinero=R(Object.entries(cocina[suc].cocineros).map(([k,v])=>({id:k,nombre:v.nombre}))); c.armadoEn=c.pedidoEn+RI(2,9)*M; } if(["espera","repartiendo","entregado"].includes(etapa)||["entregado","archivado"].includes(estado)) c.listoCocinaEn=(c.armadoEn||c.pedidoEn)+RI(8,18)*M; if(["entregado","archivado"].includes(estado)){ c.entregadoEn=c.listoCocinaEn+RI(10,25)*M; c.etapa="entregado"; } }
+    if(estado==="archivado") c.archivadoEn=c.entregadoEn+30*M; if(Math.random()<(estado==="archivado"?.9:.5)&&estado!=="armando") c.pago={estado:"pagado",metodo:R(["efectivo","efectivo","transferencia","tarjeta"]),ts:c.creado+RI(5,60)*M,por:"demo"}; tab[sl].pedidos[c.id]=c; return c; };
+  // ahora mismo
+  card("familia-lopez-acosta","ibero","López Acosta","armando",null,12); card("familia-garza","vinedos","Garza","armando",null,6); card("familia-ramos","juarez","Salinas","armando",null,3);
+  card("familia-garza","vinedos","Cantú","porpedir",null,18); card("oficina-superleads","sanatorio","Marketing","porpedir",null,25);
+  card("familia-lopez-acosta","ibero","Cruz Frías","pedido","proceso",22); card("familia-trevino","vinedos","Treviño","pedido","proceso",15); card("mostrador-vinedos","vinedos","Pedido 7","pedido","proceso",9,{mostrador:true}); card("mesa-juarez-3","juarez","Mesa 3","pedido","proceso",5,{mesa:true});
+  card("familia-garza","vinedos","Montemayor","pedido","armado",31,{avance:{"p1:g:0":true,"p2:g:0":true}}); card("mesa-vinedos-2","vinedos","Mesa 2","pedido","armado",14,{mesa:true,avance:{"p1:g:0":true}}); card("familia-ramos","juarez","Zambrano","pedido","armado",27);
+  card("oficina-superleads","sanatorio","Ventas","pedido","espera",40); card("mostrador-juarez","juarez","Pedido 4","pedido","espera",33,{mostrador:true});
+  card("familia-lopez-acosta","ibero","Ibarra","pedido","repartiendo",52); card("familia-trevino","vinedos","Lozano","pedido","repartiendo",47);
+  card("familia-garza","vinedos","Sada","entregado",null,80); card("mostrador-ibero","ibero","Pedido 2","entregado",null,95,{mostrador:true}); card("familia-ramos","juarez","Aguirre","entregado",null,70);
+  // historial de 14 días
+  for(let d=1;d<=14;d++){ const nd=RI(3,9); for(let j=0;j<nd;j++){ const sl=R(boards)[0]; const suc=tab[sl].config.sucursal; const min=d*24*60+RI(-60,600); card(sl,suc,R(FAM),"archivado",null,min); } }
+  // bitácora reciente
+  const acts=[["familia","pedido","creo","Creó un pedido nuevo"],["familia","edicion","edito","Cambió: Pablo: +2 Asado · 🌾 harina"],["familia","pedido","listo","Dio Listo → Por pedir (🫓 6 gorditas)"],["anfitrion","pedido","whatsapp","Mandó el WhatsApp a Suc. Viñedos con 2 familia(s): Garza, Cantú"],["cocina","cocina","tomo","Tomó el pedido para armarlo (🫓 9)"],["cocina","cocina","comal","Comal listo: 3 Asado 🌾 HARINA"],["cocina","cocina","listo","Terminó el pedido en cocina, espera repartidor (11 min armando)"],["caja","reparto","etapa","Salió a repartir"],["caja","reparto","entrego","Marcó entregado al cliente"],["caja","pago","pago","Marcó pagado (efectivo)"],["mesa","pedido","ordeno","Ordenó desde la mesa: 🫓 4 gorditas"],["admin","producto","apago","Apagó Picadillo en Viñedos"],["caja","pedido","cocina","Mandó a cocina: 🫓 5 (🌾3 · 🌽2)"]];
+  for(let i=0;i<60;i++){ const a=R(acts); const sl=R(boards); bit_({ts:now-RI(1,240)*M,cat:a[1],accion:a[2],det:a[3],actor:{tipo:a[0],nombre:a[0]==="cocina"?R(["Lupe","Pepe","Mary"]):a[0]==="familia"?"Familia "+R(FAM):a[0]==="anfitrion"?sl[1]:a[0]==="caja"?"Caja "+R(SUCS).replace(/^./,x=>x.toUpperCase()):"Maestro",sid:"demo"},tablero:sl[0],tableroNombre:sl[1],sucursal:sl[2],pedido:"d0001",familia:R(FAM)}); }
+  return {sucursales:sucs,anfitriones:anf,tableros:tab,cocina,catalogo:cat,menu:{},bitacora:bita,admin:{usuarios:{"caja-vinedos":{nombre:"Caja Viñedos",clave:"1111",vistas:["pedidos","mostrador","mesas"],creado:now-9*24*H},"cocina-juarez":{nombre:"Cocina Juárez",clave:"2222",vistas:["cocina"],creado:now-9*24*H},"repartidores":{nombre:"Repartidores",clave:"3333",vistas:["pedidos"],creado:now-8*24*H}}}}; }
+// Simulador: cada pocos segundos pasa algo en algún lado, con destello y bitácora
+function demoPaso(){ if(!DEMO) return; demoTick++; const now=Date.now(); const all=[]; Object.entries(DEMO.tableros).forEach(([sl,t])=>Object.values(t.pedidos||{}).forEach(c=>all.push(Object.assign(c,{slug:sl})))); const G=CATALOGO[0].items.filter(x=>x!=="Combinada");
+  const log=(cat,accion,det,c,tipo,nombre)=>{ demoRef(ROOT+"/bitacora").push({ts:now,cat,accion,det,actor:{tipo,nombre,sid:"demo"},tablero:c?c.slug:"",tableroNombre:c?((DEMO.anfitriones[c.slug]||{}).nombre||""):"",sucursal:c?c.sucursal:"",pedido:c?c.id:null,familia:c?c.familia:""}); };
+  const w=(c,patch)=>{ Object.assign(c,patch,{actualizado:now,_w:"demo"}); };
+  const opciones=[];
+  const arm=all.filter(c=>c.estado==="armando"); if(arm.length) opciones.push(()=>{ const c=R(arm); const p=R(c.personas); p.gorditas.push({guiso:R(G),masa:Math.random()<.6?"harina":"maiz",cant:1,detalle:""}); w(c,{}); log("edicion","edito","Cambió: "+nombreDe(p)+": +1 "+p.gorditas[p.gorditas.length-1].guiso,c,"familia","Familia "+c.familia); });
+  if(arm.length&&demoTick%3===0) opciones.push(()=>{ const c=R(arm); w(c,{estado:"porpedir",listo:true,listoEn:now}); log("pedido","listo","Dio Listo → Por pedir ("+totStr(totales(c))+")",c,"familia","Familia "+c.familia); });
+  const porp=all.filter(c=>c.estado==="porpedir"); if(porp.length&&demoTick%4===0) opciones.push(()=>{ const c=R(porp); w(c,{estado:"pedido",etapa:"proceso",pedidoEn:now}); log("pedido","whatsapp","Mandó el WhatsApp a Suc. "+((SUCURSALES.find(s=>s.id===c.sucursal)||{}).n||"")+" con 1 familia(s): "+c.familia,c,"anfitrion",(DEMO.anfitriones[c.slug]||{}).nombre||""); });
+  const proc=all.filter(c=>c.estado==="pedido"&&(!c.etapa||c.etapa==="proceso")); if(proc.length) opciones.push(()=>{ const c=R(proc); const cs=Object.entries((DEMO.cocina[c.sucursal]||{}).cocineros||{}); if(!cs.length) return; const k=R(cs); w(c,{etapa:"armado",cocinero:{id:k[0],nombre:k[1].nombre},armadoEn:now}); log("cocina","tomo","Tomó el pedido para armarlo ("+totStr(totales(c))+")",c,"cocina",k[1].nombre); });
+  const arma=all.filter(c=>c.estado==="pedido"&&c.etapa==="armado"); if(arma.length) opciones.push(()=>{ const c=R(arma); const L=lineasDe(c).filter(l=>!(c.avance||{})[l.k]); if(L.length){ const l=R(L); c.avance=c.avance||{}; c.avance[l.k]=true; w(c,{}); log("cocina","comal","Comal listo: "+l.cant+" "+l.n,c,"cocina",(c.cocinero||{}).nombre||"Lupe"); } else { w(c,{etapa:"espera",listoCocinaEn:now}); log("cocina","listo","Terminó el pedido en cocina, espera repartidor ("+mins(c.armadoEn)+" min armando)",c,"cocina",(c.cocinero||{}).nombre||"Lupe"); } });
+  const esp=all.filter(c=>c.estado==="pedido"&&c.etapa==="espera"); if(esp.length&&demoTick%2===0) opciones.push(()=>{ const c=R(esp); w(c,{etapa:"repartiendo"}); log("reparto","etapa","Salió a repartir",c,"caja","Caja"); });
+  const rep=all.filter(c=>c.estado==="pedido"&&c.etapa==="repartiendo"); if(rep.length&&demoTick%3===0) opciones.push(()=>{ const c=R(rep); w(c,{estado:"entregado",etapa:"entregado",entregadoEn:now}); if(!c.pago) c.pago={estado:"pagado",metodo:R(["efectivo","tarjeta","transferencia"]),ts:now,por:"demo"}; log("reparto","entrego","Marcó entregado al cliente",c,"caja","Repartidor"); });
+  if(demoTick%5===0) opciones.push(()=>{ const sl=R(Object.keys(DEMO.tableros).filter(k=>!k.startsWith("mesa-")&&!k.startsWith("mostrador-"))); const t=DEMO.tableros[sl]; const fam=R(["Villarreal","Cantú","Sada","Elizondo","Lozano","Fernández","Aguirre","De la Garza"]); const c={id:"n"+now.toString(36),familia:fam,estado:"armando",listo:false,creado:now,actualizado:now,personas:[{id:"p1",rol:"papa",nombre:R(["Luis","Jorge","Beto"]),masa:"harina",gorditas:[{guiso:R(G),masa:"harina",cant:2,detalle:""}],bebidas:[],postres:[],chilaquiles:null},{id:"p2",rol:"mama",nombre:R(["Paty","Claudia","Sofía"]),masa:"harina",gorditas:[],bebidas:[],postres:[],chilaquiles:null}],notas:"",sucursal:t.config.sucursal,_w:"demo"}; t.pedidos[c.id]=c; log("pedido","creo","Creó un pedido nuevo",Object.assign(c,{slug:sl}),"familia","Familia "+fam); });
+  if(demoTick%6===0) opciones.push(()=>{ const suc=R(SUCURSALES).id; const sl="mesa-"+suc+"-"+RI(1,6); const t=DEMO.tableros[sl]; if(!t) return; const c={id:"m"+now.toString(36),familia:"Mesa "+sl.split("-").pop(),estado:"pedido",etapa:"proceso",mesa:true,listo:true,creado:now,pedidoEn:now,actualizado:now,personas:[{id:"p1",rol:"otro",nombre:R(["Karla","Memo","Fer"]),masa:"harina",gorditas:[{guiso:R(G),masa:R(["harina","maiz"]),cant:RI(1,3),detalle:""}],bebidas:[{nombre:"Café de olla",cant:1,detalle:""}],postres:[],chilaquiles:null}],notas:"",sucursal:suc,_w:"demo"}; t.pedidos[c.id]=c; log("pedido","ordeno","Ordenó desde la mesa: "+totStr(totales(c)),Object.assign(c,{slug:sl}),"mesa","Mesa "+sl.split("-").pop()); });
+  if(opciones.length){ R(opciones)(); demoSync(); } }
+function demoToggle(on){ demoOn=on; localStorage.setItem("ranitas-demo",on?"1":"0"); $("#demoBanner").hidden=!on; document.body.classList.toggle("demo",on);
+  if(on){ demoReal={tableros,anfitriones,catalogo,menu,cocineros,usuarios,bitLog,SUCURSALES,SUC_TODAS,bitOn,bitLoadedOnce}; DEMO=demoBase(); db={ref:demoRef}; pos.card=null; pos.slug=null; kit.abierto=null; demoSync(); demoTimer=setInterval(demoPaso,3500); toast("🎬 Modo demo: datos ficticios con movimiento"); }
+  else { clearInterval(demoTimer); demoTimer=null; db=realDb; DEMO=null; if(demoReal){ ({tableros,anfitriones,catalogo,menu,cocineros,usuarios,bitLog,SUCURSALES,SUC_TODAS,bitOn,bitLoadedOnce}=demoReal); demoReal=null; } pos.card=null; pos.slug=null; kit.abierto=null; render(); toast("Datos reales"); } }
+$("#demoSw").addEventListener("change",e=>demoToggle(e.target.checked));
+if(localStorage.getItem("ranitas-demo")==="1"){ $("#demoSw").checked=true; setTimeout(()=>demoToggle(true),600); }
 
 /* ---------- menú ---------- */
 function renderNav(){ const cards=allCards(); const vis=yo?yo.vistas:[];
@@ -455,9 +529,9 @@ const CATS={pago:["💵","Pagos","#166534"],pedido:["📦","Pedidos","#8a5a00"],
 const TIPOS={familia:"Familia",anfitrion:"Anfitrión",mesa:"Mesa",admin:"Admin",caja:"Caja",cocina:"Cocina"};
 const bitq={q:"",cats:new Set(),tipos:new Set(),suc:"",tab:"",pedido:"",n:300};
 let bitLog={}, bitOn=false, bitNew=new Set(), bitFirstKey=null, bitLoadedOnce=false;
-function bitSuscribir(){ if(bitOn) return; bitOn=true; const ref=db.ref(ROOT+"/bitacora").orderByKey().limitToLast(bitq.n);
+function bitSuscribir(){ if(bitOn) return; bitOn=true; const ref=realDb.ref(ROOT+"/bitacora").orderByKey().limitToLast(bitq.n);
   ref.once("value",s=>{ bitLog=s.val()||{}; const ks=Object.keys(bitLog).sort(); bitFirstKey=ks[0]||null; bitLoadedOnce=true; render();
-    db.ref(ROOT+"/bitacora").orderByKey().limitToLast(1).on("child_added",c=>{ if(bitLog[c.key]) return; bitLog[c.key]=c.val(); bitNew.add(c.key); setTimeout(()=>bitNew.delete(c.key),1500); if(vista==="bitacora") render(); else renderNav(); }); }); }
+    realDb.ref(ROOT+"/bitacora").orderByKey().limitToLast(1).on("child_added",c=>{ if(demoOn||bitLog[c.key]) return; bitLog[c.key]=c.val(); bitNew.add(c.key); setTimeout(()=>bitNew.delete(c.key),1500); if(vista==="bitacora") render(); else renderNav(); }); }); }
 function bitCargarMas(){ if(!bitFirstKey) return; db.ref(ROOT+"/bitacora").orderByKey().endAt(bitFirstKey).limitToLast(401).once("value",s=>{ const v=s.val()||{}; delete v[bitFirstKey]; Object.assign(bitLog,v); const ks=Object.keys(v).sort(); if(ks.length) bitFirstKey=ks[0]; else bitFirstKey=null; toast(ks.length?ks.length+" registros más":"Ya está todo cargado"); render(); }); }
 function bitEntradas(){ return Object.entries(bitLog).map(([k,v])=>Object.assign({k},v)).sort((a,b)=>b.k<a.k?-1:1); }
 function bitPasa(e){ if(bitq.pedido&&e.pedido!==bitq.pedido) return false; if(bitq.cats.size&&!bitq.cats.has(e.cat)) return false; if(bitq.tipos.size&&!bitq.tipos.has((e.actor||{}).tipo)) return false; if(bitq.suc&&e.sucursal!==bitq.suc) return false; if(bitq.tab&&e.tablero!==bitq.tab) return false;
