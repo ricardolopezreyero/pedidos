@@ -15,6 +15,7 @@ Sistema completo de pedidos para **Gorditas Ranitas** (Torreón, Coahuila): las 
 | Admin del restaurante | https://ranita.capitaltorreon.com/admin |
 | Manuales por perfil | https://ranita.capitaltorreon.com/manual |
 | Postulación de proveedores (pública) | https://ranita.capitaltorreon.com/proveedores |
+| Talento y reclutamiento (pública) | https://ranita.capitaltorreon.com/talento |
 | Hoja QR de una mesa (imprimible carta) | `https://ranita.capitaltorreon.com/mesa?s=mesa-<sucursal>-<n>` |
 | Repositorio | https://github.com/ricardolopezreyero/pedidos |
 | Cloudflare Pages (proyecto `ranita`) | https://ranita.pages.dev |
@@ -78,6 +79,7 @@ Es **la misma tarjeta** en todos lados: lo que la familia teclea lo ve la caja a
 | 🏬 **Sucursales** | Alta de sucursal con todo automático (mesas, mostrador, catálogo, cocina). Solo Maestro. | Dueño |
 | 📖 **Recetas** | Recetario de casa v2: 33 recetas con gramajes exactos, preparación de ingredientes, paso a paso con tiempos y temperaturas, puntos de control, secretos, conservación y alérgenos. Calculadora que escala con costo estimado, "lo pedido hoy", modo lectura para estudiar (pasos palomeados, subrayado, notas, se retoma donde se quedó) y certificación por cocinero. | Cocina, dueño |
 | 🏬 **Proveedores por ciudad** (dentro de Compras) | Página pública `/proveedores` donde cualquier negocio se postula con su lista de precios puesto en sucursal y pago a 30 días (con hoja imprimible para llenar a mano). En Compras: ciudades, guía de 15 rubros que hay que conseguir en cada ciudad, bandeja de postulaciones (aceptar crea el proveedor y sus cotizaciones), comparador de cotizaciones por insumo con el más barato en verde y elección de proveedor por insumo. Las recetas no cambian de ciudad a ciudad; los proveedores sí. | Dueño, compras |
+| 🌟 **Talento** | Reclutamiento: sitio público `/talento` con manifiesto, organigrama (Central · CEDIS de ciudad · Frentes, 14 puestos), perfil de cada puesto (qué harás, qué buscamos, un día, requisitos) y postulación por ciudad y nivel (aprendiz, junior, senior, líder) con 3 preguntas cerradas calificadas solas y 6 abiertas para ver el razonamiento. En el admin: base de candidatos con filtros, calificación C · B · A · AA · AAA, estados (nuevo, preseleccionado, seleccionado, contratado, descartado), notas, WhatsApp y vacantes abiertas por ciudad y puesto. Postulaciones siempre abiertas. | Dueño, dirección de ciudad |
 | 🛒 **Compras** | Lista de compras sumada por insumo y agrupada por proveedor, orden por WhatsApp, marcar como pedida, historial, catálogo de insumos con precio y proveedores con WhatsApp y días de entrega. | Dueño, caja |
 | 📜 **Bitácora** | Registro permanente de absolutamente todo, en vivo, con filtros y búsqueda. | Dueño |
 | 📖 **Manuales** | Manual por perfil con capturas y lenguaje simple. | Todos |
@@ -167,6 +169,8 @@ Cualquier servidor estático sobre `app/` sirve (por ejemplo `python3 -m http.se
 | `proveedores/<id>` | `{nombre, contacto, rubro, rubros[], wa, dias, minimo, direccion, ciudad, condiciones, notas, origen}` |
 | `ciudades/<id>` | `{n, estado, activa}` · cada sucursal lleva `ciudad` |
 | `cotizaciones/<ciudad>/<insumo>/<proveedor>` | `{precio, unidad, presentacion, ts, fuente}` · `insumos/<id>/proveedorPor/<ciudad>` = proveedor elegido |
+| `talento/candidatos/<push>` | candidato de `/talento`: datos, puesto, nivel, ciudad, cerradas[{q,r,ok}], aciertos, abiertas[{q,r}], palabras, estado, nivelRanitas (C/B/A/AA/AAA), notas |
+| `talento/vacantes/<ciudad>/<puesto>` | `true` cuando hay vacante abierta ahora (se muestra en /talento) |
 | `postulaciones/<push>` | lo que llena un proveedor en `/proveedores`: negocio, contacto, wa, ciudad, rubros, precios{}, estado pendiente/aceptada/rechazada |
 | `compras/lista/<insumo\|unidad>` · `compras/historial/<push>` | lista viva de compras y órdenes ya pedidas |
 | `bitacora/<push>` | registro permanente, solo se agrega |
