@@ -146,6 +146,18 @@ body.is-home .suc,body.is-home #btnCall,body.is-home #btnShare,body.is-home #btn
 .hmsg{min-height:20px;font-weight:800;font-size:13px;color:var(--r);margin:8px 0}
 .hnote{font-size:12.5px;color:var(--mut);font-weight:700;margin-top:10px}
 .hfoot{text-align:center;color:var(--mut);font-weight:700;font-size:12px;margin-top:22px}
+.persona.col{padding:8px 12px;background:#fff}
+.p-sum{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.p-sum b{font-size:15px}
+.p-sum span{font-size:12.5px;color:var(--mut);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#mConf{z-index:60;background:rgba(30,22,0,.6)}
+.conf-fam{font-weight:900;font-size:18px;margin-bottom:8px}
+.conf-per{background:var(--y3);border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px}
+.conf-per.none{opacity:.6;background:#fff}
+.conf-nom{font-weight:900;font-size:15.5px}
+.conf-per ul{margin:4px 0 0;padding-left:18px;font-weight:700;font-size:14.5px;line-height:1.5}
+.conf-none{font-size:13px;color:var(--mut);font-weight:700;margin-top:2px}
+.conf-tot{margin-top:8px;font-weight:900;color:var(--g);font-size:14px}
 .caret{display:inline-block;color:var(--r);font-weight:900;animation:blink .9s steps(2,start) infinite;margin-left:1px}
 @keyframes blink{to{visibility:hidden}}
 .persons{display:flex;flex-direction:column;gap:4px;font-size:13.5px}
@@ -284,6 +296,15 @@ textarea.msg{width:100%;min-height:46vh;font-family:ui-monospace,SFMono-Regular,
     <div class="head"><h2>📲 Mensaje para WhatsApp</h2><button class="x" data-a="close" data-v="mMsg">✕</button></div>
     <div class="body" id="msgBody"></div>
     <div class="foot" id="msgFoot"></div>
+  </div>
+</div>
+
+<!-- Confirmar pedido -->
+<div class="modal" id="mConf">
+  <div class="sheet">
+    <div class="head"><h2>🧾 Revisa el pedido</h2><button class="x" data-a="close" data-v="mConf">✕</button></div>
+    <div class="body" id="confBody"></div>
+    <div class="foot" id="confFoot"></div>
   </div>
 </div>
 
@@ -688,12 +709,22 @@ function validarDraft(d){ const err=[]; const vacios=[];
     p.bebidas.forEach(l=>{ if(l.nombre==="Refresco"&&!(l.detalle||"").trim()) err.push(n+": ¿qué refresco?"); });
     if(p.chilaquiles){ if(!p.chilaquiles.salsa) err.push(n+": falta la salsa de los chilaquiles."); if(!p.chilaquiles.queso) err.push(n+": falta el queso de los chilaquiles."); if(p.chilaquiles.extras.includes("Guiso favorito")&&!p.chilaquiles.guiso) err.push(n+": ¿qué guiso llevan los chilaquiles?"); } });
   return {err,vacios}; }
-function closeEditor(listo){ if(!ui.draft) return; clearTimeout(saveTimer);
+// Doble confirmación: antes de dar Listo se muestra el pedido acomodado por persona — RLR
+function openConfirm(d){ const v=validarDraft(d); const $c=costo(d);
+  $("#confBody").innerHTML=`<div class="conf-fam">👨‍👩‍👧‍👦 Familia ${esc(d.familia||"sin nombre")}</div>
+    ${v.err.length?`<div class="warn">⚠️ Falta resolver:<br>${v.err.map(esc).join("<br>")}</div>`:""}
+    ${d.personas.map(p=>{ const L=personLines(p); return `<div class="conf-per${L.length?"":" none"}"><div class="conf-nom">${rolDe(p).e} ${esc(nombreDe(p))}</div>${L.length?`<ul>${L.map(l=>`<li>${esc(l)}</li>`).join("")}</ul>`:`<div class="conf-none">Sin pedido esta vez</div>`}</div>`; }).join("")}
+    ${d.notas?`<div class="notas">📝 ${esc(d.notas)}</div>`:""}
+    <div class="conf-tot">${esc(totStr(totales(d)))}${$c!=null?` · 💰 aprox. ${money($c)}`:""}</div>`;
+  $("#confFoot").innerHTML=`<button class="btn ghost" data-a="close" data-v="mConf">✏️ Seguir editando</button><button class="btn p" data-a="confirmar" ${v.err.length?"disabled":""}>✅ Confirmar pedido</button>`;
+  show("mConf"); }
+function closeEditor(listo,confirmado){ if(!ui.draft) return; clearTimeout(saveTimer);
   const d=ui.draft; d.familia=(d.familia||"").trim(); const id=ui.editing;
   if(listo){ const v=validarDraft(d);
-    if(v.err.length){ toast("⚠️ "+v.err[0]); if(!d.familia){ const i=$("#edBody input[data-in=familia]"); if(i) i.focus(); } return; }
-    if(v.vacios.length===d.personas.length&&d.personas.length){ toast("⚠️ Nadie tiene nada todavía"); return; }
-    if(v.vacios.length){ const nombres=v.vacios.map(nombreDe).join(", "); if(confirm(nombres+(v.vacios.length>1?" no tienen":" no tiene")+" nada en el pedido. ¿Quitarlos?")) d.personas=d.personas.filter(p=>!v.vacios.includes(p)); }
+    if(!d.familia){ toast("⚠️ Ponle nombre a la familia"); const i=$("#edBody input[data-in=familia]"); if(i) i.focus(); return; }
+    if(v.vacios.length===d.personas.length){ toast("⚠️ Nadie tiene nada todavía"); return; }
+    if(!confirmado){ openConfirm(d); return; }
+    hide("mConf");
   }
   d.listo=!!listo;
   ui.editing=null; ui.draft=null; saveCard(d); hide("mEditor"); clearPresence(id);
@@ -725,9 +756,11 @@ function personaHTML(p,pi){
   const lines=p.gorditas.map((l,i)=>`<div class="line"><span class="qty"><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="-1">−</button><span class="lq">${l.cant}</span><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="1">+</button></span><span class="ln">${esc(l.guiso)}<em>${l.masa==="maiz"?"maíz":"harina"}</em></span>
     ${l.guiso==="Combinada"?`<input class="det" data-in="gdet" data-p="${pi}" data-i="${i}" value="${esc(l.detalle)}" placeholder="¿de qué?">`:""}</div>`).join("");
   const openB=ui.open[p.id+"b"]||p.bebidas.length, openP=ui.open[p.id+"p"]||p.postres.length;
+  const col=!!ui.open[p.id+"c"]; const L=personLines(p);
+  if(col) return `<section class="persona col"><div class="p-head"><span class="p-emoji">${r.e}</span><div class="p-sum"><b>${esc(nombreDe(p))}</b><span>${L.length?esc(L.join(" · ")):"sin pedido"}</span></div><button class="ib" data-a="colPersona" data-p="${pi}" title="Abrir">▾</button></div></section>`;
   return `<section class="persona">
     <div class="p-head"><span class="p-emoji">${r.e}</span><input class="p-name" data-in="nombre" data-p="${pi}" value="${esc(p.nombre)}" placeholder="Nombre (${r.n})" autocomplete="off">
-      <button class="ib" data-a="dupPersona" data-p="${pi}" title="Duplicar pedido de esta persona">⧉</button><button class="ib" data-a="delPersona" data-p="${pi}" title="Quitar">✕</button></div>
+      <button class="ib" data-a="colPersona" data-p="${pi}" title="Cerrar (queda en el pedido)">▴</button><button class="ib" data-a="dupPersona" data-p="${pi}" title="Duplicar pedido de esta persona">⧉</button><button class="ib" data-a="delPersona" data-p="${pi}" title="Quitar">✕</button></div>
     <div class="sec-head"><span>🫓 Gorditas</span><div class="seg"><button class="${p.masa!=="maiz"?"on":""}" data-a="masa" data-p="${pi}" data-v="harina">Harina</button><button class="${p.masa==="maiz"?"on":""}" data-a="masa" data-p="${pi}" data-v="maiz">Maíz</button></div></div>
     <div class="chips">${chips}</div>
     <div class="lines">${lines}</div>
@@ -851,6 +884,8 @@ document.addEventListener("click",e=>{
     case "delPersona": if(!personLines(p).length||confirm("¿Quitar a "+nombreDe(p)+" y su pedido?")){ d.personas.splice(pi,1); R(); } break;
     case "dupPersona": { const c=clone(p); c.id=uid(); c.nombre=""; d.personas.splice(pi+1,0,c); R(); toast("Copiado. Ponle nombre 👇"); break; }
     case "masa": p.masa=v; R(); break;
+    case "colPersona": ui.open[p.id+"c"]=!ui.open[p.id+"c"]; renderEditor(); break;
+    case "confirmar": closeEditor(true,true); break;
     case "addG": { const masa=p.masa||"harina"; const l=p.gorditas.find(x=>x.guiso===v&&x.masa===masa); if(l) l.cant++; else p.gorditas.push({guiso:v,masa,cant:1,detalle:""}); R(); break; }
     case "gQty": p.gorditas[i].cant+=+v; if(p.gorditas[i].cant<=0) p.gorditas.splice(i,1); R(); break;
     case "togChil": if(p.chilaquiles) p.chilaquiles=null; else p.chilaquiles={salsa:"",queso:"",extras:[],guiso:"",cant:1}; R(); break;
@@ -864,10 +899,11 @@ document.addEventListener("click",e=>{
     case "pQty": p.postres[i].cant+=+v; if(p.postres[i].cant<=0) p.postres.splice(i,1); R(); break;
   }
 });
-document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{ if(e.target===m){ if(m.id==="mEditor") closeEditor(false); else { m.classList.remove("open"); if(m.id==="mCfg"){ saveConfig(); renderBoard(); } } } }));
-document.addEventListener("keydown",e=>{ if(e.key==="Enter"&&e.target&&(e.target.id==="hEntrar"||e.target.id==="hSlug"||e.target.id==="hTel")){ e.preventDefault(); if(e.target.id==="hEntrar") entrarTablero(); else crearTablero(); }
+document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{ if(e.target===m){ if(m.id==="mConf"){ hide("mConf"); return; } if(m.id==="mEditor") closeEditor(false); else { m.classList.remove("open"); if(m.id==="mCfg"){ saveConfig(); renderBoard(); } } } }));
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&$("#mConf").classList.contains("open")){ hide("mConf"); e.stopImmediatePropagation(); return; }
+  if(e.key==="Enter"&&e.target&&(e.target.id==="hEntrar"||e.target.id==="hSlug"||e.target.id==="hTel")){ e.preventDefault(); if(e.target.id==="hEntrar") entrarTablero(); else crearTablero(); }
   if(e.key==="Enter"&&e.target&&e.target.dataset&&e.target.dataset.in==="familia"){ e.preventDefault(); const n=$("#edBody .p-name"); if(n) n.focus(); }
-  if(e.key==="Escape"){ if($("#mEditor").classList.contains("open")) closeEditor(false); ["mNuevo","mMsg","mCfg"].forEach(hide); } });
+  if(e.key==="Escape"){ if($("#mEditor").classList.contains("open")) closeEditor(false); ["mNuevo","mMsg","mCfg","mConf"].forEach(hide); } });
 
 /* ---------- arranque ---------- */
 Object.keys(pedidos).forEach(k=>pedidos[k]=normCard(Object.assign({id:k},pedidos[k])));
