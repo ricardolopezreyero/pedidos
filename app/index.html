@@ -118,8 +118,8 @@ button.tag.click:hover{border-style:dashed;border-color:var(--ink)}
 .fch.on{background:var(--ink);color:var(--y);border-color:var(--ink)}.fch.on span{background:rgba(255,214,10,.25)}
 .fch.porpagar.on{background:#92400E;color:#FEF3C7;border-color:#92400E}.fch.pagado.on,.fch.entregado.on{background:#166534;color:#DCFCE7;border-color:#166534}
 @media(min-width:760px){.filtros{padding:10px 14px 0}}
-.card.moved{animation:moved .7s cubic-bezier(.2,.8,.2,1)}
-@keyframes moved{0%{transform:translateY(18px) scale(.97);opacity:0;box-shadow:0 0 0 4px var(--y)}70%{box-shadow:0 0 0 4px var(--y)}100%{transform:none;opacity:1}}
+.card.moved{animation:moved 1.2s ease-out}
+@keyframes moved{0%,60%{box-shadow:0 0 0 4px var(--y),var(--sh)}100%{box-shadow:var(--sh)}}
 .card.flip{transition:transform .55s cubic-bezier(.2,.8,.2,1)}
 .col[data-col="archivado"] .card{background:#FAF6E8;box-shadow:none;border:1px solid #E6DCB8;opacity:.9}
 .col[data-col="archivado"] .col-head{color:#5a4a1a}
@@ -862,7 +862,7 @@ let _rbPend=false; function renderBoard(){ if(_rbPend) return; _rbPend=true; set
 /* FLIP: las tarjetas que cambian de lugar se deslizan en vez de brincar — RLR */
 let flipCtx="";
 function flipAntes(root){ const m={}; if(!root||document.querySelector(".modal.open")) { flipCtx=""; return m; } flipCtx=ui.tab+"|"+Math.round(scrollY); root.querySelectorAll("article[data-id],.rstop[data-id]").forEach(el=>{ const r=el.getBoundingClientRect(); m[el.dataset.id]=[r.left,r.top]; }); return m; }
-function flipDespues(root,antes){ if(!root||!flipCtx||flipCtx!==ui.tab+"|"+Math.round(scrollY)||document.querySelector(".modal.open")||matchMedia("(prefers-reduced-motion:reduce)").matches) return; const mov=[]; root.querySelectorAll("article[data-id],.rstop[data-id]").forEach(el=>{ const a=antes[el.dataset.id]; if(!a||el.classList.contains("moved")) return; const r=el.getBoundingClientRect(); const dx=a[0]-r.left, dy=a[1]-r.top; if(Math.abs(dx)<1&&Math.abs(dy)<1||Math.abs(dy)>260) return; el.style.transition="none"; el.style.transform=`translate(${dx}px,${dy}px)`; mov.push(el); });
+function flipDespues(root,antes){ if(!root||!flipCtx||flipCtx!==ui.tab+"|"+Math.round(scrollY)||document.querySelector(".modal.open")||matchMedia("(prefers-reduced-motion:reduce)").matches) return; const mov=[]; root.querySelectorAll("article[data-id],.rstop[data-id]").forEach(el=>{ const a=antes[el.dataset.id]; if(!a) return; const r=el.getBoundingClientRect(); const dx=a[0]-r.left, dy=a[1]-r.top; if(Math.abs(dx)<1&&Math.abs(dy)<1||Math.abs(dy)>900) return; el.style.transition="none"; el.style.transform=`translate(${dx}px,${dy}px)`; mov.push(el); });
   if(!mov.length) return; void root.offsetHeight; mov.forEach(el=>{ el.classList.add("flip"); el.style.transition=""; el.style.transform=""; el.addEventListener("transitionend",()=>{ el.classList.remove("flip"); el.removeAttribute("style"); },{once:true}); }); }
 function renderBoardNow(){
   // ¿Qué cambió desde el último render? (solo brillan los cambios que vienen de OTRA pantalla)
@@ -909,13 +909,14 @@ function renderBoardNow(){
 /* Redibuja SOLO lo que cambió: las tarjetas iguales se quedan tal cual (sin parpadeo, sin reiniciar animaciones, sin brincos de scroll) — RLR */
 function reconcileBoard(root,html){ const tpl=document.createElement("div"); tpl.innerHTML=html; const nuevas=[...tpl.children], viejas=[...root.children];
   if(viejas.length!==nuevas.length||viejas.some((v,i)=>v.dataset.col!==nuevas[i].dataset.col)){ root.innerHTML=html; return; }
+  const mapaG={}; root.querySelectorAll("article[data-id]").forEach(a=>mapaG[a.dataset.id]=a);
   nuevas.forEach((nc,i)=>{ const oc=viejas[i]; if(oc.className!==nc.className) oc.className=nc.className;
     const nParts=[...nc.children].filter(x=>!x.classList.contains("cards")), oParts=[...oc.children].filter(x=>!x.classList.contains("cards"));
     if(nParts.map(x=>x.outerHTML).join("")!==oParts.map(x=>x.outerHTML).join("")){ const cardsEl=oc.querySelector(".cards"); oParts.forEach(x=>x.remove()); nParts.forEach(x=>oc.insertBefore(x,cardsEl)); }
     const nCards=nc.querySelector(".cards"), oCards=oc.querySelector(".cards"); if(!nCards||!oCards){ oc.replaceWith(nc); return; }
     const nKids=[...nCards.children], oKids=[...oCards.children]; const key=x=>x.dataset.id||("~"+x.className);
     if(nKids.map(key).join("|")===oKids.map(key).join("|")){ nKids.forEach((nk,j)=>{ const ok=oKids[j]; if(ok.outerHTML!==nk.outerHTML) ok.replaceWith(nk); }); }
-    else { const mapa={}; oKids.forEach(x=>{ if(x.dataset.id) mapa[x.dataset.id]=x; }); oCards.replaceChildren(...nKids.map(nk=>{ const ok=nk.dataset.id&&mapa[nk.dataset.id]; return ok&&ok.outerHTML===nk.outerHTML?ok:nk; })); }
+    else { oCards.replaceChildren(...nKids.map(nk=>{ const ok=nk.dataset.id&&mapaG[nk.dataset.id]; if(!ok) return nk; if(ok.outerHTML===nk.outerHTML) return ok; return nk; })); }
   }); }
 function topGuisos(){ const m={}; Object.values(pedidos).filter(c=>c.estado==="archivado"||c.estado==="entregado").forEach(c=>c.personas.forEach(p=>p.gorditas.forEach(l=>{ m[l.guiso]=(m[l.guiso]||0)+l.cant; })));
   return Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,3); }
@@ -962,6 +963,7 @@ function crearPedido(from){
   c.id=uid(); c.estado="armando"; c.listo=false; c.creado=Date.now(); c.actualizado=c.creado;
   ["liga","pedidoEn","entregadoEn","archivadoEn","mensaje","sucursal","tel","pago","faltas","avance","empaque","cocinero","etapa","listoEn","listoCocinaEn","armadoEn","_w","mesa"].forEach(k=>delete c[k]);
   c.personas.forEach(p=>p.id=uid());
+  if(from&&from.id&&pedidos[from.id]&&from.liga){ c.liga=from.liga; const P={liga:null}; if(from.estado==="entregado"){ P.estado="archivado"; P.archivadoEn=Date.now(); } patchCard(from.id,P); }   // la liga de siempre pasa al pedido nuevo; el viejo se archiva — RLR
   mine.add(c.id); saveMine(); saveCard(c); ui.tab="armando"; openEditor(c.id); if(!host) notificar("nueva",c);
   bit("pedido",from?"repitio":"creo",from?"Repitió el pedido de "+(from.familia||"")+" ("+totStr(totales(c))+")":"Creó un pedido nuevo",{pedido:c.id,familia:c.familia});
   if(from) toast("Pedido copiado de "+(from.familia||"sin nombre")+". Ajusta lo que cambie.");

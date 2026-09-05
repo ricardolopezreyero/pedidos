@@ -103,9 +103,13 @@ tr.tot td{font-weight:900;background:var(--y3)}
 .cards{display:flex;flex-direction:column;gap:8px}
 .pc{background:#fff;border-radius:14px;box-shadow:var(--sh);padding:10px 12px;border-left:5px solid var(--y)}
 .pc.flash{animation:fl 1.6s ease-out}
-.pc.moved{animation:pmoved .7s cubic-bezier(.2,.8,.2,1)}
-@keyframes pmoved{0%{transform:translateY(18px) scale(.97);opacity:0;box-shadow:0 0 0 4px var(--y)}70%{box-shadow:0 0 0 4px var(--y)}100%{transform:none;opacity:1}}
-.pc.flip{transition:transform .55s cubic-bezier(.2,.8,.2,1)}
+.pc.moved{animation:pmoved 1.2s ease-out}
+@keyframes pmoved{0%,60%{box-shadow:0 0 0 4px var(--y),var(--sh)}100%{box-shadow:var(--sh)}}
+.pc.flip{transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.acts2{display:flex;gap:6px;margin-top:8px;align-items:stretch}
+.acts2 .btn:not(.ghost){flex:1;font-size:14px;padding:11px 12px;border-radius:12px}
+.acts2 .btn.ghost{padding:8px 10px}
+.acts2 .b.wip{align-self:center}
 @keyframes fl{0%{background:#FFF3B0}100%{background:#fff}}
 .pc-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
 .pc-top h3{font-size:15px;font-weight:900}
@@ -876,16 +880,30 @@ function renderPedidos(){
   const colPrev=prevCol; prevCol={}; cards.forEach(c=>{ snap[c.id]=JSON.stringify(c); const col=colDeAdmin(c); prevCol[c.id]=col; if(!first&&c._w!==SID&&prev[c.id]!==snap[c.id]) flash[c.id]=now; if(!first&&colPrev[c.id]&&colPrev[c.id]!==col) moved[c.id]=now; }); prev=snap; first=false; Object.keys(moved).forEach(k=>{ if(now-moved[k]>900) delete moved[k]; });
   const antes=flipAntes($("#main"));
   const Tc=sumT(cards.filter(c=>c.estado==="pedido"&&(!c.etapa||c.etapa==="proceso"||c.etapa==="armado")));
-  $("#main").innerHTML=`<div class="top"><h1>📋 Pedidos</h1><input class="buscar" id="q" value="${esc(q)}" placeholder="🔎 Buscar familia, persona, guiso, tablero…"><span class="sp"></span>${filtrosHTML()}${anfBarHTML()}<div class="sub">🍳 En cocina ahora: ${esc(totStr(Tc))} · toca los botones para avanzar cada pedido; las familias lo ven al instante.${q?` · <b>${cards.length}</b> resultado${cards.length===1?"":"s"} para "${esc(q)}"`:""}</div></div>
+  const aeP=document.activeElement; const keepP=aeP&&aeP.id==="q"?{s:aeP.selectionStart,e:aeP.selectionEnd}:null;
+  pintarPedidos(`<div class="top"><h1>📋 Pedidos</h1><input class="buscar" id="q" value="${esc(q)}" placeholder="🔎 Buscar familia, persona, guiso, tablero…"><span class="sp"></span>${filtrosHTML()}${anfBarHTML()}<div class="sub">🍳 En cocina ahora: ${esc(totStr(Tc))} · toca los botones para avanzar cada pedido; las familias lo ven al instante.${q?` · <b>${cards.length}</b> resultado${cards.length===1?"":"s"} para "${esc(q)}"`:""}</div></div>
   ${filtroPagoHTML(cardsAll)}
-  <div class="board">${ETAPAS.map(e=>{ const cs=cards.filter(e.f).sort(e.k>=5?(a,b)=>(b.entregadoEn||b.archivadoEn||b.actualizado||0)-(a.entregadoEn||a.archivadoEn||a.actualizado||0):(a,b)=>(turno(a)-turno(b))); /* por turnos: el más antiguo arriba, el nuevo entra abajo; Historial al revés — RLR */ return `<section class="col k${e.k}"><div class="col-head"><span>${e.n}</span><span class="n">${cs.length}</span></div>${e.id==="armando"&&fTab&&!(anfitriones[fTab]||{}).mostrador?`<button class="btn p otrafam" data-otrafam="${esc(fTab)}">➕ Otra familia en este tablero</button>`:""}<div class="cards">${cs.length?cs.map(cardHTML).join(""):`<div class="empty">Nada por aquí</div>`}</div></section>`; }).join("")}</div>`;
-  flipDespues($("#main"),antes);
+  <div class="board">${ETAPAS.map(e=>{ const cs=cards.filter(e.f).sort(e.k>=5?(a,b)=>(b.entregadoEn||b.archivadoEn||b.actualizado||0)-(a.entregadoEn||a.archivadoEn||a.actualizado||0):(a,b)=>(turno(a)-turno(b))); /* por turnos: el más antiguo arriba, el nuevo entra abajo; Historial al revés — RLR */ return `<section class="col k${e.k}" data-col="${e.id}"><div class="col-head"><span>${e.n}</span><span class="n">${cs.length}</span></div>${e.id==="armando"&&fTab&&!(anfitriones[fTab]||{}).mostrador?`<button class="btn p otrafam" data-otrafam="${esc(fTab)}">➕ Otra familia en este tablero</button>`:""}<div class="cards">${cs.length?cs.map(cardHTML).join(""):`<div class="empty">Nada por aquí</div>`}</div></section>`; }).join("")}</div>`);
+  flipDespues($("#main"),antes); if(keepP){ const el=$("#q"); if(el){ el.focus({preventScroll:true}); try{ el.setSelectionRange(keepP.s,keepP.e); }catch(x){} } }
 }
+/* Pinta el tablero sin destruirlo: las tarjetas que no cambiaron se quedan; las que cambian de columna se MUEVEN (mismo nodo) y el FLIP las desliza — RLR */
+function pintarPedidos(html){ const main=$("#main"); const viejo=main.querySelector(".board"); if(!viejo){ main.innerHTML=html; return; }
+  const tpl=document.createElement("div"); tpl.innerHTML=html; const nuevoBoard=tpl.querySelector(".board");
+  const nParts=[...tpl.children].filter(x=>!x.classList.contains("board")), oParts=[...main.children].filter(x=>!x.classList.contains("board"));
+  if(nParts.map(x=>x.outerHTML).join("")!==oParts.map(x=>x.outerHTML).join("")){ oParts.forEach(x=>x.remove()); nParts.forEach(x=>main.insertBefore(x,viejo)); }
+  const nCols=[...nuevoBoard.children], oCols=[...viejo.children]; if(nCols.length!==oCols.length||nCols.some((c,i)=>c.dataset.col!==oCols[i].dataset.col)){ viejo.replaceWith(nuevoBoard); return; }
+  const mapa={}; viejo.querySelectorAll("article[data-id]").forEach(a=>mapa[a.dataset.id]=a);
+  nCols.forEach((nc,i)=>{ const oc=oCols[i]; if(oc.className!==nc.className) oc.className=nc.className;
+    const nHead=[...nc.children].filter(x=>!x.classList.contains("cards")), oHead=[...oc.children].filter(x=>!x.classList.contains("cards"));
+    if(nHead.map(x=>x.outerHTML).join("")!==oHead.map(x=>x.outerHTML).join("")){ const cardsEl=oc.querySelector(".cards"); oHead.forEach(x=>x.remove()); nHead.forEach(x=>oc.insertBefore(x,cardsEl)); }
+    const nCards=nc.querySelector(".cards"), oCards=oc.querySelector(".cards"); if(!nCards||!oCards){ oc.replaceWith(nc); return; }
+    const kids=[...nCards.children].map(nk=>{ const id=nk.dataset.id; const ok=id&&mapa[id]; if(!ok) return nk; if(ok.outerHTML!==nk.outerHTML){ ok.replaceWith(nk); mapa[id]=nk; return nk; } return ok; });
+    const same=kids.length===oCards.children.length&&kids.every((k,j)=>k===oCards.children[j]); if(!same) oCards.replaceChildren(...kids); }); }
 const turno=c=>({armando:c.creado,porpedir:c.listoEn||c.actualizado,pedido:c.pedidoEn,entregado:c.entregadoEn,archivado:c.archivadoEn}[c.estado])||c.creado||c.actualizado||0;
 function colDeAdmin(c){ const e=ETAPAS.find(e=>e.f(c)); return e?e.id:""; }
 let prevCol={}, moved={};
 let flipKey=""; function flipAntes(root){ const m={}; if(!root) return m; if(flipKey!==vista+"|"+pSuc){ flipKey=vista+"|"+pSuc; return m; } /* solo dentro de la misma vista — RLR */ root.querySelectorAll("article[data-id],.rstop[data-id]").forEach(el=>{ const r=el.getBoundingClientRect(); m[el.dataset.id]=[r.left,r.top]; }); return m; }
-function flipDespues(root,antes){ if(!root||matchMedia("(prefers-reduced-motion:reduce)").matches) return; const mov=[]; root.querySelectorAll("article[data-id],.rstop[data-id]").forEach(el=>{ const a=antes[el.dataset.id]; if(!a||el.classList.contains("moved")) return; const r=el.getBoundingClientRect(); const dx=a[0]-r.left, dy=a[1]-r.top; if(Math.abs(dx)<1&&Math.abs(dy)<1||Math.abs(dy)>260) return; el.style.transition="none"; el.style.transform=`translate(${dx}px,${dy}px)`; mov.push(el); });
+function flipDespues(root,antes){ if(!root||matchMedia("(prefers-reduced-motion:reduce)").matches) return; const mov=[]; root.querySelectorAll("article[data-id],.rstop[data-id]").forEach(el=>{ const a=antes[el.dataset.id]; if(!a) return; const r=el.getBoundingClientRect(); const dx=a[0]-r.left, dy=a[1]-r.top; if(Math.abs(dx)<1&&Math.abs(dy)<1) return; el.style.transition="none"; el.style.transform=`translate(${dx}px,${dy}px)`; mov.push(el); });
   if(!mov.length) return; void root.offsetHeight; mov.forEach(el=>{ el.classList.add("flip"); el.style.transition=""; el.style.transform=""; el.addEventListener("transitionend",()=>{ el.classList.remove("flip"); el.removeAttribute("style"); },{once:true}); }); }
 /* Con el filtro en un anfitrión: su celular a la mano, un clic para marcar o para WhatsApp — RLR */
 function anfBarHTML(){ if(!fTab) return ""; const a=anfitriones[fTab]||{}; const cfg=(tableros[fTab]||{}).config||{}; const tel=String(cfg.telAnfitrion||a.tel||"").replace(/\D/g,"").slice(-10); const nom=cfg.anfitrion||a.nombre||fTab; const msg="Hola "+nom+" 👋 Le escribimos de Gorditas Ranitas sobre su pedido. ";
@@ -909,7 +927,7 @@ function cardHTML(c){
     ${tagsHTML(c,c.slug,true)}
     <div>${persons}</div>${c.notas?`<div class="notas">📝 ${esc(c.notas)}</div>`:""}
     ${c.estado!=="armando"&&(cfg.direccion||cfg.telAnfitrion)?`<div class="notas contacto">${cfg.direccion?`🏠 ${esc(cfg.direccion)}`:""}${cfg.telAnfitrion?`<span> · 📱 ${telFmt(cfg.telAnfitrion)}</span>`:""}<span class="o-acts">${contactoHTML(c,c.slug,true)}</span></div>`:""}
-    <div class="tot">${esc(totStr(totales(c)))}${costo(c)!=null?` · <b>💰 ${money(costo(c)+envioCard(c))}</b>${envioCard(c)?` <small>(incluye envío ${money(envioCard(c))})</small>`:""}`:""}</div><div class="acts">${A}${c.estado!=="archivado"?`<button class="btn y" data-a="editar" data-id="${c.id}" data-s="${c.slug}">✏️ Editar</button>`:""}${!vacia?`<button class="btn ghost" data-a="ticket" data-id="${c.id}" data-s="${c.slug}" title="Imprimir comanda">🖨</button>`:""}</div></article>`;
+    <div class="tot">${esc(totStr(totales(c)))}${costo(c)!=null?` · <b>💰 ${money(costo(c)+envioCard(c))}</b>${envioCard(c)?` <small>(incluye envío ${money(envioCard(c))})</small>`:""}`:""}</div><div class="acts">${c.estado!=="archivado"?`<button class="btn y" data-a="editar" data-id="${c.id}" data-s="${c.slug}">✏️ Editar</button>`:""}${!vacia?`<button class="btn ghost" data-a="ticket" data-id="${c.id}" data-s="${c.slug}" title="Imprimir comanda">🖨</button>`:""}${!vacia&&(c.estado==="entregado"||c.estado==="archivado")?`<button class="btn ghost" data-a="repetir" data-id="${c.id}" data-s="${c.slug}" title="Clonar este pedido: el nuevo se queda con la misma liga y este pasa a Historial">🔁 Repetir</button>`:""}</div>${A?`<div class="acts2">${A}</div>`:""}</article>`;
 }
 // Contacto y origen de un pedido: liga del tablero, celular del anfitrión (llamar / WhatsApp), dirección, hora, pago — RLR
 const telFmt=t=>String(t||"").replace(/\D/g,"").slice(-10).replace(/(\d{3})(\d{3})(\d{2})(\d{2})/,"$1 $2 $3 $4");
@@ -1665,7 +1683,14 @@ document.addEventListener("click",e=>{ const fp=e.target.closest("[data-fp]"); i
   if(a==="tomar"){ const c=((tableros[s]||{}).pedidos||{})[id]; if(!c) return; const cfg=(tableros[s]||{}).config||{}; if(!confirm("¿Marcar el pedido de "+(c.familia||"")+" como pedido? Úsalo cuando la familia ya lo pidió por teléfono o WhatsApp; la cocina lo verá en su cola.")) return; upd(s,id,{estado:"pedido",etapa:"proceso",pedidoEn:Date.now(),sucursal:c.sucursal||cfg.sucursal||pSuc||null}); toast("📲 Pedido · ya lo ve la cocina"); bit("pedido","ordeno","Tomó el pedido desde admin (la familia pidió por fuera): "+totStr(totales(c)),{pedido:id,familia:fam,tablero:s}); }
   if(a==="borrarVacio"){ const c=((tableros[s]||{}).pedidos||{})[id]; if(!c||lineasDe(c).length) return; if(!confirm("Esta tarjeta está vacía y sin actividad. ¿Borrarla?")) return; db.ref(ROOT+"/tableros/"+s+"/pedidos/"+id).remove(); toast("Tarjeta vacía borrada"); bit("pedido","borro","Borró una tarjeta vacía desde Pedidos",{pedido:id,familia:fam,tablero:s}); }
   if(a==="ticket"){ const c=((tableros[s]||{}).pedidos||{})[id]; if(c) imprimirComanda(c); }
+  if(a==="repetir"){ repetirPedido(s,id); }
 });
+/* Repetir: clona el pedido en Armando con la MISMA liga (la familia sigue entrando por su liga de siempre); el anterior se va al Historial — RLR */
+function repetirPedido(slug,id){ const old=((tableros[slug]||{}).pedidos||{})[id]; if(!old) return; const c=JSON.parse(JSON.stringify(old)); const nid=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  ["pedidoEn","entregadoEn","archivadoEn","mensaje","tel","pago","faltas","avance","empaque","cocinero","repartidor","viaje","salioEn","regresoEn","etapa","listoEn","listoCocinaEn","armadoEn","_w"].forEach(k=>delete c[k]);
+  c.id=nid; c.estado="armando"; c.listo=false; c.creado=Date.now(); c.actualizado=c.creado; c.liga=old.liga||null; c.personas=toArr(c.personas).map(p=>Object.assign(p,{id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),gorditas:toArr(p.gorditas),bebidas:toArr(p.bebidas),postres:toArr(p.postres)})); c._w=SID;
+  const upd={}; upd["tableros/"+slug+"/pedidos/"+nid]=c; upd["tableros/"+slug+"/pedidos/"+id+"/liga"]=null; upd["tableros/"+slug+"/pedidos/"+id+"/actualizado"]=Date.now(); if(old.estado==="entregado"){ upd["tableros/"+slug+"/pedidos/"+id+"/estado"]="archivado"; upd["tableros/"+slug+"/pedidos/"+id+"/archivadoEn"]=Date.now(); }
+  db.ref(ROOT).update(upd).then(()=>{ toast("🔁 Pedido repetido · en Armando con la misma liga"); bit("pedido","repitio","Repitió el pedido de "+(old.familia||"")+" ("+totStr(totales(c))+"); el anterior pasó a Historial",{pedido:nid,familia:c.familia,tablero:slug}); abrirEnMostrador(slug,nid); }); }
 /* Comanda imprimible (ticket angosto, sirve en impresora térmica o carta) — RLR */
 function imprimirComanda(c){ const cfg=(tableros[c.slug]||{}).config||{}; const a=anfitriones[c.slug]||{}; const suc=(SUCURSALES.find(x=>x.id===(c.sucursal||cfg.sucursal))||{}).n||""; const F=c.faltas||{};
   const LL=lineasDe(c); const per=toArr(c.personas).map((p,pi)=>{ const pid=p.id||("p"+pi); const ls=LL.filter(l=>l.pid===pid); return ls.length?`<div class="p"><b>${ROLES[p.rol]||"🙂"} ${esc(nombreDe(p))}</b>${ls.map(l=>`<div class="l${F[l.k]?" no":""}">${l.cant} ${esc(l.n)}${l.masa?" · "+(l.masa==="maiz"?"🌽 maíz":"🌾 harina"):""}${F[l.k]?" ⛔ no hubo":""}</div>`).join("")}</div>`:""; }).join("");
