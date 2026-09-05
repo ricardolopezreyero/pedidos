@@ -287,6 +287,8 @@ label.f input,label.f textarea,label.f select{margin-top:4px;font-weight:700}
 .pill{border:1.5px dashed #cdbf8a;background:#fff;border-radius:999px;padding:7px 12px;font-weight:800;font-size:13px;color:#6b5a00}
 .pill.on{border-style:solid;border-color:var(--g);background:var(--g2);color:var(--g)}
 .sub{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:10px}
+.sub.plano{background:transparent;border:0;padding:0;margin-top:0}
+.sec-head.sec-mini{margin:14px 0 6px;font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
 .sub .t{font-weight:900;font-size:13.5px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
 .sub .t>button{border:0;background:transparent;color:var(--r);font-weight:800;font-size:12px}
 .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0}
@@ -659,8 +661,8 @@ function personLines(p){ const L=[];
   if(p.chilaquiles){ const c=p.chilaquiles;
     const ex=(c.extras||[]).map(x=>x==="Guiso favorito"?(c.guiso?"guiso de "+c.guiso.toLowerCase():"guiso favorito"):x.toLowerCase());
     L.push((c.cant>1?c.cant+" ":"")+"Chilaquiles"+(c.salsa?" salsa "+c.salsa.toLowerCase():" (falta salsa)")+(c.queso?" · queso "+c.queso.toLowerCase():" · (falta queso)")+(ex.length?" + "+ex.join(" + "):"")); }
-  p.bebidas.forEach(l=>L.push(l.cant+" "+l.nombre+(l.detalle?" ("+l.detalle+")":"")));
   p.postres.forEach(l=>L.push(l.cant+" "+l.nombre));
+  p.bebidas.forEach(l=>L.push(l.cant+" "+l.nombre+(l.detalle?" ("+l.detalle+")":"")));
   return L; }
 const masaTag=m=>`<span class="mt ${m==="maiz"?"m-m":"m-h"}">${m==="maiz"?"🌽 Maíz":"🌾 Harina"}</span>`;
 const lineaHTML=t=>esc(t).replace(/ · (🌾 harina|🌽 maíz)$/,(_,x)=>" "+masaTag(x.includes("maíz")?"maiz":"harina"));
@@ -672,8 +674,8 @@ function totales(c){ const t={g:0,h:0,m:0,ch:0,b:0,po:0,per:0};
     if(p.chilaquiles) t.ch+=p.chilaquiles.cant||1; p.bebidas.forEach(l=>t.b+=l.cant); p.postres.forEach(l=>t.po+=l.cant); });
   return t; }
 function totStr(t){ const s=[]; if(t.g) s.push("🫓 "+t.g+" gordita"+(t.g>1?"s":"")+" (🌾"+t.h+" · 🌽"+t.m+")");
-  if(t.ch) s.push("🍳 "+t.ch); if(t.b) s.push("☕ "+t.b); if(t.po) s.push("🍰 "+t.po); return s.length?s.join("  ·  "):"Sin nada todavía"; }
-function totCorto(t){ const s=[]; if(t.g) s.push(t.g+" gordita"+(t.g>1?"s":"")); if(t.ch) s.push(t.ch+" chilaquiles"); if(t.b) s.push(t.b+" bebida"+(t.b>1?"s":"")); if(t.po) s.push(t.po+" postre"+(t.po>1?"s":"")); return s.join(" · "); }
+  if(t.ch) s.push("🍳 "+t.ch); if(t.po) s.push("🍰 "+t.po); if(t.b) s.push("☕ "+t.b); return s.length?s.join("  ·  "):"Sin nada todavía"; }
+function totCorto(t){ const s=[]; if(t.g) s.push(t.g+" gordita"+(t.g>1?"s":"")); if(t.ch) s.push(t.ch+" chilaquiles"); if(t.po) s.push(t.po+" postre"+(t.po>1?"s":"")); if(t.b) s.push(t.b+" bebida"+(t.b>1?"s":"")); return s.join(" · "); }
 // Precios opcionales (⚙️): si Ricardo los captura, se estima cuánto es por familia y en total — RLR
 const num=v=>{ const x=parseFloat(String(v||"").replace(/[^0-9.]/g,"")); return isNaN(x)?0:x; };
 function hayPrecios(){ return !!config.mostrarPrecios&&Object.values(cat).some(v=>v&&(v.precio!=null&&v.precio!==""||v.precioM!=null&&v.precioM!="")); }
@@ -717,8 +719,8 @@ function buildMessage(cards){
   if(g) L.push("🫓 Gorditas: "+g+" (🌾 "+h+" harina · 🌽 "+m+" maíz)");
   Object.keys(kit).sort((a,b)=>(kit[b].h+kit[b].m)-(kit[a].h+kit[a].m)||a.localeCompare(b)).forEach(k=>{ const v=kit[k]; const parts=[]; if(v.h) parts.push("🌾 "+v.h+" harina"); if(v.m) parts.push("🌽 "+v.m+" maíz"); L.push("    · "+k+": "+parts.join(", ")); });
   if(ch) L.push("🍳 Chilaquiles: "+ch);
-  const bk=Object.keys(beb); if(bk.length) L.push("☕ Bebidas: "+bk.reduce((a,k)=>a+beb[k],0)+" ("+bk.map(k=>beb[k]+" "+k.toLowerCase()).join(", ")+")");
   const pk=Object.keys(pos); if(pk.length) L.push("🍰 Postres: "+pk.reduce((a,k)=>a+pos[k],0)+" ("+pk.map(k=>pos[k]+" "+k.toLowerCase()).join(", ")+")");
+  const bk=Object.keys(beb); if(bk.length) L.push("☕ Bebidas: "+bk.reduce((a,k)=>a+beb[k],0)+" ("+bk.map(k=>beb[k]+" "+k.toLowerCase()).join(", ")+")");
   if(hayPrecios()) L.push("💰 Total aprox.: "+money(costoTotal));
   L.push("");
   L.push("¡Gracias! 🐸");
@@ -911,7 +913,6 @@ function personaHTML(p,pi){
     const off=!disponible("g",g.n,p.masa||"harina"), soloOtra=!off&&!disponible("g",g.n,p.masa==="maiz"?"harina":"maiz"); const pic=picDe(g.n); return `<button class="chip${c?" has":""}${off?" off":""}" data-a="${off?"agotado":"addG"}" data-p="${pi}" data-v="${esc(g.n)}">${esc(g.n)}${pic&&!off?`<span class="pic">${"🌶".repeat(pic)}</span>`:""}${off?`<span class="cnt no">sin ${p.masa==="maiz"?"maíz":"harina"}</span>`:b?b:soloOtra?`<span class="cnt ok2">solo ${p.masa==="maiz"?"maíz":"harina"}</span>`:""}</button>`; }).join("");
   const lines=p.gorditas.map((l,i)=>`<div class="line ${l.masa==="maiz"?"mm":"mh"}${disponible("g",l.guiso,l.masa)?"":" off"}"><span class="qty"><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="-1">−</button><span class="lq">${l.cant}</span><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="1">+</button></span><span class="ln">${esc(l.guiso)}${masaTag(l.masa)}${disponible("g",l.guiso,l.masa)?"":`<em class="no">⛔ agotado hoy</em>`}</span>
     ${l.guiso==="Combinada"?`<input class="det" data-in="gdet" data-p="${pi}" data-i="${i}" value="${esc(l.detalle)}" placeholder="¿de qué?">`:""}</div>`).join("");
-  const openB=ui.open[p.id+"b"]||p.bebidas.length, openP=ui.open[p.id+"p"]||p.postres.length;
   const col=!!ui.open[p.id+"c"]; const L=personLines(p);
   if(col) return `<section class="persona col"><div class="p-head"><span class="p-emoji">${r.e}</span><div class="p-sum"><b>${esc(nombreDe(p))}</b><span>${L.length?L.map(lineaHTML).join(" · "):"sin pedido"}</span></div><button class="ib" data-a="colPersona" data-p="${pi}" title="Abrir">▾</button></div></section>`;
   return `<section class="persona">
@@ -920,25 +921,21 @@ function personaHTML(p,pi){
     <div class="sec-head"><span>🫓 Gorditas</span><div class="seg"><button class="sh${p.masa!=="maiz"?" on":""}" data-a="masa" data-p="${pi}" data-v="harina">🌾 Harina</button><button class="sm${p.masa==="maiz"?" on":""}" data-a="masa" data-p="${pi}" data-v="maiz">🌽 Maíz</button></div></div>
     <div class="chips">${chips}</div>
     <div class="lines">${lines}</div>
-    <div class="p-extras">
-      <button class="pill${p.chilaquiles?" on":""}${disponible("ch","chilaquiles")?"":" off"}" data-a="${p.chilaquiles||disponible("ch","chilaquiles")?"togChil":"agotado"}" data-p="${pi}" data-v="Chilaquiles">🍳 Chilaquiles${disponible("ch","chilaquiles")?"":" · agotado"}</button>
-      <button class="pill${openB?" on":""}" data-a="togSec" data-p="${pi}" data-v="b">☕ Bebida</button>
-      <button class="pill${openP?" on":""}" data-a="togSec" data-p="${pi}" data-v="p">🍰 Postre</button>
-    </div>
-    ${p.chilaquiles?chilHTML(p,pi):""}
-    ${openB?subHTML(p,pi,"bebidas",BEBIDAS,"☕ Bebida","addB","bQty","bdet"):""}
-    ${openP?subHTML(p,pi,"postres",POSTRES,"🍰 Postre","addP","pQty",null):""}
+    <div class="sec-head sec-mini"><span>🍳 Chilaquiles</span></div>
+    ${p.chilaquiles?chilHTML(p,pi):`<div class="chips"><button class="chip${disponible("ch","chilaquiles")?"":" off"}" data-a="${disponible("ch","chilaquiles")?"togChil":"agotado"}" data-p="${pi}" data-v="Chilaquiles">🍳 Chilaquiles${disponible("ch","chilaquiles")?"":`<span class="cnt no">agotado</span>`}</button></div>`}
+    ${subHTML(p,pi,"postres",POSTRES,"🍰 Postres","addP","pQty",null)}
+    ${subHTML(p,pi,"bebidas",BEBIDAS,"☕ Bebidas","addB","bQty","bdet")}
   </section>`;
 }
 function subHTML(p,pi,key,items,title,addA,qtyA,detIn){
   const have={}; p[key].forEach(l=>have[l.nombre]=(have[l.nombre]||0)+l.cant);
-  return `<div class="sub"><div class="t">${title}<button data-a="togSec" data-p="${pi}" data-v="${key==="bebidas"?"b":"p"}" data-x="1">quitar</button></div>
+  return `<div class="sec-head sec-mini"><span>${title}</span></div><div class="sub plano">
     <div class="chips">${items.map(it=>{ const off=!disponible(key==="bebidas"?"b":"po",it.n); return `<button class="chip${have[it.n]?" has":""}${off?" off":""}" data-a="${off?"agotado":addA}" data-p="${pi}" data-v="${esc(it.n)}">${esc(it.n)}${off?`<span class="cnt no">agotado</span>`:have[it.n]?`<span class="cnt">${have[it.n]}</span>`:""}</button>`; }).join("")}</div>
     <div class="lines">${p[key].map((l,i)=>{ const it=items.find(x=>x.n===l.nombre); const off=!disponible(key==="bebidas"?"b":"po",l.nombre); return `<div class="line${off?" off":""}"><span class="qty"><button data-a="${qtyA}" data-p="${pi}" data-i="${i}" data-v="-1">−</button><span class="lq">${l.cant}</span><button data-a="${qtyA}" data-p="${pi}" data-i="${i}" data-v="1">+</button></span><span class="ln">${esc(l.nombre)}${off?`<em class="no">⛔ agotado hoy</em>`:""}</span>
       ${detIn&&it&&it.det?`<input class="det" data-in="${detIn}" data-p="${pi}" data-i="${i}" value="${esc(l.detalle)}" placeholder="${esc(it.det)}">`:""}</div>`; }).join("")}</div></div>`;
 }
 function chilHTML(p,pi){ const c=p.chilaquiles;
-  return `<div class="sub"><div class="t">🍳 Chilaquiles <span class="qty" style="margin-left:auto;margin-right:8px"><button data-a="chQty" data-p="${pi}" data-v="-1">−</button><span class="lq">${c.cant}</span><button data-a="chQty" data-p="${pi}" data-v="1">+</button></span><button data-a="togChil" data-p="${pi}">quitar</button></div>
+  return `<div class="sub"><div class="t"><span class="qty" style="margin-right:8px"><button data-a="chQty" data-p="${pi}" data-v="-1">−</button><span class="lq">${c.cant}</span><button data-a="chQty" data-p="${pi}" data-v="1">+</button></span><button data-a="togChil" data-p="${pi}">quitar</button></div>
     ${disponible("ch","chilaquiles")?"":`<div class="warn">⛔ Hoy no hay chilaquiles en Suc. ${esc(getSuc().n)}. Quítalos del pedido.</div>`}
     <div class="row"><span class="lbl">1 · Salsa</span>${SALSAS.map(s=>{ const off=!disponible("sal",s); return `<button class="chip${c.salsa===s?" on":""}${off?" off":""}" data-a="${off?"agotado":"chSet"}" data-p="${pi}" data-k="salsa" data-v="${esc(s)}">${esc(s)}${off?`<span class="cnt no">agotada</span>`:""}</button>`; }).join("")}</div>
     <div class="row"><span class="lbl">2 · Queso</span>${QUESOS.map(s=>{ const off=!disponible("q",s); return `<button class="chip${c.queso===s?" on":""}${off?" off":""}" data-a="${off?"agotado":"chSet"}" data-p="${pi}" data-k="queso" data-v="${esc(s)}">${esc(s)}${off?`<span class="cnt no">agotado</span>`:""}</button>`; }).join("")}</div>
