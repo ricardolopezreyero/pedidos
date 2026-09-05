@@ -479,10 +479,7 @@ function renderHome(){
     <label class="f">Tu liga<div class="slugrow"><span>${esc(APP_URL.replace("https://",""))}</span><input id="hSlug" placeholder="familia-lopez-acosta" autocomplete="off" spellcheck="false"></div></label>
     <div id="hMsg" class="hmsg"></div>
     <button class="btn p big" data-a="crearTablero">🐸 Crear mi tablero</button>
-    <p class="hnote">La liga se queda para siempre con el historial de lo que pidió cada familia. Con tu celular activas el modo anfitrión en cualquier otro dispositivo.</p></section>
-  <section class="hcard"><h2>🔗 Ya tengo una liga</h2>
-    <label class="f">Pega la liga que te pasaron<input id="hEntrar" placeholder="ranita.capitaltorreon.com/familia-…" autocomplete="off" spellcheck="false"></label>
-    <button class="btn y big" data-a="entrarTablero">Entrar al tablero</button></section>
+    <p class="hnote">La liga se queda para siempre con el historial de lo que pidió cada familia. Con tu celular activas el modo anfitrión en cualquier otro dispositivo. Si alguien ya te pasó una liga, solo ábrela.</p></section>
   <p class="hfoot">Gorditas Ranitas · Torreón · ${SUCURSALES.map(x=>x.n).join(" · ")}</p>`;
   $("#home").hidden=false;
 }
