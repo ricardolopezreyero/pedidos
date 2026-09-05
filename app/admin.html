@@ -302,6 +302,13 @@ button.tag.click{cursor:pointer}button.tag.click:hover{border-style:dashed;borde
 .knh{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:0 10px;font-weight:900;font-size:12px;color:var(--r);white-space:nowrap}
 .kitem.nohubo{background:var(--r2);border-color:var(--r);color:#b3261e}.kitem.nohubo .kq{background:var(--r);color:#fff}.kitem.nohubo .kchk{background:var(--r);color:#fff;border-color:var(--r)}
 .item .uso{display:block;font-size:11px;color:var(--b);font-weight:800}
+/* sucursales */
+.form3{grid-template-columns:1fr 1fr 1fr auto}
+@media(max-width:800px){.form3{grid-template-columns:1fr}}
+.suclog{margin-top:12px;display:flex;flex-direction:column;gap:4px;font-weight:800;font-size:13.5px}
+.suclog .run{color:var(--mut);animation:pulse 1s infinite}.suclog .ok{color:var(--g)}
+.mesa.suc{text-align:left}.mesa.suc.off{opacity:.55}
+.sucinfo{font-size:13px;font-weight:700;color:#4a4238;display:flex;flex-direction:column;gap:3px;margin-bottom:8px}
 /* acceso */
 .gate{position:fixed;inset:0;background:var(--ink);display:grid;place-items:center;z-index:99;padding:20px}
 .gate form{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:360px;text-align:center}
@@ -333,9 +340,12 @@ button.tag.click{cursor:pointer}button.tag.click:hover{border-style:dashed;borde
 const _RLR="Ricardo López Reyero", _k="EYE", _rev=181218;
 const FIREBASE_CONFIG={apiKey:"AIzaSyDSAFxL2E_S1iHiRfSHGbbuHiR_-2j-HP4",authDomain:"notion-casa.firebaseapp.com",databaseURL:"https://notion-casa-default-rtdb.firebaseio.com",projectId:"notion-casa",storageBucket:"notion-casa.firebasestorage.app",messagingSenderId:"450309398626",appId:"1:450309398626:web:a2d12ad763123c16d6b13b"};
 const ROOT="ranitas", CLAVE_MAESTRA="123";   // usuario maestro (provisional)
-const SUCURSALES=[{id:"sanatorio",n:"Sanatorio Español"},{id:"vinedos",n:"Viñedos"},{id:"juarez",n:"Juárez"},{id:"ibero",n:"Villas de la Ibero"}];
+// Sucursales: viven en ranitas/sucursales (el Maestro las crea desde la vista Sucursales); estas 4 son el respaldo si el nodo no existe — RLR
+const SUC_BASE=[{id:"sanatorio",n:"Sanatorio Español",tels:["8717189478","8715093598"]},{id:"vinedos",n:"Viñedos",tels:["8712036783","8714189903"]},{id:"juarez",n:"Juárez",tels:["8719432960"]},{id:"ibero",n:"Villas de la Ibero",tels:["8714334785"]}];
+let SUCURSALES=SUC_BASE.slice(), SUC_TODAS={};
+function aplicarSucursales(v){ SUC_TODAS=v||{}; const arr=Object.entries(SUC_TODAS).filter(([k,x])=>x&&x.activa!==false).map(([k,x])=>({id:k,n:x.n||k,tels:Array.isArray(x.tels)?x.tels:Object.values(x.tels||{}),direccion:x.direccion||"",orden:x.orden||0,creado:x.creado||0})).sort((a,b)=>(a.orden-b.orden)||(a.creado-b.creado)); if(arr.length) SUCURSALES=arr; }
 const ROLES={papa:"👨",mama:"👩",hijo:"👦",hija:"👧",otro:"🙂"};
-const VISTAS=[{id:"panorama",n:"Panorama",e:"📊"},{id:"pedidos",n:"Pedidos",e:"📋"},{id:"mostrador",n:"Mostrador",e:"🧾"},{id:"cocina",n:"Cocina",e:"🔥"},{id:"mesas",n:"Mesas",e:"🪑"},{id:"productos",n:"Productos",e:"🏪"},{id:"precios",n:"Precios",e:"💲"},{id:"usuarios",n:"Usuarios",e:"👥"},{id:"bitacora",n:"Bitácora",e:"📜"},{id:"manual",n:"Manuales",e:"📖"}];   // Manuales lo ven todos
+const VISTAS=[{id:"panorama",n:"Panorama",e:"📊"},{id:"pedidos",n:"Pedidos",e:"📋"},{id:"mostrador",n:"Mostrador",e:"🧾"},{id:"cocina",n:"Cocina",e:"🔥"},{id:"mesas",n:"Mesas",e:"🪑"},{id:"productos",n:"Productos",e:"🏪"},{id:"precios",n:"Precios",e:"💲"},{id:"usuarios",n:"Usuarios",e:"👥"},{id:"sucursales",n:"Sucursales",e:"🏬",solo:"maestro"},{id:"bitacora",n:"Bitácora",e:"📜"},{id:"manual",n:"Manuales",e:"📖"}];   // Manuales lo ven todos
 const GUISOS_PIC={"Chicharrón prensado":2,"Chicharrón pella":2,"Carne con chile":2,"Guiso verde":1,"Huevo verde":1,"Huevo rojo":1,"Asado":1};   // picor de fábrica (editable en Productos → ranitas/menu)
 const SALSAS=["Verde cremosa","Roja","Verde tomatillo","Chipotle con crema","La más picosa 🌶🌶🌶"], QUESOS=["Asadero","Chihuahua"], EXTRAS=["Huevo estrellado","Huevo revuelto","Guiso favorito"];
 const slugify=x=>(x||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
@@ -385,7 +395,7 @@ const porGuiso=cards=>{ const m={}; cards.forEach(c=>toArr(c.personas).forEach(p
 /* ---------- acceso: maestro + usuarios con vistas ---------- */
 let usuarios={}, yo=null;
 function sesion(){ try{ return JSON.parse(localStorage.getItem("ranitas-admin-sesion")||"null"); }catch(e){ return null; } }
-function entrar(clave){ if(clave===CLAVE_MAESTRA) return {id:"maestro",nombre:"Maestro",vistas:VISTAS.map(v=>v.id)}; const u=Object.entries(usuarios).find(([id,u])=>u&&u.clave===clave); return u?Object.assign({id:u[0]},u[1],{vistas:toArr(u[1].vistas).concat(["manual"])}):null; }
+function entrar(clave){ if(clave===CLAVE_MAESTRA) return {id:"maestro",nombre:"Maestro",vistas:VISTAS.map(v=>v.id)}; const u=Object.entries(usuarios).find(([id,u])=>u&&u.clave===clave); return u?Object.assign({id:u[0]},u[1],{vistas:toArr(u[1].vistas).filter(x=>x!=="sucursales").concat(["manual"])}):null; }   // Sucursales es exclusiva del Maestro
 function refrescarYo(){ const s=sesion(); if(!s) return; if(s.id==="maestro"){ yo=entrar(CLAVE_MAESTRA); } else { const u=usuarios[s.id]; yo=u?Object.assign({id:s.id},u,{vistas:toArr(u.vistas).concat(["manual"])}):null; if(!yo){ localStorage.removeItem("ranitas-admin-sesion"); $("#gate").style.display="grid"; return; } } render(); }
 $("#gateForm").addEventListener("submit",e=>{ e.preventDefault(); const u=entrar($("#pw").value); if(u){ yo=u; localStorage.setItem("ranitas-admin-sesion",JSON.stringify({id:u.id})); $("#gate").style.display="none"; bit("sistema","entro","Entró al admin"); if(!yo.vistas.includes(vista)) vista=yo.vistas[0]||"pedidos"; render(); } else { $("#gateErr").textContent="Contraseña incorrecta"; $("#pw").value=""; } });
 $("#salir").addEventListener("click",()=>{ bit("sistema","salio","Cerró sesión"); localStorage.removeItem("ranitas-admin-sesion"); setTimeout(()=>location.href=location.pathname,150); });
@@ -399,6 +409,7 @@ let vista=QS.get("v")||"panorama", fSuc=QS.get("suc")||"", fTab=QS.get("t")||"",
 if(!VISTAS.some(v=>v.id===vista)) vista="panorama";
 firebase.initializeApp(FIREBASE_CONFIG); const db=firebase.database();
 db.ref(".info/connected").on("value",s=>{ online=!!s.val(); $("#dot").className="dot"+(online?" on":""); $("#conn").textContent=online?"en vivo":"sin conexión"; });
+db.ref(ROOT+"/sucursales").on("value",s=>{ aplicarSucursales(s.val()); if(!SUCURSALES.some(x=>x.id===pSuc)) pSuc=(SUCURSALES[0]||{}).id||pSuc; render(); });
 db.ref(ROOT+"/anfitriones").on("value",s=>{ anfitriones=s.val()||{}; render(); });
 db.ref(ROOT+"/tableros").on("value",s=>{ tableros=s.val()||{}; if(QS.get("ped")&&!pos._auto){ const [sl,id]=QS.get("ped").split("/"); if(tableros[sl]&&tableros[sl].pedidos&&tableros[sl].pedidos[id]){ pos._auto=1; abrirEnMostrador(sl,id); return; } } render(); });
 db.ref(ROOT+"/catalogo").on("value",s=>{ catalogo=s.val()||{}; render(); });
@@ -418,7 +429,7 @@ function renderNav(){ const cards=allCards(); const vis=yo?yo.vistas:[];
   $("#who").textContent=yo?yo.nombre:""; }
 $("#nav").addEventListener("click",e=>{ const b=e.target.closest("[data-v]"); if(!b) return; vista=b.dataset.v; syncUrl(); render(); });
 let _rPend=false; function render(){ if(_rPend) return; _rPend=true; setTimeout(()=>{ _rPend=false; renderNow(); },0); }
-function renderNow(){ if(!yo) return; if(vista!=="mesas"&&$("#main").dataset.mesasSig) delete $("#main").dataset.mesasSig; if(!yo.vistas.includes(vista)) vista=yo.vistas[0]; if(!vista) return; renderNav(); if(pos.card&&vista==="mostrador"){ renderMostrador(); return; } ({panorama:renderPanorama,pedidos:renderPedidos,mostrador:renderMostrador,cocina:renderCocina,mesas:renderMesas,productos:renderProductos,precios:renderPrecios,usuarios:renderUsuarios,manual:renderManual,bitacora:renderBitacora})[vista](); }
+function renderNow(){ if(!yo) return; if(vista!=="mesas"&&$("#main").dataset.mesasSig) delete $("#main").dataset.mesasSig; if(!yo.vistas.includes(vista)) vista=yo.vistas[0]; if(!vista) return; renderNav(); if(pos.card&&vista==="mostrador"){ renderMostrador(); return; } ({panorama:renderPanorama,pedidos:renderPedidos,mostrador:renderMostrador,cocina:renderCocina,mesas:renderMesas,sucursales:renderSucursales,productos:renderProductos,precios:renderPrecios,usuarios:renderUsuarios,manual:renderManual,bitacora:renderBitacora})[vista](); }
 
 /* ---------- BITÁCORA: feed en vivo, filtros, buscador y línea de tiempo por pedido — RLR ---------- */
 const CATS={pago:["💵","Pagos","#166534"],pedido:["📦","Pedidos","#8a5a00"],edicion:["✏️","Ediciones","#2b4a9e"],cocina:["🔥","Cocina","#E4322B"],reparto:["🛵","Reparto","#7c3aed"],producto:["🏪","Productos","#0f766e"],precio:["💲","Precios","#0f766e"],usuario:["👥","Usuarios","#555"],tablero:["🏠","Tableros","#c98a00"],sistema:["⚙️","Sistema","#999"]};
@@ -754,6 +765,35 @@ document.addEventListener("click",async e=>{ if(vista!=="mesas") return; const t
   const qt=t.closest("[data-quitar]"); if(qt&&confirm("¿Ocultar esta mesa? Su QR dejará de funcionar para pedidos nuevos.")){ db.ref(ROOT+"/anfitriones/"+qt.dataset.quitar+"/activa").set(false); bit("tablero","mesa","Ocultó la mesa /"+qt.dataset.quitar,{tablero:qt.dataset.quitar,sucursal:suc}); }
 });
 
+/* ---------- 2e. SUCURSALES (solo Maestro): crear una sucursal deja todo listo en segundos — RLR ---------- */
+let sucLog=[], sucCreando=false;
+function renderSucursales(){ if(!yo||yo.id!=="maestro"){ $("#main").innerHTML=`<div class="empty big">Solo el usuario Maestro puede administrar sucursales.</div>`; return; }
+  const todas=Object.entries(SUC_TODAS).map(([k,x])=>Object.assign({id:k},x)).sort((a,b)=>(a.orden||0)-(b.orden||0)||(a.creado||0)-(b.creado||0));
+  const cards=allCards();
+  $("#main").innerHTML=`<div class="top"><h1>🏬 Sucursales</h1><div class="sub">Exclusivo del Maestro. Al crear una sucursal se prepara todo automáticamente: registro, catálogo completo prendido, 6 mesas con QR, mostrador, cocina y bitácora. Lista para usar al terminar.</div></div>
+  <div class="card" style="margin-bottom:14px"><h3 style="margin-bottom:8px">➕ Nueva sucursal</h3><div class="form form3"><label>Nombre<input id="sNombre" placeholder="Ej. Torreón Centro"></label><label>WhatsApp para pedidos (10 dígitos)<input id="sTel" placeholder="871 000 00 00" inputmode="tel"></label><label>Segundo número (opcional)<input id="sTel2" placeholder="871 000 00 00" inputmode="tel"></label><label style="grid-column:1/-1">Dirección (opcional)<input id="sDir" placeholder="Calle, número, colonia"></label><button class="btn p" id="sCrear" ${sucCreando?"disabled":""}>${sucCreando?"Creando…":"🏬 Crear sucursal"}</button></div>
+    ${sucLog.length?`<div class="suclog">${sucLog.map(x=>`<div class="${x.ok?"ok":"run"}">${x.ok?"✅":"⏳"} ${esc(x.t)}</div>`).join("")}</div>`:""}</div>
+  <div class="mesas">${todas.map(x=>{ const mesas=Object.values(anfitriones).filter(a=>a&&a.mesa&&a.sucursal===x.id&&a.activa!==false).length; const act=cards.filter(c=>c.sucursal===x.id&&c.estado==="pedido").length; const ap=apagados(x.id).length; const tels=Array.isArray(x.tels)?x.tels:Object.values(x.tels||{}); return `<div class="mesa suc${x.activa===false?" off":""}"><div class="mesa-h"><b>🏬 ${esc(x.n)}</b>${x.activa===false?`<span class="b">inactiva</span>`:`<span class="b ok">activa</span>`}</div>
+    <div class="sucinfo"><div>📲 ${tels.map(t=>esc(t.replace(/(\d{3})(\d{3})(\d{2})(\d{2})/,"$1 $2 $3 $4"))).join(" · ")||"sin WhatsApp"}</div>${x.direccion?`<div>📍 ${esc(x.direccion)}</div>`:""}<div>🪑 ${mesas} mesas · 🍳 ${act} pedidos activos · ${ap?`⛔ ${ap} apagados`:"✅ catálogo completo"}</div><div class="mesa-url">id: ${esc(x.id)}</div></div>
+    <div class="mesa-acts"><button class="btn" data-sedit="${esc(x.id)}">✏️ Editar</button><a class="btn ghost" href="/admin?v=mesas&suc=${esc(x.id)}">🪑 Mesas</a><a class="btn ghost" href="/admin?v=productos&suc=${esc(x.id)}">🏪 Productos</a>${x.activa===false?`<button class="btn p" data-sact="${esc(x.id)}" data-v="1">Activar</button>`:`<button class="btn ghost" data-sact="${esc(x.id)}" data-v="0" title="Deja de aparecer para pedir; nada se borra">Desactivar</button>`}</div></div>`; }).join("")}</div>`; }
+const digitsA=x=>String(x||"").replace(/\D/g,"").slice(-10);
+async function crearSucursal(nombre,tels,direccion){ const base=slugify(nombre).replace(/-/g,"")||("suc"+Date.now().toString(36)); let id=base, i=2; while(SUC_TODAS[id]) id=base+i++;
+  const paso=async(t,fn)=>{ sucLog.push({t,ok:false}); renderSucursales(); await fn(); sucLog[sucLog.length-1].ok=true; renderSucursales(); };
+  sucCreando=true; sucLog=[]; renderSucursales();
+  const orden=Math.max(0,...Object.values(SUC_TODAS).map(x=>x.orden||0))+1;
+  await paso("Registro de la sucursal "+nombre,()=>db.ref(ROOT+"/sucursales/"+id).set({n:nombre,tels,direccion:direccion||"",activa:true,orden,creado:Date.now()}));
+  await paso("Catálogo: "+CATALOGO.reduce((a,g)=>a+g.items.length,0)+" productos prendidos, harina y maíz",()=>{ const cat={}; CATALOGO.forEach(g=>g.items.forEach(it=>{ cat[catKey(g.c,it)]={on:true,precio:null,precioM:null,ts:Date.now()}; })); return db.ref(ROOT+"/catalogo/"+id).set(cat); });
+  await paso("6 mesas con su QR",async()=>{ for(let m=1;m<=6;m++) await crearMesa(id,m); });
+  await paso("Mostrador para caja",()=>asegurarMostrador(id));
+  await paso("Cocina lista (los cocineros se agregan desde la vista Cocina)",()=>db.ref(ROOT+"/cocina/"+id+"/creado").set(Date.now()));
+  await paso("Bitácora",async()=>{ bit("tablero","sucursal","Creó la sucursal "+nombre+" ("+id+") con catálogo, 6 mesas y mostrador",{sucursal:id}); });
+  sucCreando=false; sucLog.push({t:"Listo: "+nombre+" ya puede recibir pedidos",ok:true}); renderSucursales(); toast("🏬 "+nombre+" creada y lista"); setTimeout(()=>{ sucLog=[]; if(vista==="sucursales") renderSucursales(); },8000); return id; }
+document.addEventListener("click",async e=>{ if(vista!=="sucursales"||!yo||yo.id!=="maestro") return; const t=e.target;
+  if(t.id==="sCrear"){ const nombre=$("#sNombre").value.trim(); const t1=digitsA($("#sTel").value), t2=digitsA($("#sTel2").value); if(nombre.length<3) return toast("Pon el nombre de la sucursal"); if(t1.length<10) return toast("Pon el WhatsApp de 10 dígitos"); const tels=[t1].concat(t2.length===10?[t2]:[]); if(Object.values(SUC_TODAS).some(x=>x&&(x.n||"").trim().toLowerCase()===nombre.toLowerCase())) return toast("Ya existe una sucursal con ese nombre"); try{ await crearSucursal(nombre,tels,$("#sDir").value.trim()); }catch(err){ sucCreando=false; toast("Algo falló: "+err.message); renderSucursales(); } return; }
+  const ed=t.closest("[data-sedit]"); if(ed){ const x=SUC_TODAS[ed.dataset.sedit]; const nombre=prompt("Nombre de la sucursal:",x.n); if(nombre==null) return; const tels=(Array.isArray(x.tels)?x.tels:Object.values(x.tels||{})); const t1=digitsA(prompt("WhatsApp principal (10 dígitos):",tels[0]||"")); const t2=digitsA(prompt("Segundo número (vacío si no hay):",tels[1]||"")); const dir=prompt("Dirección:",x.direccion||""); if(nombre.trim().length<3||t1.length<10) return toast("Nombre o teléfono inválidos"); await db.ref(ROOT+"/sucursales/"+ed.dataset.sedit).update({n:nombre.trim(),tels:[t1].concat(t2.length===10?[t2]:[]),direccion:dir||""}); bit("tablero","sucursal","Editó la sucursal "+nombre.trim(),{sucursal:ed.dataset.sedit}); toast("Sucursal actualizada"); return; }
+  const ac=t.closest("[data-sact]"); if(ac){ const on=ac.dataset.v==="1"; if(!on&&!confirm("¿Desactivar esta sucursal? Deja de aparecer para pedir. Nada se borra y se puede reactivar.")) return; await db.ref(ROOT+"/sucursales/"+ac.dataset.sact+"/activa").set(on); bit("tablero","sucursal",(on?"Activó":"Desactivó")+" la sucursal "+((SUC_TODAS[ac.dataset.sact]||{}).n||ac.dataset.sact),{sucursal:ac.dataset.sact}); toast(on?"Sucursal activada":"Sucursal desactivada"); return; }
+});
+
 /* ---------- 3. PRODUCTOS (prender / apagar por sucursal) ---------- */
 function sucSelect(){ return `<select id="pSuc">${SUCURSALES.map(x=>{ const a=apagados(x.id).length; return `<option value="${x.id}"${x.id===pSuc?" selected":""}>📍 ${x.n}${a?" · "+a+" apagado"+(a>1?"s":""):""}</option>`; }).join("")}</select>`; }
 function renderProductos(){ const c=catalogo[pSuc]||{}; const ap=apagados(pSuc).length;
@@ -782,7 +822,7 @@ function renderUsuarios(){ const us=Object.entries(usuarios);
   <div class="card" style="margin-bottom:14px"><h3 style="margin-bottom:8px">➕ Nuevo usuario</h3><div class="form"><label>Nombre<input id="uNombre" placeholder="Sucursal Viñedos · Cocina · Pepe"></label><label>Clave para entrar<input id="uClave" placeholder="ej. 4521" autocomplete="off"></label><button class="btn p" id="uCrear">Crear</button></div></div>
   <div class="users">
     <div class="user"><div><div class="nm">👑 Maestro</div><div class="cl">Ve todas las vistas · no se puede borrar</div></div><span class="b ok">siempre</span><div class="chk">${VISTAS.filter(v=>v.id!=="manual").map(v=>`<label class="on">${v.e} ${v.n}</label>`).join("")}</div></div>
-    ${us.map(([id,u])=>{ const vs=toArr(u.vistas); return `<div class="user" data-id="${id}"><div><div class="nm">${esc(u.nombre)}</div><div class="cl">clave: <b>${esc(u.clave)}</b> · creado ${fmtFecha(u.creado)}</div></div><button class="btn r" data-del="${id}">🗑 Borrar</button><div class="chk">${VISTAS.filter(v=>v.id!=="manual").map(v=>`<label class="${vs.includes(v.id)?"on":""}"><input type="checkbox" hidden data-uid="${id}" data-vista="${v.id}" ${vs.includes(v.id)?"checked":""}>${v.e} ${v.n}</label>`).join("")}</div></div>`; }).join("")||`<div class="empty">Todavía no hay usuarios además del maestro.</div>`}
+    ${us.map(([id,u])=>{ const vs=toArr(u.vistas); return `<div class="user" data-id="${id}"><div><div class="nm">${esc(u.nombre)}</div><div class="cl">clave: <b>${esc(u.clave)}</b> · creado ${fmtFecha(u.creado)}</div></div><button class="btn r" data-del="${id}">🗑 Borrar</button><div class="chk">${VISTAS.filter(v=>v.id!=="manual"&&!v.solo).map(v=>`<label class="${vs.includes(v.id)?"on":""}"><input type="checkbox" hidden data-uid="${id}" data-vista="${v.id}" ${vs.includes(v.id)?"checked":""}>${v.e} ${v.n}</label>`).join("")}</div></div>`; }).join("")||`<div class="empty">Todavía no hay usuarios además del maestro.</div>`}
   </div>`; }
 document.addEventListener("click",e=>{
   if(e.target.id==="uCrear"){ const nombre=$("#uNombre").value.trim(), clave=$("#uClave").value.trim(); if(nombre.length<2||clave.length<3) return toast("Pon nombre y una clave de al menos 3 caracteres"); if(clave===CLAVE_MAESTRA||Object.values(usuarios).some(u=>u&&u.clave===clave)) return toast("Esa clave ya está en uso");

@@ -404,12 +404,14 @@ const FAM=QS.get("f")||"";   // liga de una familia: abre directo su pedido
 const goTo=sl=>{ location.href=LOCAL?location.pathname+"?t="+sl:"/"+sl; };
 
 /* ---------- Menú Ranitas (según menú oficial) ---------- */
-const SUCURSALES=[
+// Sucursales: viven en ranitas/sucursales y se leen en vivo; estas 4 son el respaldo — RLR
+let SUCURSALES=[
   {id:"sanatorio",n:"Sanatorio Español",tels:["8717189478","8715093598"]},
   {id:"vinedos",  n:"Viñedos",          tels:["8712036783","8714189903"]},
   {id:"juarez",   n:"Juárez",           tels:["8719432960"]},
   {id:"ibero",    n:"Villas de la Ibero",tels:["8714334785"]}
 ];
+function aplicarSucursales(v){ const arr=Object.entries(v||{}).filter(([k,x])=>x&&x.activa!==false).map(([k,x])=>({id:k,n:x.n||k,tels:(Array.isArray(x.tels)?x.tels:Object.values(x.tels||{})).filter(Boolean),orden:x.orden||0,creado:x.creado||0})).sort((a,b)=>(a.orden-b.orden)||(a.creado-b.creado)); if(arr.length) SUCURSALES=arr; }
 const ROLES=[
   {id:"papa",n:"Papá",e:"👨"},{id:"mama",n:"Mamá",e:"👩"},
   {id:"hijo",n:"Hijo",e:"👦"},{id:"hija",n:"Hija",e:"👧"},{id:"otro",n:"Otro",e:"🙂"}
@@ -498,8 +500,8 @@ function fmtFecha(ts,hora=true){ const o={day:"numeric",month:"short"}; if(hora)
 function toast(t){ const e=$("#toast"); e.textContent=t; e.classList.add("on"); clearTimeout(e._t); e._t=setTimeout(()=>e.classList.remove("on"),2200); }
 function show(id){ $("#"+id).classList.add("open"); }
 function hide(id){ $("#"+id).classList.remove("open"); }
-function getSuc(){ return SUCURSALES.find(s=>s.id===config.sucursal)||SUCURSALES[1]; }
-function getTel(){ const s=getSuc(); return s.tels[Math.min(config.telIdx||0,s.tels.length-1)]; }
+function getSuc(){ return SUCURSALES.find(s=>s.id===config.sucursal)||SUCURSALES[0]; }
+function getTel(){ const s=getSuc(); return (s.tels&&s.tels.length?s.tels:["0000000000"])[Math.min(config.telIdx||0,Math.max(0,(s.tels||[]).length-1))]; }
 function fmtTel(t){ return t.replace(/(\d{3})(\d{3})(\d{2})(\d{2})/,"$1 $2 $3 $4"); }
 // api.whatsapp.com directo: el redirect de wa.me rompe los emojis (salen como �) — RLR
 function waLink(tel,text){ return "https://api.whatsapp.com/send?phone=52"+tel+"&text="+encodeURIComponent(text); }
@@ -558,6 +560,7 @@ function onlineCount(){ const now=Date.now(); return Object.values(ui.online).fi
 function initFirebase(){
   try{ firebase.initializeApp(FIREBASE_CONFIG); db=firebase.database(); }catch(e){ db=null; renderHeader(); return; }
   db.ref(".info/connected").on("value",s=>{ online=!!s.val(); if(online&&SLUG){ heartbeat(); if(ui.editing) setPresence(); } renderHeader(); });
+  db.ref(ROOT+"/sucursales").on("value",s=>{ aplicarSucursales(s.val()); if(SLUG){ renderHeader(); renderBoard(); if($("#mCfg").classList.contains("open")) return; } else if(document.body.classList.contains("is-home")) renderHome(); });
   if(!SLUG){ renderHome(); return; }
   db.ref(ROOT+"/anfitriones/"+SLUG).once("value").then(s=>{
     const a=s.val();
