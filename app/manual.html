@@ -33,9 +33,9 @@ h2{font-size:22px;font-weight:900;margin:30px 0 10px;display:flex;align-items:ce
 h3{font-size:18px;font-weight:900;margin:18px 0 6px}
 p{margin:8px 0}
 .paso{display:flex;gap:14px;align-items:flex-start;background:#fff;border-radius:16px;padding:14px 16px;box-shadow:var(--sh);margin:10px 0}
-.num{flex:none;width:44px;height:44px;border-radius:50%;background:var(--y);display:grid;place-items:center;font-weight:900;font-size:22px}
+.num{flex:none;width:44px;height:44px;border-radius:50%;background:var(--y);display:grid;place-items:center;font-weight:900;font-size:22px;line-height:1}
 .paso div{flex:1}
-.paso b{font-size:18px;display:block;margin-bottom:2px}
+.paso div>b:first-child{font-size:18px;display:block;margin-bottom:2px}
 .paso small{display:block;color:var(--mut);font-weight:700;font-size:14px;margin-top:4px}
 figure{margin:14px 0;background:#fff;border-radius:16px;padding:10px;box-shadow:var(--sh)}
 figure img{width:100%;height:auto;border-radius:10px;border:1px solid var(--line);display:block}
@@ -73,205 +73,292 @@ figcaption{font-size:14px;color:var(--mut);font-weight:700;padding:8px 4px 2px;t
 <!-- ================= ANFITRIÓN ================= -->
 <section class="perfil" data-p="anfitrion">
 <h1>🏠 Anfitrión</h1>
-<div class="quien">Eres <b>anfitrión</b> si invitaste familias a tu casa y tú mandas el pedido a Ranitas. Tienes tu propia liga. Las familias entran, cada quien pone lo suyo, y tú mandas todo junto por WhatsApp.</div>
+<div class="quien">Eres <b>anfitrión</b> si invitaste familias a tu casa y tú mandas el pedido a Ranitas. Tienes tu propia liga para siempre. Las familias entran, cada quien pone lo suyo, y tú mandas todo junto por WhatsApp. Se instala como app en tu celular.</div>
 
 <h2>Tu recorrido</h2>
-<div class="recorrido"><span>✏️ Armando</span><i>→</i><span>📋 Por pedir</span><i>→</i><span>📲 Pedido</span><i>→</i><span>🔥 Cocinando</span><i>→</i><span>🛵 En camino</span><i>→</i><span>✅ Entregado</span></div>
-<p>Las tres primeras columnas las mueven tus familias y tú. Las tres siguientes las mueve Ranitas solo. Tú nada más miras cómo avanza la tarjeta.</p>
+<div class="recorrido"><span>✏️ Armando</span><i>→</i><span>📋 Por pedir</span><i>→</i><span>📲 Pedido</span><i>→</i><span>🔥 Cocinando</span><i>→</i><span>🛵 En camino</span><i>→</i><span>✅ Entregado</span><i>→</i><span>📚 Historial</span></div>
+<p>En el celular, este recorrido se ve como un camino de círculos: el círculo negro es donde estás parado y el globito rojo dice cuántos pedidos hay en cada paso. Arriba del camino hay una fila chica que dice <b>ESTADO</b>: son filtros (por pagar, pagados, por entregar, entregados), no pasos. Los tres primeros pasos los mueven tus familias y tú; los siguientes los mueve Ranitas solo.</p>
 
 <h2>Paso a paso</h2>
-<div class="paso"><span class="num">1</span><div><b>Crea tu tablero una sola vez</b>Entra a <span class="liga">ranita.capitaltorreon.com</span>, escribe tu nombre y tu celular, y toca <span class="btn">🐸 Crear mi tablero</span>. Te da una liga que es tuya para siempre.<small>Tu celular sirve para activar el modo anfitrión en otro teléfono o computadora.</small></div></div>
+<div class="paso"><span class="num">1</span><div><b>Crea tu tablero una sola vez</b>Entra a <span class="liga">ranita.capitaltorreon.com</span>, escribe tu nombre y tu celular, y toca <span class="btn">🐸 Crear mi tablero</span>. Te da una liga tuya para siempre, por ejemplo <span class="liga">ranita.capitaltorreon.com/familia-lopez-acosta</span>.<small>Tu celular sirve para activar el modo anfitrión en otro teléfono y para que la sucursal te llame si hay dudas.</small></div></div>
 <figure class="tel"><img src="/manual/fam-home.png" alt="Pantalla de inicio para crear tablero"><figcaption>Inicio: aquí creas tu tablero o entras a los que ya tienes.</figcaption></figure>
-<div class="paso"><span class="num">2</span><div><b>Revisa la configuración ⚙️</b>Toca el engrane arriba a la derecha. Pon tu dirección de entrega, la sucursal que te queda, para cuándo lo quieres y cómo vas a pagar. Todo eso sale en el mensaje que llega a Ranitas.<small>Si pagas en efectivo, escribe con cuánto pagas para que el repartidor lleve cambio.</small></div></div>
-<div class="paso"><span class="num">3</span><div><b>Comparte tu liga 🔗</b>Toca el botón de liga arriba y mándala por WhatsApp a las familias. Cada familia entra y toca <span class="btn y">➕ Pedido de familia</span>.</div></div>
+<div class="paso"><span class="num">2</span><div><b>Decide cómo llega el pedido</b>Debajo de tu liga hay una palanca: <span class="btn k">🏪 Yo paso por el pedido</span> o <span class="btn k">🛵 A mi casa +$60</span>. Viene en "yo paso". Si la cambias a "a mi casa", te pide tu dirección y el envío de $60 se suma al total del pedido.<small>El envío se cobra una vez por pedido, no por familia.</small></div></div>
+<div class="paso"><span class="num">3</span><div><b>Revisa la configuración ⚙️</b>Toca el engrane arriba a la derecha. Ahí están la sucursal a la que se pide, la dirección, para cuándo lo quieres, cómo vas a pagar y la hora de cierre.<small>Si pagas en efectivo, escribe con cuánto pagas para que el repartidor lleve cambio.</small></div></div>
+<div class="paso"><span class="num">4</span><div><b>Comparte tu liga 🔗</b>Toca el botón de liga arriba y mándala por WhatsApp. Cada familia entra y toca <span class="btn y">➕ Pedido de familia</span>. Tú también puedes crear el pedido de tu propia familia.</div></div>
 <figure class="tel"><img src="/manual/fam-tablero.png" alt="Tablero del anfitrión"><figcaption>Tu tablero. Arriba la sucursal y el número de WhatsApp al que se manda.</figcaption></figure>
-<div class="paso"><span class="num">4</span><div><b>Mira cómo van</b>Cada familia aparece como una tarjeta. Ves en vivo lo que escriben. Cuando una familia termina y toca <span class="btn">✅ Listo</span>, su tarjeta pasa sola a <b>Por pedir</b> y te llega un aviso.</div></div>
+<div class="paso"><span class="num">5</span><div><b>Mira cómo van</b>Cada familia es una tarjeta con lo de cada persona, sus gorditas de 🌾 harina (ámbar) y 🌽 maíz (azul), y abajo su total en pesos. Ves en vivo lo que escriben. Cuando una familia toca <span class="btn">✅ Listo</span>, su tarjeta pasa sola a <b>Por pedir</b> y te llega un aviso.</div></div>
 <figure class="tel"><img src="/manual/fam-porpedir.png" alt="Columna Por pedir"><figcaption>Por pedir: aquí están las familias que ya terminaron.</figcaption></figure>
-<div class="paso"><span class="num">5</span><div><b>Manda todo junto</b>En Por pedir toca <span class="btn">📲 Mandar todo por WhatsApp</span>. Se arma un solo mensaje con todas las familias, persona por persona, y un resumen para cocina. Toca <b>Abrir WhatsApp</b>, envíalo, regresa y toca <span class="btn">✅ Ya se pidió</span>.<small>Las familias que sigan armando no entran en ese mensaje. Puedes mandarlas después.</small></div></div>
-<div class="paso"><span class="num">6</span><div><b>Sigue la tarjeta</b>Cuando la cocina toma el pedido, la tarjeta pasa a <b>Cocinando</b>. Cuando sale, a <b>En camino</b>. Cuando te lo entregan, a <b>Entregado</b>. Recibes un aviso en cada paso.</div></div>
+<div class="paso"><span class="num">6</span><div><b>Manda el pedido por WhatsApp</b>Tienes dos formas. <b>Todo junto:</b> en Por pedir toca <span class="btn">📲 Mandar todo por WhatsApp</span>; se arma un solo mensaje con todas las familias, persona por persona, tu dirección si es a domicilio y el total. <b>Una por una:</b> cada tarjeta trae <span class="btn">💬 WhatsApp</span> con solo ese pedido. En los dos casos toca <b>Abrir WhatsApp</b>, envíalo, regresa y toca <span class="btn">✅ Ya se pidió</span> o <span class="btn">📲 Ya lo pedí</span>.<small>El mensaje no lleva resumen para cocina: es solo para que tomen el pedido. La cocina ve el detalle en su pantalla.</small></div></div>
+<div class="paso"><span class="num">7</span><div><b>Sigue la tarjeta</b>Cuando la cocina toma el pedido, la tarjeta pasa a <b>Cocinando</b> y dice quién lo está preparando. Cuando sale, a <b>En camino</b> con el nombre del repartidor. Cuando te lo entregan, a <b>Entregado</b>.</div></div>
 <figure class="tel"><img src="/manual/fam-cocinando.png" alt="Columna Cocinando"><figcaption>Cocinando: la cocina ya está con tu pedido.</figcaption></figure>
-<div class="paso"><span class="num">7</span><div><b>Reparte y archiva</b>Cuando llegue la comida toca <span class="btn k">📋 Reparto</span>: es una lista por persona para ir entregando bolsas. Al final toca <span class="btn">📦 Archivar</span>. El pedido queda en Historial y la próxima vez lo repites con un toque.</div></div>
+<div class="paso"><span class="num">8</span><div><b>Reparte y archiva</b>Cuando llegue la comida toca <span class="btn k">📋 Reparto</span>: es una lista por persona para ir entregando bolsas. Al final toca <span class="btn">📦 Archivar</span>. Lo entregado hace más de 12 horas se archiva solo.</div></div>
+<div class="paso"><span class="num">9</span><div><b>Repite con un toque</b>Todas las tarjetas traen <span class="btn y">🔁</span> Duplicar, también en Historial. Crea un pedido nuevo igualito para ajustar solo lo que cambie.</div></div>
+
+<h2>La liga de cada familia</h2>
+<div class="ok">🔗 Cada familia tiene su propia liga, corta y fija: <span class="liga">ranita.capitaltorreon.com/familia-lopez-acosta/murra-garza</span>. Se forma con el nombre que le pusieron (los espacios se vuelven guiones) y sigue al nombre si lo cambian. Si dos familias se llaman igual, la segunda lleva <b>-2</b>. Con esa liga cada quien entra directo a su tarjeta.</div>
+
+<h2>El menú y los precios</h2>
+<div class="ok">📋 El botón de menú arriba muestra la carta completa con precios, picor y lo que esté agotado hoy. Al pedir no salen precios en los botones, para que sea rápido; cada familia solo ve su <b>total</b> al pie de su tarjeta y en la confirmación.</div>
 
 <h2>Lo que debes vigilar</h2>
 <div class="ojo">⏰ Si pones <b>hora de cierre</b> en ⚙️, las familias ven una cuenta regresiva y se apuran.</div>
-<div class="ojo">⛔ Si una tarjeta dice <b>Agotado</b>, la sucursal apagó ese producto hoy. Esa familia tiene que cambiarlo antes de que puedas mandar.</div>
-<div class="ok">👀 Arriba dice cuántas personas están conectadas y en la tarjeta ves "Familia X está escribiendo…". No necesitas preguntar si ya van.</div>
+<div class="ojo">⛔ Si una tarjeta dice <b>Agotado</b>, la sucursal apagó ese producto hoy. Esa familia tiene que cambiarlo antes de que puedas mandar. Si se acabó algo después de pedido, la tarjeta dice "no hubo" y te llega aviso.</div>
+<div class="ojo">🛵 Si prendiste "A mi casa" y no has puesto dirección, el tablero te lo marca en rojo y el mensaje te avisa antes de mandar.</div>
+<div class="ok">👀 Arriba dice cuántas personas están conectadas y en la tarjeta ves "X está escribiendo…". No necesitas preguntar si ya van.</div>
+<div class="ok">📲 Instala la app: en Android y computadora aparece "Instalar la app"; en iPhone toca Compartir y luego "Agregar a pantalla de inicio". Abre al instante desde el ícono de la ranita.</div>
 
-<h2>Si pasa esto…</h2>
-<details class="faq"><summary>No veo el botón de Mandar todo por WhatsApp</summary><div>Tu teléfono no está en modo anfitrión. Toca ⚙️, prende <b>Soy el anfitrión</b> y escribe tu celular. Solo tú lo puedes hacer.</div></details>
-<details class="faq"><summary>Una familia se creó dos veces</summary><div>Abre la que sobra, toca 🗑 y bórrala. La app avisa cuando alguien escribe un apellido que ya existe, pero si lo ignoraron pasa esto.</div></details>
-<details class="faq"><summary>Una familia dio Listo pero le faltó algo</summary><div>Que abra su tarjeta con <b>Editar</b>. Al tocar "Seguir después" regresa a Armando; al volver a dar Listo regresa a Por pedir.</div></details>
-<details class="faq"><summary>Ya mandé el WhatsApp y quiero cambiar algo</summary><div>Llama a la sucursal con el botón 📞 de arriba. Lo que ya está en Pedido lo controla Ranitas.</div></details>
-<details class="faq"><summary>Quiero mandar el pedido de una sola familia</summary><div>En su tarjeta, en Por pedir, toca el botón 📲 pequeño. Manda solo esa.</div></details>
-<details class="faq"><summary>No me llegan avisos por SMS</summary><div>Revisa en ⚙️ que esté prendido <b>Avisos por SMS</b> y que tu celular esté bien escrito.</div></details>
+<h2>Preguntas frecuentes</h2>
+<details class="faq"><summary>No veo el botón de Mandar todo por WhatsApp</summary><div>Tu teléfono no está en modo anfitrión. Toca ⚙️, prende <b>Soy el anfitrión</b> y escribe tu celular. Aun sin modo anfitrión, cada tarjeta en Por pedir tiene su propio botón 💬 WhatsApp.</div></details>
+<details class="faq"><summary>¿Cuánto cuesta el envío y cuándo se cobra?</summary><div>$60 por pedido, solo si la palanca está en "🛵 A mi casa". Si pasas por el pedido a la sucursal no tiene costo. El envío aparece en el WhatsApp y en el total.</div></details>
+<details class="faq"><summary>Cambié la palanca a domicilio y me abrió la configuración</summary><div>Es porque tu tablero no tiene dirección. Escríbela ahí y cierra. Sin dirección el repartidor no puede salir.</div></details>
+<details class="faq"><summary>¿Los precios que ven las familias son los reales?</summary><div>Sí. Son los del menú de la sucursal que elegiste. Solo se muestra el total por familia, nunca el precio de cada gordita, para no hacer ruido al pedir. La carta completa está en el botón 📋.</div></details>
+<details class="faq"><summary>Una familia se creó dos veces</summary><div>Abre la que sobra, toca 🗑 y bórrala. Si las dos tienen pedido, deja la más completa.</div></details>
+<details class="faq"><summary>Una familia dio Listo pero le faltó algo</summary><div>Que abra su tarjeta con <b>Editar</b>. Al tocar "Seguir después" regresa a Armando; al volver a dar Listo regresa a Por pedir. También puedes editarla tú.</div></details>
+<details class="faq"><summary>Marqué "Ya lo pedí" por error</summary><div>En la tarjeta, en Pedido, toca ↩︎. Regresa a Por pedir. Solo se puede mientras la cocina no lo haya tomado.</div></details>
+<details class="faq"><summary>Ya mandé el WhatsApp y quiero cambiar algo</summary><div>Mientras la tarjeta diga "en cola de cocina" todavía puedes tocar <b>✏️ Cambiar</b>. Si ya la tomó la cocina, llama a la sucursal con el botón 📞 de arriba.</div></details>
+<details class="faq"><summary>Quiero mandar el pedido de una sola familia</summary><div>En su tarjeta, en Por pedir, toca 💬 WhatsApp. Manda solo esa y luego toca "Ya lo pedí".</div></details>
+<details class="faq"><summary>¿Puedo pedir a otra sucursal?</summary><div>Sí. Cambia la sucursal en el selector de arriba o en ⚙️. El número de WhatsApp cambia solo y los productos agotados se revisan contra esa sucursal.</div></details>
+<details class="faq"><summary>La liga de una familia cambió</summary><div>La liga sigue al nombre. Si renombraron la familia, la liga nueva es con el nombre nuevo. La liga vieja con <b>?f=</b> sigue funcionando.</div></details>
+<details class="faq"><summary>¿Qué es el camino de círculos y qué es la fila de ESTADO?</summary><div>El camino son los pasos del pedido (Armando, Por pedir, Pedido…). La fila ESTADO son filtros para ver solo lo que falta pagar o entregar. Toca "Todos" para quitar el filtro.</div></details>
+<details class="faq"><summary>¿Cómo sé quién lleva mi pedido?</summary><div>En Cocinando la tarjeta dice el nombre del cocinero. En En camino dice "Juan va en camino con tu pedido".</div></details>
+<details class="faq"><summary>Quiero repetir la invitación del mes pasado</summary><div>Ve al paso Historial y toca 🔁 Duplicar en cada familia, o que cada familia toque ➕ Pedido de familia y elija "Repite un pedido anterior".</div></details>
+<details class="faq"><summary>¿Se pierde algo si se va el internet?</summary><div>No. La app abre aunque no haya señal y muestra lo último. Lo que escribas se manda solo cuando regrese la conexión.</div></details>
+<details class="faq"><summary>No me llegan avisos por SMS</summary><div>Los avisos por SMS todavía no están activos. Los avisos dentro de la app sí funcionan mientras la tengas abierta.</div></details>
+<details class="faq"><summary>¿Puedo borrar mi tablero?</summary><div>No hace falta. Si no lo usas, no aparece en ningún lado. Tu historial se queda por si vuelves a invitar.</div></details>
 </section>
 
 <!-- ================= FAMILIAS ================= -->
 <section class="perfil" data-p="familia">
 <h1>👨‍👩‍👧 Familias invitadas</h1>
-<div class="quien">Te mandaron una liga para pedir gorditas. Entras, pones lo que quiere cada quien de tu familia y das <b>Listo</b>. Nada más. El anfitrión manda el pedido.</div>
+<div class="quien">Te mandaron una liga para pedir gorditas. Entras, pones lo que quiere cada quien de tu familia y das <b>Listo</b>. Nada más. El anfitrión manda el pedido. Ves tu total al final, sin precios en medio.</div>
 
 <h2>Paso a paso</h2>
-<div class="paso"><span class="num">1</span><div><b>Abre la liga y toca ➕ Pedido de familia</b>Escribe tu apellido. Ya vienen Papá y Mamá; agrega Hijo, Hija u Otro con los botones de abajo. Ponle nombre a cada quien.</div></div>
+<div class="paso"><span class="num">1</span><div><b>Abre la liga y toca ➕ Pedido de familia</b>Escribe tu apellido. Ya vienen Papá y Mamá; agrega Hijo, Hija u Otro con los botones de abajo. Ponle nombre a cada quien.<small>Si te mandaron la liga de tu familia (la que termina con tu apellido), entras directo a tu tarjeta.</small></div></div>
 <div class="paso"><span class="num">2</span><div><b>Elige harina o maíz y toca las gorditas</b>Arriba de cada persona está el botón <b>Harina | Maíz</b>. Toca un guiso y se agrega una gordita. Tócalo otra vez y se agrega otra. Con − y + ajustas.<small>Los 🌶 dicen qué tan picoso es. Si un guiso está en rojo y dice "agotado", hoy no hay.</small></div></div>
-<figure class="tel"><img src="/manual/fam-editor.png" alt="Editor del pedido de una familia"><figcaption>Cada persona tiene sus gorditas. Abajo: chilaquiles, bebida y postre.</figcaption></figure>
-<div class="paso"><span class="num">3</span><div><b>Chilaquiles, bebida y postre</b>Toca 🍳 Chilaquiles y elige salsa y queso. Toca ☕ Bebida o 🍰 Postre y elige. Si alguien no va a comer, déjalo sin nada o ciérralo con ▴.</div></div>
-<div class="paso"><span class="num">4</span><div><b>Da Listo y confirma</b>Toca <span class="btn">✅ Listo, ya quedó</span>. Te sale un resumen por persona. Revísalo y toca <b>Confirmar pedido</b>. Si falta algo (la salsa de los chilaquiles, qué refresco), te lo marca.</div></div>
-<div class="paso"><span class="num">5</span><div><b>Manda la liga de tu familia a los tuyos</b>Arriba del editor está <span class="btn y">🔗 Mi liga</span>. Si se la mandas a tus hijos, cada quien pone lo suyo en el mismo pedido, en vivo.</div></div>
+<figure class="tel"><img src="/manual/fam-editor.png" alt="Editor del pedido de una familia"><figcaption>Cada persona tiene sus gorditas. Abajo: chilaquiles, postres y bebidas.</figcaption></figure>
+<div class="paso"><span class="num">3</span><div><b>Chilaquiles, postre y bebida</b>Toca 🍳 Chilaquiles y elige salsa (cada salsa dice su picor 🌶), queso y si quieres huevo o tu guiso favorito. Toca 🍰 Postre o ☕ Bebida y elige. Si alguien no va a comer, déjalo sin nada o ciérralo con ▴.</div></div>
+<div class="paso"><span class="num">4</span><div><b>Da Listo y confirma</b>Toca <span class="btn">✅ Listo, ya quedó</span>. Te sale un resumen por persona con el total. Revísalo y toca <b>Confirmar pedido</b>. Si falta algo (la salsa de los chilaquiles, qué refresco), te lo marca.</div></div>
+<div class="paso"><span class="num">5</span><div><b>Manda la liga de tu familia a los tuyos</b>Arriba del editor está <span class="btn y">🔗 Mi liga</span>. Es una liga corta con tu apellido. Si se la mandas a tus hijos, cada quien pone lo suyo en el mismo pedido, en vivo.</div></div>
 
-<h2>Si pasa esto…</h2>
+<h2>Preguntas frecuentes</h2>
+<details class="faq"><summary>¿Cuánto va a costar?</summary><div>Al pie de tu tarjeta y en la confirmación aparece <b>💰 Total</b>. Es lo tuyo nada más. Si el anfitrión pidió a domicilio, el envío de $60 lo ve él en su total general, no va en el tuyo. La carta con precios está en el botón 📋 de arriba.</div></details>
 <details class="faq"><summary>No me deja confirmar</summary><div>Lee el aviso rojo. Casi siempre falta la salsa o el queso de los chilaquiles, o hay un producto agotado que hay que cambiar.</div></details>
-<details class="faq"><summary>Me equivoqué después de dar Listo</summary><div>Toca <b>Editar</b> en tu tarjeta, corrige y vuelve a dar Listo.</div></details>
-<details class="faq"><summary>Quiero pedir lo mismo de la vez pasada</summary><div>Toca ➕ Pedido de familia y elige tu familia en "Repite un pedido anterior". Solo cambias lo que sea diferente.</div></details>
+<details class="faq"><summary>Me equivoqué después de dar Listo</summary><div>Toca <b>Editar</b> en tu tarjeta, corrige y vuelve a dar Listo. Si tu tarjeta ya está en "Pedido" y la cocina no la ha tomado, el botón dice <b>✏️ Cambiar</b>.</div></details>
+<details class="faq"><summary>Ya la tomó la cocina y quiero cambiar algo</summary><div>Ya no se puede desde la app. Avísale al anfitrión para que llame a la sucursal.</div></details>
+<details class="faq"><summary>Quiero pedir lo mismo de la vez pasada</summary><div>Toca ➕ Pedido de familia y elige tu familia en "Repite un pedido anterior". O toca 🔁 en tu tarjeta del Historial. Solo cambias lo que sea diferente.</div></details>
+<details class="faq"><summary>¿Qué significa "no hubo" en mi tarjeta?</summary><div>Ya estando en cocina se acabó ese guiso. Si todavía está en cola, toca Cambiar y elige otro. Si ya lo están preparando, te lo entregan sin eso y te lo descuentan en caja.</div></details>
+<details class="faq"><summary>Un familiar tiene que pedir desde otro celular</summary><div>Mándale tu liga 🔗 Mi liga. Los dos ven la misma tarjeta y lo que uno escribe le aparece al otro al momento.</div></details>
+<details class="faq"><summary>¿Qué es "Reparto" en la tarjeta?</summary><div>Es una lista por persona para que, cuando llegue la comida, vayan palomeando qué bolsa es de quién. No cambia el pedido.</div></details>
+<details class="faq"><summary>La app se ve "apagada" en algunos pasos del camino de arriba</summary><div>Los pasos donde no hay pedidos se ven tenues. Es normal. El círculo negro es donde estás.</div></details>
+<details class="faq"><summary>¿Puedo instalarla?</summary><div>Sí. En Android y computadora toca "Instalar la app". En iPhone: Compartir y luego "Agregar a pantalla de inicio".</div></details>
 </section>
 
 <!-- ================= CAJA / MOSTRADOR ================= -->
 <section class="perfil" data-p="caja">
 <h1>🧾 Caja y mostrador</h1>
-<div class="quien">Tú tomas pedidos de los clientes que llegan a la sucursal y das salida a los que se entregan. Tu pantalla es <b>Mostrador</b> y <b>Pedidos</b> en <span class="liga">ranita.capitaltorreon.com/admin</span>.</div>
+<div class="quien">Tú atiendes al cliente: tomas pedidos en la sucursal, contestas el teléfono, resuelves dudas de anfitriones y mesas, cobras y das salida. Tus pantallas son <b>Mostrador</b> y <b>Pedidos</b> en <span class="liga">ranita.capitaltorreon.com/admin</span>.</div>
 
 <h2>Tomar un pedido rápido</h2>
-<div class="paso"><span class="num">1</span><div><b>Entra a Mostrador y revisa la sucursal</b>Arriba dice en qué sucursal estás. Toca <span class="btn">➕ Nuevo pedido</span>.</div></div>
-<div class="paso"><span class="num">2</span><div><b>Ponle nombre al pedido</b>El nombre del cliente o "Mesa 4". Con ese nombre lo vas a encontrar después.</div></div>
-<div class="paso"><span class="num">3</span><div><b>Escribe y da Enter</b>En la caja grande escribe las primeras letras: <b>asa</b> y Enter agrega Asado. <b>2 ques</b> y Enter agrega dos de Queso. <b>chila</b> chilaquiles. <b>caf</b> café. También puedes tocar los botones.<small>Teclas rápidas: <b>H</b> harina, <b>M</b> maíz, <b>+</b> otra persona, <b>N</b> pedido nuevo.</small></div></div>
-<figure><img src="/manual/adm-mostrador.png" alt="Pantalla de Mostrador"><figcaption>Mostrador: a la izquierda escribes, a la derecha se va armando el pedido.</figcaption></figure>
-<div class="paso"><span class="num">4</span><div><b>Una persona por bolsa</b>Cada persona del pedido es un botón arriba (Persona 1, Persona 2). Toca <b>➕ Persona</b> para la siguiente. Así la cocina empaca por persona y el cliente recibe cada bolsa con lo suyo.</div></div>
-<div class="paso"><span class="num">5</span><div><b>Manda a cocina</b>Toca <span class="btn">🍳 Mandar a cocina</span>. Listo. El pedido aparece en la cola de la cocina al instante.</div></div>
+<div class="paso"><span class="num">1</span><div><b>Entra a Mostrador y revisa la sucursal</b>Arriba dice en qué sucursal estás. Toca <span class="btn">➕ Nuevo pedido</span>. El pedido ya trae el número que sigue ("Pedido 19"); puedes cambiarlo por el nombre del cliente.</div></div>
+<div class="paso"><span class="num">2</span><div><b>Escribe y da Enter, o dicta</b>En la caja grande escribe las primeras letras: <b>asa</b> y Enter agrega Asado. <b>2 ques</b> agrega dos de Queso. <b>chila</b> chilaquiles. <b>caf</b> café. O toca el 🎤 y dicta: "dos chicharrón prensado de maíz, un café de olla, otra persona". También puedes tocar los botones.<small>Teclas rápidas: <b>H</b> harina, <b>M</b> maíz, <b>+</b> otra persona, <b>N</b> pedido nuevo.</small></div></div>
+<figure><img src="/manual/adm-mostrador.png" alt="Pantalla de Mostrador"><figcaption>Mostrador: arriba los atajos a pedidos abiertos, mesas, anfitriones y reparto; abajo el pedido que estás armando.</figcaption></figure>
+<div class="paso"><span class="num">3</span><div><b>Una persona por bolsa</b>Cada persona del pedido es un botón (Persona 1, Persona 2). Toca <b>➕ Persona</b> para la siguiente. Así la cocina empaca por persona y el cliente recibe cada bolsa con lo suyo. A la derecha ves el total en pesos.</div></div>
+<div class="paso"><span class="num">4</span><div><b>Cobra si te pagan</b>A la derecha toca <b>💵 Cobrar</b> y elige efectivo, transferencia o tarjeta. La tarjeta queda marcada como pagada en todos lados.</div></div>
+<div class="paso"><span class="num">5</span><div><b>Manda a cocina</b>Toca <span class="btn">🍳 Mandar a cocina</span>. El pedido aparece en la cola de la cocina al instante.</div></div>
 <div class="paso"><span class="num">6</span><div><b>Si llega otro cliente a medio pedido</b>Toca <b>Minimizar</b>. El pedido queda arriba como una fichita con su nombre. Atiende al otro y luego toca la fichita para seguir donde ibas.</div></div>
 
+<h2>Los atajos de Mostrador</h2>
+<div class="paso"><span class="num">🪑</span><div><b>Mesas con pedido</b>Si un comensal llega al mostrador con dudas, pregunta "¿qué mesa eres?", toca esa mesa y se abre su pedido para revisarlo, cambiarlo o mandarlo a cocina. Él ve los cambios en su celular al momento.</div></div>
+<div class="paso"><span class="num">🏠</span><div><b>Anfitriones con pedido</b>Si llaman a la sucursal ("les hice un pedido, soy la familia López"), escribe el nombre en el buscador, toca al anfitrión y te lleva a Pedidos con su tablero completo. Ahí ves todas sus familias, exactamente lo que él ve.</div></div>
+<div class="paso"><span class="num">👨‍👩‍👧</span><div><b>Otra familia en su tablero</b>Cuando editas el pedido de un anfitrión, arriba aparece "Tablero de …" con todas sus familias y el botón <span class="btn">➕ Otra familia</span>. Sirve cuando por teléfono te dicen "agrégale también a los Cruz". En Pedidos, con el tablero filtrado, el mismo botón está bajo la columna Armando.</div></div>
+<div class="paso"><span class="num">🛵</span><div><b>Reparto</b>Una franja dice cuántos pedidos están listos para salir y cuántos van en ruta, con liga directa a la pestaña Reparto.</div></div>
+
 <h2>Dar salida a los pedidos</h2>
-<div class="paso"><span class="num">1</span><div><b>Entra a Pedidos</b>Es el tablero de columnas. Cada columna es una etapa. Arriba puedes buscar por nombre.</div></div>
-<figure><img src="/manual/adm-pedidos.png" alt="Tablero de Pedidos"><figcaption>Pedidos: de izquierda a derecha, así avanza cada pedido.</figcaption></figure>
-<div class="paso"><span class="num">2</span><div><b>Cuando el repartidor sale</b>En la columna <b>Espera de repartidor</b> toca <span class="btn v">🛵 Salió a repartir</span> en ese pedido.</div></div>
-<div class="paso"><span class="num">3</span><div><b>Cuando se entregó</b>En <b>Repartiendo</b> toca <span class="btn">✅ Entregado</span>. El cliente lo ve en su teléfono al momento.</div></div>
-<div class="paso"><span class="num">4</span><div><b>Si un pedido está mal</b>Toca <span class="btn y">✏️ Editar</span> en la tarjeta, corrige y toca Guardar cambios.</div></div>
+<div class="paso"><span class="num">1</span><div><b>Entra a Pedidos</b>Es el tablero de columnas: Armando → Por pedir → Pedido → En proceso → Armando en cocina → Espera de repartidor → Repartiendo → Entregado → Historial. Arriba puedes buscar por nombre, filtrar por sucursal o tablero, y por pagado o entregado.</div></div>
+<figure><img src="/manual/adm-pedidos.png" alt="Tablero de Pedidos"><figcaption>Pedidos: de izquierda a derecha, así avanza cada pedido. El más antiguo arriba; el nuevo entra abajo.</figcaption></figure>
+<div class="paso"><span class="num">2</span><div><b>Los botones de cada columna</b>En Armando: <span class="btn b">📋 Listo, por pedir</span>. En Por pedir: <span class="btn b">📲 Pedido</span> (cuando la familia ya pidió por teléfono) y ↩︎. En cocina: <span class="btn b">Listo</span>. En Espera: <span class="btn v">🛵 Salió a repartir</span> o <span class="btn">✅ Entregado al cliente</span> si pasa a recoger. En Repartiendo: <span class="btn">✅ Entregado</span>. Cada tarjeta trae 🖨 para imprimir la comanda.</div></div>
+<div class="paso"><span class="num">3</span><div><b>Contacta al anfitrión en un clic</b>Cuando filtras por un tablero, arriba aparece su nombre, celular, sucursal y dirección con los botones <span class="btn y">📞 Llamar</span> y <span class="btn">💬 WhatsApp</span>.</div></div>
+<div class="paso"><span class="num">4</span><div><b>Si un pedido está mal</b>Toca <span class="btn y">✏️ Editar</span> en la tarjeta, corrige y toca Guardar cambios. Si la cocina ya lo tomó, te pide confirmar y tienes que avisarle a cocina.</div></div>
 
 <h2>Lo que debes vigilar</h2>
 <div class="ojo">📋 Los pedidos de las familias llegan solos a <b>Pedido</b> cuando el anfitrión manda el WhatsApp; pasan a <b>En proceso</b> cuando la cocina los toma y a <b>Armando en cocina</b> cuando ya salieron del comal. No los tienes que capturar.</div>
+<div class="ojo">🛵 / 🏪 Cada tarjeta dice si es <b>A domicilio</b> (lleva envío de $60 y va a Reparto) o <b>Pasa a recoger</b> (se entrega en el mostrador). El total ya incluye el envío cuando aplica.</div>
 <div class="ojo">⛔ Si la cocina te dice que ya no hay un guiso, ve a <b>Productos</b> y apágalo. Los clientes dejan de poder pedirlo en ese momento.</div>
 <div class="no">🚫 No toques "Entregado" hasta que de verdad se entregó. Esa palomita le llega al cliente.</div>
+<div class="no">🚫 No pongas "Familia" ni nada delante del nombre. Se escribe tal cual lo dice el cliente.</div>
 
-<h2>Si pasa esto…</h2>
-<details class="faq"><summary>No encuentro un pedido</summary><div>En Pedidos escribe el nombre en la caja de buscar. Busca por familia, persona, guiso o mesa.</div></details>
+<h2>Preguntas frecuentes</h2>
+<details class="faq"><summary>No encuentro un pedido</summary><div>En Pedidos escribe el nombre en la caja de buscar. Busca por familia, persona, guiso o mesa. Si es de un anfitrión, en Mostrador usa "Anfitriones con pedido".</div></details>
+<details class="faq"><summary>Llaman y dicen "les mandé un WhatsApp con mi pedido"</summary><div>Búscalo en Por pedir. Si está ahí, toca <b>📲 Pedido</b> para pasarlo a la cola de cocina. Si no aparece, es que la familia no dio Listo: pídeles que lo hagan o captúralo en Mostrador.</div></details>
+<details class="faq"><summary>¿Qué es "Pedido" y qué es "En proceso"?</summary><div>Pedido: ya lo pidieron de verdad y está en la cola de cocina. En proceso: un cocinero ya lo tomó y está en el comal. Armando en cocina: el comal terminó y están acomodando las bolsas.</div></details>
+<details class="faq"><summary>El cliente pasa a recoger, ¿cómo lo cierro?</summary><div>Cuando la cocina lo marque listo, en Espera de repartidor la tarjeta dice <b>✅ Entregado al cliente</b>. Tócalo cuando se lo des. También sale en Reparto en "Recogen en sucursal".</div></details>
+<details class="faq"><summary>¿Cómo cobro el envío?</summary><div>Ya viene sumado. Si la familia prendió "A mi casa", el total de la tarjeta, la comanda y el cobro en Reparto incluyen los $60.</div></details>
+<details class="faq"><summary>El número del pedido no es el que sigue</summary><div>Cuenta los pedidos de hoy en Mostrador que terminan en número ("18", "0018", "Pedido 18"). Si a uno le pusieron nombre de cliente, no cuenta. Puedes escribir el número a mano.</div></details>
+<details class="faq"><summary>Se me borra lo que escribo en el nombre</summary><div>Ya no pasa: la pantalla guarda tu cursor aunque llegue información nueva. Si te vuelve a pasar, avisa.</div></details>
 <details class="faq"><summary>Un pedido se fue a Entregado por error</summary><div>Toca ↩︎ en la tarjeta y regresa un paso.</div></details>
+<details class="faq"><summary>Hay tarjetas vacías en Armando</summary><div>Si llevan más de media hora sin nada, aparece 🗑 para borrarlas. Las que sí tienen productos no se borran desde ahí.</div></details>
+<details class="faq"><summary>¿Puedo imprimir el pedido?</summary><div>Sí, el botón 🖨 de cada tarjeta abre la comanda: sirve para impresora de tickets o carta. Trae personas, masa, notas, dirección, total y si está pagado.</div></details>
 <details class="faq"><summary>Cerré el navegador con un pedido a medias</summary><div>No se pierde. Entra a Mostrador y ahí está la fichita con su nombre.</div></details>
 <details class="faq"><summary>La pantalla dice "sin conexión"</summary><div>Se fue el internet. Lo que hagas se guarda y se manda solo cuando regrese. No cierres la pestaña.</div></details>
+<details class="faq"><summary>El dictado no me entiende</summary><div>Habla con comas mentales: "dos asado de harina, un queso de maíz, chilaquiles, café de olla". Dice "otra persona" para cambiar de persona. Revisa lo que agregó a la derecha.</div></details>
+<details class="faq"><summary>¿Cómo veo el menú del día con lo apagado?</summary><div>Productos: lo apagado sale gris. En la app de las familias el botón 📋 muestra la carta con lo agotado tachado.</div></details>
 </section>
 
 <!-- ================= COCINA ================= -->
 <section class="perfil" data-p="cocina">
 <h1>🔥 Cocina</h1>
-<div class="quien">Tu pantalla es <b>Cocina</b>. Ahí ves los pedidos que hay que hacer, tomas uno, lo armas palomeando y lo marcas listo. Funciona en tablet o en el monitor grande.</div>
+<div class="quien">Tu pantalla es <b>Cocina</b>. Ahí ves los pedidos que hay que hacer, tomas uno, lo armas palomeando y lo marcas listo. Funciona en tablet, celular o en el monitor grande.</div>
 
 <h2>Tu recorrido</h2>
 <div class="recorrido"><span>🍳 En cola</span><i>→</i><span>🔥 Lo tomo</span><i>→</i><span>1 · Comal</span><i>→</i><span>2 · Empaque</span><i>→</i><span>✅ Listo para repartir</span></div>
 
 <h2>Paso a paso</h2>
 <div class="paso"><span class="num">1</span><div><b>Di quién eres</b>Arriba a la derecha dice "Soy:". Toca tu nombre. Si no está, toca <b>＋</b> y escríbelo una vez.<small>Sin nombre no puedes tomar pedidos. Así todos saben quién trae cada pedido.</small></div></div>
-<div class="paso"><span class="num">2</span><div><b>Toma un pedido</b>A la izquierda está la cola, el más viejo arriba. Toca <span class="btn r">🔥 Lo tomo</span>. Ese pedido es tuyo y nadie más lo puede tomar.</div></div>
+<div class="paso"><span class="num">2</span><div><b>Toma un pedido</b>A la izquierda está la cola, el más viejo arriba. Las mesas van primero con un aviso verde: el comensal está esperando sentado. Toca <span class="btn r">🔥 Lo tomo</span>. Ese pedido es tuyo y nadie más lo puede tomar.</div></div>
 <figure><img src="/manual/adm-cocina.png" alt="Pantalla de Cocina"><figcaption>Cocina: cola a la izquierda, tu pedido a la derecha con lo que falta.</figcaption></figure>
-<div class="paso"><span class="num">3</span><div><b>Paso 1 · Comal</b>Te sale la lista sumada: si tres personas pidieron asado de harina, ves un solo renglón "3 Asado HARINA". Haz el renglón y tócalo para palomearlo. Se pone verde.<small>Renglón amarillo con número: gorditas. Naranja: chilaquiles. Azul: bebidas. Morado: postres.</small></div></div>
-<div class="paso"><span class="num">4</span><div><b>Paso 2 · Empaque</b>Cuando todo el comal está verde, toca <b>Empacar</b>. Ahora la lista es por persona: lo que va en cada bolsa. Mete lo de cada quien y toca su nombre.</div></div>
-<div class="paso"><span class="num">5</span><div><b>Listo para repartir</b>Toca el botón verde <span class="btn">✅ Listo para repartir</span>. El pedido pasa a caja y el cliente ve que ya salió de cocina.</div></div>
+<div class="paso"><span class="num">3</span><div><b>Paso 1 · Comal</b>Te sale la lista sumada: si tres personas pidieron asado de harina, ves un solo renglón "3 Asado 🌾 HARINA". Haz el renglón y tócalo para palomearlo. Se pone verde.<small>Ámbar: harina. Azul: maíz. Naranja: chilaquiles, con su salsa y picor. Morado: postres. Azul claro: bebidas.</small></div></div>
+<div class="paso"><span class="num">4</span><div><b>Si no hay un guiso</b>Debajo de cada renglón hay una letra chiquita que dice <b>no hay</b>. Tócala solo si se acabó ese guiso para ese pedido. El cliente recibe aviso al instante y el renglón se tacha. Si te equivocaste, toca "sí hubo".</div></div>
+<div class="paso"><span class="num">5</span><div><b>Paso 2 · Empaque</b>Cuando todo el comal está verde, toca <b>Empacar</b>. Es una bolsa por persona: cada renglón trae el nombre y lo que va en su bolsa. Mete lo de cada quien y toca la bolsa 👜; se vuelve ✅ con su número.</div></div>
+<div class="paso"><span class="num">6</span><div><b>Listo para repartir</b>Toca el botón verde <span class="btn">✅ Listo para repartir</span>. El pedido pasa a Reparto si es a domicilio, o a caja si lo recogen, y el cliente ve que ya salió de cocina.</div></div>
 
 <h2>Cocina en tandas</h2>
-<div class="ok">Arriba de la cola dice <b>Demanda en cola</b>: por ejemplo "7 Asado H · 3 Queso M". Es la suma de todos los pedidos que esperan. Pon a hacer esos guisos de una vez, aunque sean de pedidos distintos. Así sale más rápido todo.</div>
+<div class="ok">Arriba de la cola dice <b>Demanda en cola</b>: por ejemplo "7 Asado 🌾 · 3 Queso 🌽". Es la suma de todos los pedidos que esperan. Pon a hacer esos guisos de una vez, aunque sean de pedidos distintos. Así sale más rápido todo.</div>
 
 <h2>Lo que debes vigilar</h2>
-<div class="ojo">⏱ Cada pedido trae su reloj. Amarillo a los 10 minutos, rojo parpadeando a los 20. Los rojos van primero.</div>
+<div class="ojo">⏱ Cada pedido trae su reloj. Amarillo a los 10 minutos, rojo parpadeando a los 20. Los rojos van primero, y las mesas antes que todo.</div>
 <div class="ojo">📝 Las notas del cliente salen en rojo arriba del pedido ("sin cebolla", "salsa aparte"). Léelas antes de empezar.</div>
-<div class="ojo">⛔ Si se acaba un guiso, avisa a caja para que lo apague en Productos. Ya no lo van a pedir.</div>
+<div class="ojo">⛔ Si se acabó un guiso para todos, avisa a caja para que lo apague en Productos. Si se apaga algo que ya estaba pedido, arriba sale un letrero rojo con un botón para marcar "no hubo" en todos de un toque.</div>
 <div class="no">🚫 No marques "Listo para repartir" si falta algo. Lo que se marca listo ya no regresa a tu lista.</div>
 
-<h2>Si pasa esto…</h2>
+<h2>Preguntas frecuentes</h2>
 <details class="faq"><summary>Tomé un pedido por error</summary><div>Toca <b>↩︎ Soltar</b>. Regresa a la cola para que lo tome otro.</div></details>
 <details class="faq"><summary>Traigo dos pedidos a la vez</summary><div>Abajo de tu pedido dice "Mis pedidos". Toca el otro para cambiarte. Lo que ya palomeaste se queda guardado.</div></details>
-<details class="faq"><summary>Palomeé algo por error</summary><div>Tócalo otra vez y se quita la palomita.</div></details>
+<details class="faq"><summary>Palomeé algo por error</summary><div>Tócalo otra vez y se quita la palomita. Igual en las bolsas del empaque.</div></details>
+<details class="faq"><summary>¿Por qué la mesa va primero si llegó después?</summary><div>El comensal de mesa está sentado esperando. Los de domicilio y recoger tienen más margen. Por eso la mesa lleva prioridad y el aviso verde.</div></details>
+<details class="faq"><summary>¿Qué pasa cuando marco "no hay"?</summary><div>Ese renglón se tacha para ese pedido, la familia ve "no hubo" en su celular y en caja lo descuentan. No apaga el producto para los demás: eso se hace en Productos.</div></details>
+<details class="faq"><summary>El cliente cambió el pedido cuando ya lo tenía tomado</summary><div>Caja tiene que confirmar el cambio y avisarte. La tarjeta se actualiza sola; revisa la lista del comal antes de empacar.</div></details>
+<details class="faq"><summary>¿Cómo sé qué salsa y qué picor llevan los chilaquiles?</summary><div>El renglón lo dice: "Chilaquiles roja 🌶🌶 · asadero + huevo estrellado". Los chilitos son el picor real de esa salsa.</div></details>
+<details class="faq"><summary>¿Cuántas bolsas son?</summary><div>Una por persona con pedido. El paso Empaque las numera y trae el nombre de cada quien. Si una persona no pidió nada, no tiene bolsa.</div></details>
 <details class="faq"><summary>Quiero la pantalla en el monitor grande</summary><div>Toca <b>⛶ Pantalla completa</b>. Se quita el menú y las letras crecen para verlas de lejos.</div></details>
-<details class="faq"><summary>Uso el celular en la cocina</summary><div>Sí funciona. La cola queda arriba y tu pedido abajo.</div></details>
+<details class="faq"><summary>Uso el celular en la cocina</summary><div>Sí funciona. La cola queda arriba y tu pedido abajo. Instálala desde "Agregar a pantalla de inicio" para que abra al instante.</div></details>
+<details class="faq"><summary>¿Se puede saber cuánto tardo?</summary><div>Abajo dice "Hoy: N pedidos salidos de cocina" y el promedio de minutos por cocinero. El dueño lo ve también en Panorama.</div></details>
 <figure class="tel"><img src="/manual/adm-cocina-movil.png" alt="Cocina en celular"><figcaption>Cocina en celular.</figcaption></figure>
 </section>
 
 <!-- ================= REPARTIDOR ================= -->
 <section class="perfil" data-p="repartidor">
 <h1>🛵 Repartidor</h1>
-<div class="quien">Tú llevas los pedidos a la casa del cliente. Usas la pestaña <b>Reparto</b> en tu celular: <span class="liga">ranita.capitaltorreon.com/admin</span>. Es como la cocina: una cola de pedidos listos, y tú armas tu viaje.</div>
+<div class="quien">Tú llevas los pedidos a la casa del cliente. Usas la pestaña <b>Reparto</b> en tu celular: <span class="liga">ranita.capitaltorreon.com/admin</span>. Es como la cocina: una cola de pedidos listos, y tú armas tu viaje con varios.</div>
 
 <h2>Tu recorrido</h2>
 <div class="recorrido"><span>🔔 Listos para salir</span><i>→</i><span>➕ A mi viaje</span><i>→</i><span>🛵 Salir</span><i>→</i><span>✅ Entregado</span></div>
 <figure><img src="/manual/reparto.png" alt="Pantalla de Reparto"><figcaption>Izquierda: los pedidos que la cocina ya terminó, agrupados por colonia. Derecha: tu viaje.</figcaption></figure>
 
 <h2>Paso a paso</h2>
-<div class="paso"><span class="num">1</span><div><b>Elige tu nombre arriba</b>Si no está, tócale ＋ y escríbelo una sola vez. Con eso tus entregas quedan a tu nombre.</div></div>
-<div class="paso"><span class="num">2</span><div><b>Arma tu viaje</b>Los pedidos listos están agrupados por colonia. Toca <b>➕ A mi viaje</b> en los que te vas a llevar. Cuando agregas uno, los de la misma colonia se marcan solos para que te los lleves juntos. Puedes llevar uno, dos, tres o los que quepan.</div></div>
-<div class="paso"><span class="num">3</span><div><b>Revisa cada tarjeta antes de salir</b>Trae la dirección, el teléfono, la hora en que lo quieren, cuántas bolsas son y cómo va a pagar. Si dice "paga con $500 → lleva cambio", lleva cambio.</div></div>
-<div class="paso"><span class="num">4</span><div><b>Toca 🛵 Salir con N pedidos</b>Cada cliente ve en su celular "Juan va en camino con tu pedido". Si llevas varias casas, <b>🗺 Ruta completa en Maps</b> te abre el recorrido con todas las paradas.</div></div>
-<div class="paso"><span class="num">5</span><div><b>En cada casa toca ✅ Entregado</b>Hazlo en la puerta, no antes. Si cobraste, toca <b>💵 Por pagar</b> y elige cómo pagó. Los botones 📞 y 💬 te comunican con el cliente si no encuentras la casa.</div></div>
+<div class="paso"><span class="num">1</span><div><b>Elige tu nombre arriba</b>Si no está, tócale ＋ y escríbelo una sola vez. Con eso tus entregas quedan a tu nombre y el cliente ve "Juan va en camino con tu pedido".</div></div>
+<div class="paso"><span class="num">2</span><div><b>Arma tu viaje</b>Los pedidos listos están agrupados por colonia. Toca <b>➕ A mi viaje</b> en los que te vas a llevar. Cuando agregas uno, los de la misma colonia se marcan solos para que te los lleves juntos. Puedes llevar uno, dos, tres o los que quepan. Arriba del viaje ves cuántas bolsas y cuánto vas a cobrar.</div></div>
+<div class="paso"><span class="num">3</span><div><b>Revisa cada tarjeta antes de salir</b>Trae la dirección, el teléfono, la hora en que lo quieren, cuántas bolsas son y cómo va a pagar. Si dice "paga con $500 → lleva cambio", lleva cambio. El total ya incluye los $60 de envío.</div></div>
+<div class="paso"><span class="num">4</span><div><b>Toca 🛵 Salir con N pedidos</b>Cada cliente ve en su celular que vas en camino. Si llevas varias casas, <b>🗺 Ruta completa en Maps</b> te abre el recorrido con todas las paradas desde la sucursal.</div></div>
+<div class="paso"><span class="num">5</span><div><b>En cada casa toca ✅ Entregado</b>Hazlo en la puerta, no antes. Si cobraste, toca <b>💵 Por pagar</b> y elige cómo pagó. Los botones 📞 y 💬 te comunican con el cliente si no encuentras la casa, y 🗺 Ir te lleva a esa dirección.</div></div>
 
 <h2>Lo que debes vigilar</h2>
 <div class="ojo">⏱ El tiempo en cada tarjeta cuenta desde que salió de cocina. Si se pone rojo, ese pedido ya esperó mucho: llévatelo primero.</div>
-<div class="ojo">📍 Los pedidos "Recogen en sucursal" no son tuyos: son mesas y mostrador. La caja los cierra.</div>
+<div class="ojo">📍 Solo entran a tu cola los pedidos que la familia pidió <b>a domicilio</b>. Los de "Recogen en sucursal" (mesas, mostrador y familias que pasan por su pedido) los cierra la caja.</div>
 <div class="no">🚫 No toques Entregado desde la sucursal para "adelantar". El cliente recibe la palomita y se confunde.</div>
 
-<h2>Si pasa esto…</h2>
-<details class="faq"><summary>No estaba el cliente o no pude entregar</summary><div>Toca <b>↩︎ Regresa</b>. El pedido vuelve a la cola de listos y queda anotado que regresó.</div></details>
+<h2>Preguntas frecuentes</h2>
+<details class="faq"><summary>No estaba el cliente o no pude entregar</summary><div>Toca <b>↩︎ Regresa</b>. El pedido vuelve a la cola de listos y queda anotado que regresó. Llama antes con 📞: casi siempre se resuelve.</div></details>
 <details class="faq"><summary>Toqué Entregado por error</summary><div>En la pestaña Pedidos, columna Entregado, toca ↩︎ en la tarjeta. Regresa a Repartiendo.</div></details>
 <details class="faq"><summary>Otro repartidor ya se llevó un pedido que yo había marcado</summary><div>Al tocar Salir te avisa cuáles ya no estaban. El resto sale normal.</div></details>
+<details class="faq"><summary>¿Cuánto cobro?</summary><div>Lo que dice la tarjeta en "Cobrar": ya trae las gorditas, chilaquiles, bebidas, postres y el envío. Si dice "Pagado", no cobras nada.</div></details>
+<details class="faq"><summary>¿Y si el cliente paga con tarjeta o transferencia?</summary><div>Toca 💵 Por pagar en la tarjeta y elige tarjeta o transferencia. Queda registrado con tu nombre.</div></details>
+<details class="faq"><summary>La dirección está incompleta</summary><div>Toca 📞 o 💬 en la tarjeta para preguntarle al cliente. Si la corrigen en su tablero, tu tarjeta se actualiza sola.</div></details>
+<details class="faq"><summary>¿Cómo sé cuántas bolsas debo cargar?</summary><div>Cada tarjeta dice "N bolsas": una por persona. La cocina las empaca con nombre.</div></details>
+<details class="faq"><summary>¿Se guarda cuántas entregas hice?</summary><div>Sí. Abajo del viaje dice "Hoy: N entregas" y tu promedio de minutos. El dueño lo ve en Panorama y en Bitácora.</div></details>
+<details class="faq"><summary>Me quedé sin internet en la calle</summary><div>La app abre igual con lo último que tenía. Toca Entregado cuando entregues; se manda solo cuando regrese la señal.</div></details>
 </section>
 
 <!-- ================= DUEÑO / ADMINISTRADOR ================= -->
 <section class="perfil" data-p="dueno">
 <h1>👑 Dueño y administrador</h1>
-<div class="quien">Tú ves todo: cuánto se está pidiendo, qué está haciendo cada sucursal, qué productos hay, los precios y quién puede entrar al sistema. Tu entrada es <span class="liga">ranita.capitaltorreon.com/admin</span> con la clave maestra.</div>
+<div class="quien">Tú ves todo: cuánto se está pidiendo, qué está haciendo cada sucursal, qué productos hay, los precios, quién puede entrar y todo lo que pasó. Tu entrada es <span class="liga">ranita.capitaltorreon.com/admin</span> con la clave maestra.</div>
 
 <h2>Las pantallas y para qué sirve cada una</h2>
 <div class="cols">
 <div class="col"><b>📊 Panorama</b>Los números de ahora y del acumulado. Aquí decides compras, personal y menú.</div>
-<div class="col"><b>📋 Pedidos</b>El tablero completo. Todas las sucursales, todas las etapas. Busca cualquier pedido.</div>
-<div class="col"><b>🧾 Mostrador</b>Para tomar pedidos en la sucursal. Lo usa caja.</div>
-<div class="col"><b>🔥 Cocina</b>La pantalla de los cocineros.</div>
-<div class="col"><b>🏪 Productos</b>Prender y apagar productos por sucursal, harina o maíz, y qué tan picoso.</div>
-<div class="col"><b>💲 Precios</b>Precio por producto y por sucursal. Por ahora las familias no los ven.</div>
+<div class="col"><b>📋 Pedidos</b>El tablero completo. Todas las sucursales, todas las etapas. Busca cualquier pedido, filtra por tablero y contacta al anfitrión.</div>
+<div class="col"><b>🧾 Mostrador</b>Para tomar pedidos en la sucursal y atender llamadas. Lo usa caja.</div>
+<div class="col"><b>🔥 Cocina</b>La pantalla de los cocineros: comal y empaque.</div>
+<div class="col"><b>🛵 Reparto</b>La pantalla de los repartidores: viajes por colonia.</div>
+<div class="col"><b>🪑 Mesas</b>QR por mesa, hoja para imprimir, y cuántos pedidos ha entregado cada una.</div>
+<div class="col"><b>🏪 Productos</b>Prender y apagar productos por sucursal, harina o maíz, y el picor de guisos y salsas.</div>
+<div class="col"><b>💲 Precios</b>Precio por producto, agregados y envío, por sucursal.</div>
 <div class="col"><b>👥 Usuarios</b>Quién entra y qué pantallas ve.</div>
+<div class="col"><b>🏬 Sucursales</b>Abrir una sucursal nueva con todo listo. Solo clave maestra.</div>
+<div class="col"><b>📜 Bitácora</b>Todo lo que pasó, quién lo hizo y cuándo. No se borra.</div>
+<div class="col"><b>📖 Manuales</b>Esta pantalla. La ven todos.</div>
 </div>
 
 <h2>Panorama: cómo leerlo</h2>
 <figure><img src="/manual/adm-panorama.png" alt="Panorama"><figcaption>Panorama. Capa 1 arriba: ahora mismo. Capa 2 abajo: acumulado.</figcaption></figure>
-<div class="paso"><span class="num">1</span><div><b>Capa 1 · Ahora mismo</b>Seis cuadros: cuántas familias están armando, cuántas por pedir, cuántos pedidos en cocina, cuántos esperan repartidor, cuántos van en camino y cuántos se entregaron hoy. Abajo, la tabla por etapa con gorditas, chilaquiles, bebidas y postres.</div></div>
+<div class="paso"><span class="num">1</span><div><b>Capa 1 · Ahora mismo</b>Cuántas familias están armando, cuántas por pedir, cuántos pedidos en cocina, cuántos esperan repartidor, cuántos van en camino y cuántos se entregaron hoy. Abajo, la tabla por etapa con gorditas, chilaquiles, bebidas y postres.</div></div>
 <div class="paso"><span class="num">2</span><div><b>Cocina ahora y Lo que viene</b>Qué guisos se están haciendo y qué guisos están a punto de pedirse. Sirve para preparar masa y guisos antes de que lleguen.</div></div>
 <div class="paso"><span class="num">3</span><div><b>Sucursales</b>Carga de cada una y qué tienen apagado. Si una sucursal apaga mucho, algo pasa con su surtido.</div></div>
-<div class="paso"><span class="num">4</span><div><b>Capa 2 · Para decidir</b>Gorditas por persona, harina contra maíz, cuánta gente pide chilaquiles, bebida y postre, hora pico, guisos más pedidos y los últimos 14 días. Con esto decides cuánto comprar y a qué hora tener más gente.</div></div>
-<p>Arriba puedes filtrar todo por sucursal o por tablero (anfitrión).</p>
+<div class="paso"><span class="num">4</span><div><b>Capa 2 · Para decidir</b>Gorditas por persona, harina contra maíz, cuánta gente pide chilaquiles, bebida y postre, hora pico, guisos más pedidos, tiempos de cocina y reparto, y los últimos 14 días. Con esto decides cuánto comprar y a qué hora tener más gente.</div></div>
+<div class="paso"><span class="num">5</span><div><b>Línea de tiempo de un pedido</b>Filtra por tablero y abajo aparece cada hito de sus pedidos: cuándo se armó, se pidió, lo tomó cocina, salió y se entregó, con minutos entre cada paso.</div></div>
 
-<h2>Productos y precios</h2>
-<figure><img src="/manual/adm-productos.png" alt="Productos"><figcaption>Productos: cada guiso tiene interruptor general, H y M por masa, y el picor.</figcaption></figure>
-<div class="paso"><span class="num">1</span><div><b>Apagar un producto</b>Elige la sucursal arriba y toca el interruptor. Al instante sale en rojo como "agotado" en todos los tableros de esa sucursal y nadie lo puede pedir. Vuélvelo a tocar para prenderlo.</div></div>
-<div class="paso"><span class="num">2</span><div><b>Solo harina o solo maíz</b>Los botones <b>H</b> y <b>M</b> apagan una sola masa. Ejemplo: se acabó el maíz, apagas M en todos los guisos.</div></div>
-<div class="paso"><span class="num">3</span><div><b>Picor</b>Los chilitos del guiso. Se cambian aquí y así los ven las familias.</div></div>
-<figure><img src="/manual/adm-precios.png" alt="Precios"><figcaption>Precios por sucursal. Harina y maíz por separado.</figcaption></figure>
-<div class="paso"><span class="num">4</span><div><b>Precios</b>Escribe el precio y sal del campo; se guarda solo. "Copiar de…" copia los precios de otra sucursal para no teclearlos cuatro veces. Los pedidos en Pedidos y Mostrador muestran el total. A las familias no se les muestra nada hasta que lo decidas.</div></div>
+<h2>Productos, precios y envío</h2>
+<figure><img src="/manual/adm-productos.png" alt="Productos"><figcaption>Productos: cada guiso tiene interruptor general, 🌾 y 🌽 por masa, y el picor. Las salsas también tienen picor.</figcaption></figure>
+<div class="paso"><span class="num">1</span><div><b>Apagar un producto</b>Elige la sucursal arriba y toca el interruptor. Al instante sale en rojo como "agotado" en todos los tableros de esa sucursal y nadie lo puede pedir. Si ya estaba en pedidos, la cocina recibe un letrero para marcar "no hubo". Vuélvelo a tocar para prenderlo.</div></div>
+<div class="paso"><span class="num">2</span><div><b>Solo harina o solo maíz</b>Los botones 🌾 y 🌽 apagan una sola masa. Ejemplo: se acabó el maíz, apagas 🌽 en todos los guisos.</div></div>
+<div class="paso"><span class="num">3</span><div><b>Picor</b>Los chilitos del guiso y de cada salsa de chilaquiles. Se cambian aquí y así los ven las familias y la cocina.</div></div>
+<figure><img src="/manual/adm-precios.png" alt="Precios"><figcaption>Precios por sucursal. Harina y maíz por separado, agregados de chilaquiles y envío.</figcaption></figure>
+<div class="paso"><span class="num">4</span><div><b>Precios</b>Escribe el precio y sal del campo; se guarda solo. Si un campo va vacío se usa el del menú impreso ($27 la gordita, $110 los chilaquiles, etc.). "Copiar de…" copia los precios de otra sucursal. Las familias ven solo el <b>total</b> de su pedido, nunca el precio por producto.</div></div>
+<div class="paso"><span class="num">5</span><div><b>Envío a domicilio</b>Arriba de la tabla está "Envío a domicilio", $60 de base. Se cobra una vez por pedido cuando la familia prende "A mi casa" en su tablero. Si pasan por el pedido no se cobra.</div></div>
 
-<h2>Usuarios</h2>
+<h2>Mesas con QR</h2>
+<figure><img src="/manual/adm-mesas.png" alt="Mesas"><figcaption>Mesas: QR, liga, hoja para imprimir y entregas por mesa.</figcaption></figure>
+<div class="paso"><span class="num">1</span><div><b>Crea las mesas</b>Elige la sucursal y toca "Crear 6 mesas" o "Agregar mesa". Cada mesa tiene su liga y su QR.</div></div>
+<div class="paso"><span class="num">2</span><div><b>Imprime la hoja</b>"Hoja para imprimir" abre una hoja tamaño carta con el QR grande y los tres pasos para el comensal. Ponla en la mesa.</div></div>
+<div class="paso"><span class="num">3</span><div><b>Cómo funciona para el comensal</b>Escanea, pone lo de cada quien y toca Ordenar. Llega a cocina con prioridad y la etiqueta 🪑. Ve en su celular cuando lo están preparando y cuando sale.</div></div>
+<div class="paso"><span class="num">4</span><div><b>Lo que ves aquí</b>Si la mesa tiene pedido ahora, cuántos entregó hoy, cuántos en total y cuántas gorditas ha servido.</div></div>
+
+<h2>Usuarios y sucursales</h2>
 <figure><img src="/manual/adm-usuarios.png" alt="Usuarios"><figcaption>Usuarios: cada quien con su clave y sus pantallas.</figcaption></figure>
-<div class="paso"><span class="num">1</span><div><b>Crear un usuario</b>Nombre y clave. Ejemplos: "Caja Viñedos" con Mostrador y Pedidos; "Cocina Juárez" con Cocina; "Repartidores" con Pedidos.</div></div>
-<div class="paso"><span class="num">2</span><div><b>Prender o apagar pantallas</b>Toca los chips de cada usuario. Lo que está en verde lo ve; lo demás no le aparece. No hay permisos finos: es qué pantallas ve.</div></div>
-<div class="paso"><span class="num">3</span><div><b>Manuales</b>Todos ven la pantalla Manuales. Manda a tu gente aquí en vez de explicar de uno en uno.</div></div>
+<div class="paso"><span class="num">1</span><div><b>Crear un usuario</b>Nombre y clave. Ejemplos: "Caja Viñedos" con Mostrador, Pedidos y Mesas; "Cocina Juárez" con Cocina; "Repartidores" con Reparto.</div></div>
+<div class="paso"><span class="num">2</span><div><b>Prender o apagar pantallas</b>Toca los chips de cada usuario. Lo que está en verde lo ve; lo demás no le aparece.</div></div>
+<div class="paso"><span class="num">3</span><div><b>Abrir una sucursal</b>Sucursales, escribe nombre, WhatsApp y dirección. Se crean solas sus mesas, su mostrador, su catálogo con precios y su cocina. Las que no uses las puedes desactivar.</div></div>
 
-<h2>Cómo instalar en las tablets de la sucursal</h2>
-<div class="paso"><span class="num">1</span><div><b>Abre la liga en el navegador de la tablet</b><span class="liga">ranita.capitaltorreon.com/admin</span> y entra con la clave del usuario de esa sucursal.</div></div>
-<div class="paso"><span class="num">2</span><div><b>Agrégala a la pantalla de inicio</b>En el menú del navegador: "Agregar a pantalla de inicio". Queda como app, sin barra del navegador, con el ícono de la ranita.</div></div>
+<h2>Bitácora y modo demo</h2>
+<figure><img src="/manual/adm-bitacora.png" alt="Bitácora"><figcaption>Bitácora: cada acción con quién, cuándo y en qué pedido.</figcaption></figure>
+<div class="paso"><span class="num">1</span><div><b>Bitácora</b>Registra absolutamente todo: quién creó, editó, pidió, tomó, marcó "no hay", cobró, salió, entregó, apagó un producto o cambió un precio. Filtra por tipo, sucursal o pedido y busca por texto. Sirve para resolver "¿quién movió esto?".</div></div>
+<div class="paso"><span class="num">2</span><div><b>Datos demo</b>El interruptor abajo a la izquierda llena todas las pantallas con datos ficticios que se mueven solos. Sirve para capacitar y para grabar videos. Nada de eso se guarda ni toca lo real.</div></div>
+
+<h2>Cómo instalar en las tablets y celulares</h2>
+<div class="paso"><span class="num">1</span><div><b>Abre la liga en el navegador</b><span class="liga">ranita.capitaltorreon.com/admin</span> y entra con la clave del usuario de esa sucursal. Para que abra directo en una pantalla, agrega a la liga <span class="liga">?k=CLAVE&v=cocina&suc=vinedos</span> (o mostrador, reparto…).</div></div>
+<div class="paso"><span class="num">2</span><div><b>Instálala</b>En Android y computadora toca "Instalar la app". En iPhone y iPad: Compartir y luego "Agregar a pantalla de inicio". Queda como app con el ícono de la ranita, abre al instante y se actualiza sola.</div></div>
 <div class="paso"><span class="num">3</span><div><b>Cocina en monitor grande</b>Abre Cocina y toca ⛶ Pantalla completa. Las letras crecen solas.</div></div>
 
 <h2>Reglas de oro</h2>
 <div class="ok">✅ Cada etapa la mueve una sola persona: la familia arma, el anfitrión manda, la cocina toma y termina, el repartidor sale y entrega. Si todos respetan su botón, el tablero siempre dice la verdad.</div>
+<div class="ok">✅ Es la misma tarjeta en todos lados. Lo que cambia caja lo ve la familia; lo que palomea cocina lo ve el anfitrión. Por turnos: el más antiguo arriba, el nuevo entra abajo.</div>
 <div class="no">🚫 Nunca borres pedidos de familias desde el admin. Si hay un error, edítalo o regrésalo un paso con ↩︎.</div>
+<div class="no">🚫 Nada de "Familia" delante del nombre, ni números en el menú. El sistema es limpio a propósito.</div>
 <div class="ojo">🔑 La clave maestra abre todo. No la compartas; crea usuarios.</div>
 
-<h2>Si pasa esto…</h2>
-<details class="faq"><summary>Un anfitrión dice que su tablero no existe</summary><div>Que revise la liga letra por letra. Las ligas son <b>ranita.capitaltorreon.com/</b> más su nombre en minúsculas y con guiones.</div></details>
-<details class="faq"><summary>Quiero ver solo una sucursal en todo el admin</summary><div>Usa el filtro de sucursal arriba en Panorama y Pedidos. La liga cambia y la puedes guardar como favorito.</div></details>
-<details class="faq"><summary>Se apagó un producto sin querer</summary><div>Productos, elige la sucursal, toca el interruptor. Se prende al instante.</div></details>
-<details class="faq"><summary>Alguien salió de la empresa</summary><div>Usuarios, toca 🗑 Borrar en su usuario. Su sesión se cierra sola donde esté.</div></details>
+<h2>Preguntas frecuentes</h2>
+<details class="faq"><summary>Un anfitrión dice que su tablero no existe</summary><div>Que revise la liga letra por letra. Las ligas son <b>ranita.capitaltorreon.com/</b> más su nombre en minúsculas y con guiones. La liga de una familia es la del tablero más otra barra y su apellido.</div></details>
+<details class="faq"><summary>Quiero ver solo una sucursal o un anfitrión en todo el admin</summary><div>Usa los filtros de arriba en Panorama y Pedidos. La liga cambia y la puedes guardar como favorito o mandársela a alguien.</div></details>
+<details class="faq"><summary>¿Cómo cambio el WhatsApp de una sucursal?</summary><div>En Sucursales, en la tarjeta de esa sucursal. Se actualiza al momento en todos los tableros.</div></details>
+<details class="faq"><summary>¿Por qué Reparto está vacío si hay pedidos listos?</summary><div>A Reparto solo entran los pedidos que la familia pidió a domicilio. Los que pasan a recoger, las mesas y el mostrador aparecen en "Recogen en sucursal" y los cierra la caja.</div></details>
+<details class="faq"><summary>¿Cómo funciona el envío de $60?</summary><div>La familia lo prende con la palanca "A mi casa" de su tablero. Se suma una vez por pedido en el WhatsApp, en la tarjeta del admin, en la comanda y en el cobro del repartidor. El monto se cambia en Precios por sucursal.</div></details>
+<details class="faq"><summary>Se apagó un producto sin querer</summary><div>Productos, elige la sucursal, toca el interruptor. Se prende al instante. Si la cocina ya marcó "no hubo" en algún pedido, en Cocina toca "sí hubo".</div></details>
+<details class="faq"><summary>Un cliente dice que le cobraron mal</summary><div>Busca su pedido en Pedidos: ahí está el total con envío, y en Bitácora quién lo cobró y cuándo. Los precios que se usaron son los de Precios de esa sucursal.</div></details>
+<details class="faq"><summary>Alguien salió de la empresa</summary><div>Usuarios, toca 🗑 Borrar en su usuario. Su sesión se cierra sola donde esté. Los cocineros y repartidores se quitan desde el ＋ de su pantalla.</div></details>
+<details class="faq"><summary>¿Cómo sé quién tardó más en cocina o en reparto?</summary><div>Panorama trae los tiempos promedio. Cocina y Reparto muestran abajo "Hoy" con pedidos y minutos por persona. Bitácora tiene el detalle uno por uno.</div></details>
+<details class="faq"><summary>¿Se puede usar sin internet?</summary><div>La app abre y muestra lo último. Para mover pedidos entre pantallas sí se necesita conexión; lo que se haga sin señal se manda al regresar.</div></details>
+<details class="faq"><summary>¿Cómo grabo un video de capacitación sin tocar datos reales?</summary><div>Prende "Datos demo" abajo a la izquierda. Para que no salga el letrero rojo, abre la liga con <span class="liga">?demo=1&foto=1</span>.</div></details>
+<details class="faq"><summary>Actualicé algo y no lo veo en la tablet</summary><div>Cierra la app y vuelve a abrirla. Se actualiza sola en la siguiente apertura; no hace falta borrar nada.</div></details>
 </section>
 
 <p class="foot">Ranitas · Pedidos · manuales de uso · si algo no está aquí, pregúntale a tu encargado</p>
