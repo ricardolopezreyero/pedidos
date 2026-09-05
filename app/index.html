@@ -441,7 +441,9 @@ const GUISOS=[
 ].map(g=>({n:g[0],pic:g[1]}));
 const BEBIDAS=[{n:"Café de olla"},{n:"Café de grano"},{n:"Jugo de naranja"},{n:"Refresco",det:"¿Cuál?"}];
 const POSTRES=[{n:"Gordita Nutella"},{n:"Gordita Cajeta"},{n:"Brownie"},{n:"Pay"}];
-const SALSAS=["Verde cremosa","Roja","Verde tomatillo","Chipotle con crema","La más picosa 🌶🌶🌶"];
+const SALSAS=["Verde cremosa","Roja","Verde tomatillo","Chipotle con crema","La más picosa"];
+const SALSAS_PIC={"Verde cremosa":1,"Roja":2,"Verde tomatillo":1,"Chipotle con crema":2,"La más picosa":3};
+const normSalsa=x=>String(x||"").replace(/\s*(?:🌶)+\s*$/,"").trim();
 const QUESOS=["Asadero","Chihuahua"];
 const EXTRAS=["Huevo estrellado","Huevo revuelto","Guiso favorito"];
 // Columnas del tablero: las 3 primeras las mueve la familia; Cocina, En camino y Entregado las mueve Ranitas (misma tarjeta en todos los tableros) — RLR
@@ -469,7 +471,8 @@ const colDe=c=>c.estado==="pedido"?(c.etapa==="armado"?"cocina":(c.etapa==="espe
 let cat={}, catRef=null, catSuc="", menu={};
 const catKey=(c,name)=>c+"_"+slugify(name);
 const disponible=(c,name,masa)=>{ const v=cat[catKey(c,name)]; if(!v) return true; if(v.on===false) return false; if(c==="g"&&masa){ if(masa==="maiz"&&v.offM) return false; if(masa!=="maiz"&&v.offH) return false; } if(c==="g"&&!masa&&v.offH&&v.offM) return false; return true; };
-const picDe=name=>{ const v=menu["g_"+slugify(name)]; if(v&&v.pic!=null) return +v.pic; const g=GUISOS.find(x=>x.n===name); return g?g.pic:0; };
+const picDe=(name,cat)=>{ cat=cat||"g"; const nm=cat==="sal"?normSalsa(name):name; const v=menu[cat+"_"+slugify(nm)]; if(v&&v.pic!=null) return +v.pic; if(cat==="sal") return SALSAS_PIC[nm]||0; const g=GUISOS.find(x=>x.n===name); return g?g.pic:0; };
+const picTxt=(name,cat)=>{ const n=picDe(name,cat); return n?" "+"🌶".repeat(n):""; };
 // Precios desde el catálogo de la sucursal (harina y maíz por separado). Solo se muestra el TOTAL y solo si el admin lo activa (config.mostrarPrecios) — RLR
 function precioDe(c,name,masa){ const v=cat[catKey(c,name)]||{}; if(c==="g"&&masa==="maiz"&&v.precioM!=null&&v.precioM!=="") return +v.precioM; return v.precio!=null&&v.precio!==""?+v.precio:null; }
 function suscribirCatalogo(){ if(!db||!SLUG||config.sucursal===catSuc) return; if(catRef) catRef.off(); catSuc=config.sucursal; catRef=db.ref(ROOT+"/catalogo/"+catSuc);
@@ -669,14 +672,14 @@ function personLines(p){ const L=[];
   p.gorditas.forEach(l=>L.push(l.cant+" "+l.guiso+(l.detalle?" ("+l.detalle+")":"")+" · "+(l.masa==="maiz"?"🌽 maíz":"🌾 harina")));
   if(p.chilaquiles){ const c=p.chilaquiles;
     const ex=(c.extras||[]).map(x=>x==="Guiso favorito"?(c.guiso?"guiso de "+c.guiso.toLowerCase():"guiso favorito"):x.toLowerCase());
-    L.push((c.cant>1?c.cant+" ":"")+"Chilaquiles"+(c.salsa?" salsa "+c.salsa.toLowerCase():" (falta salsa)")+(c.queso?" · queso "+c.queso.toLowerCase():" · (falta queso)")+(ex.length?" + "+ex.join(" + "):"")); }
+    L.push((c.cant>1?c.cant+" ":"")+"Chilaquiles"+(c.salsa?" salsa "+normSalsa(c.salsa).toLowerCase()+picTxt(c.salsa,"sal"):" (falta salsa)")+(c.queso?" · queso "+c.queso.toLowerCase():" · (falta queso)")+(ex.length?" + "+ex.join(" + "):"")); }
   p.postres.forEach(l=>L.push(l.cant+" "+l.nombre));
   p.bebidas.forEach(l=>L.push(l.cant+" "+l.nombre+(l.detalle?" ("+l.detalle+")":"")));
   return L; }
 const masaTag=m=>`<span class="mt ${m==="maiz"?"m-m":"m-h"}">${m==="maiz"?"🌽 Maíz":"🌾 Harina"}</span>`;
 const lineaHTML=t=>esc(t).replace(/ · (🌾 harina|🌽 maíz)$/,(_,x)=>" "+masaTag(x.includes("maíz")?"maiz":"harina"));
 // Filas por persona: 🌾 harina · 🌽 maíz · 🍳🍰☕ otros, con la etiqueta a la izquierda — RLR
-function personaFilas(p){ const H=[],M=[],O=[]; toArr(p.gorditas).forEach(l=>(l.masa==="maiz"?M:H).push(l.cant+" "+l.guiso+(l.detalle?" ("+l.detalle+")":""))); if(p.chilaquiles){ const c=p.chilaquiles; O.push((c.cant>1?c.cant+" ":"")+"🍳 Chilaquiles"+(c.salsa?" "+c.salsa.toLowerCase():"")+(c.queso?" · "+c.queso.toLowerCase():"")+(toArr(c.extras).length?" + "+toArr(c.extras).map(x=>x==="Guiso favorito"?(c.guiso?"guiso de "+c.guiso.toLowerCase():"guiso favorito"):x.toLowerCase()).join(" + "):"")); } toArr(p.postres).forEach(l=>O.push(l.cant+" 🍰 "+l.nombre)); toArr(p.bebidas).forEach(l=>O.push(l.cant+" ☕ "+l.nombre+(l.detalle?" ("+l.detalle+")":"")));
+function personaFilas(p){ const H=[],M=[],O=[]; toArr(p.gorditas).forEach(l=>(l.masa==="maiz"?M:H).push(l.cant+" "+l.guiso+(l.detalle?" ("+l.detalle+")":""))); if(p.chilaquiles){ const c=p.chilaquiles; O.push((c.cant>1?c.cant+" ":"")+"🍳 Chilaquiles"+(c.salsa?" "+normSalsa(c.salsa).toLowerCase()+picTxt(c.salsa,"sal"):"")+(c.queso?" · "+c.queso.toLowerCase():"")+(toArr(c.extras).length?" + "+toArr(c.extras).map(x=>x==="Guiso favorito"?(c.guiso?"guiso de "+c.guiso.toLowerCase():"guiso favorito"):x.toLowerCase()).join(" + "):"")); } toArr(p.postres).forEach(l=>O.push(l.cant+" 🍰 "+l.nombre)); toArr(p.bebidas).forEach(l=>O.push(l.cant+" ☕ "+l.nombre+(l.detalle?" ("+l.detalle+")":"")));
   const fila=(cls,tag,arr)=>arr.length?`<div class="pg"><span class="mt ${cls}">${tag}</span><span class="pi">${esc(arr.join(" · "))}</span></div>`:""; return fila("m-h","🌾 Harina",H)+fila("m-m","🌽 Maíz",M)+fila("m-o","Otros",O); }
 function lineasDe(c){ const L=[]; toArr(c.personas).forEach((p,pi)=>{ const pid=p.id||("p"+pi); toArr(p.gorditas).forEach((l,i)=>L.push({k:pid+":g:"+i,per:nombreDe(p),n:l.guiso})); if(p.chilaquiles) L.push({k:pid+":ch:0",per:nombreDe(p),n:"Chilaquiles"}); toArr(p.bebidas).forEach((l,i)=>L.push({k:pid+":b:"+i,per:nombreDe(p),n:l.nombre})); toArr(p.postres).forEach((l,i)=>L.push({k:pid+":po:"+i,per:nombreDe(p),n:l.nombre})); }); return L; }
 function noHubo(c){ const f=c.faltas||{}; return lineasDe(c).filter(l=>f[l.k]).map(l=>l.n+" ("+l.per+")"); }
@@ -955,7 +958,7 @@ function subHTML(p,pi,key,items,title,addA,qtyA,detIn){
 function chilHTML(p,pi){ const c=p.chilaquiles;
   return `<div class="sub"><div class="t"><span class="qty" style="margin-right:8px"><button data-a="chQty" data-p="${pi}" data-v="-1">−</button><span class="lq">${c.cant}</span><button data-a="chQty" data-p="${pi}" data-v="1">+</button></span><button data-a="togChil" data-p="${pi}">quitar</button></div>
     ${disponible("ch","chilaquiles")?"":`<div class="warn">⛔ Hoy no hay chilaquiles en Suc. ${esc(getSuc().n)}. Quítalos del pedido.</div>`}
-    <div class="row"><span class="lbl">1 · Salsa</span>${SALSAS.map(s=>{ const off=!disponible("sal",s); return `<button class="chip${c.salsa===s?" on":""}${off?" off":""}" data-a="${off?"agotado":"chSet"}" data-p="${pi}" data-k="salsa" data-v="${esc(s)}">${esc(s)}${off?`<span class="cnt no">agotada</span>`:""}</button>`; }).join("")}</div>
+    <div class="row"><span class="lbl">1 · Salsa</span>${SALSAS.map(s=>{ const off=!disponible("sal",s); return `<button class="chip${normSalsa(c.salsa)===s?" on":""}${off?" off":""}" data-a="${off?"agotado":"chSet"}" data-p="${pi}" data-k="salsa" data-v="${esc(s)}">${esc(s)}<span class="pic">${picTxt(s,"sal")}</span>${off?`<span class="cnt no">agotada</span>`:""}</button>`; }).join("")}</div>
     <div class="row"><span class="lbl">2 · Queso</span>${QUESOS.map(s=>{ const off=!disponible("q",s); return `<button class="chip${c.queso===s?" on":""}${off?" off":""}" data-a="${off?"agotado":"chSet"}" data-p="${pi}" data-k="queso" data-v="${esc(s)}">${esc(s)}${off?`<span class="cnt no">agotado</span>`:""}</button>`; }).join("")}</div>
     <div class="row"><span class="lbl">3 · Agrega (opcional)</span>${EXTRAS.map(s=>{ const off=!disponible("ex",s); return `<button class="chip${c.extras.includes(s)?" on":""}${off?" off":""}" data-a="${off?"agotado":"chExtra"}" data-p="${pi}" data-v="${esc(s)}">${esc(s)}${off?`<span class="cnt no">agotado</span>`:""}</button>`; }).join("")}
       ${c.extras.includes("Guiso favorito")?`<select data-in="chGuiso" data-p="${pi}" style="margin-top:4px"><option value="">¿Qué guiso?</option>${GUISOS.filter(g=>g.n!=="Combinada").map(g=>`<option${c.guiso===g.n?" selected":""}>${esc(g.n)}</option>`).join("")}</select>`:""}</div></div>`;
