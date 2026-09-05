@@ -189,6 +189,8 @@ tr.tot td{font-weight:900;background:var(--y3)}
 .b.rep{background:#ede4ff;color:#5b21b6}
 .anfbar{flex:1 1 100%;display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;margin-top:2px}
 .anfbar .anfnom{margin-right:auto;font-weight:800;font-size:14px}.anfbar .btn{font-size:14px;padding:9px 14px}
+a.btn,a.btn:hover,a.kbtn{text-decoration:none!important}
+.btn.tel{background:var(--y);color:var(--ink)}
 .rz{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin:10px 0 4px;display:flex;align-items:center;gap:6px}.rz:first-child{margin-top:0}
 .rz .n{background:#fff;border-radius:999px;padding:0 8px;color:var(--ink)}
 .kc.rep{border-left-color:var(--v)}.kc.rep.sel{background:#f3edff;box-shadow:0 0 0 3px var(--v),var(--sh)}
@@ -778,7 +780,7 @@ function flipDespues(root,antes){ if(!root||matchMedia("(prefers-reduced-motion:
   if(!mov.length) return; void root.offsetHeight; mov.forEach(el=>{ el.classList.add("flip"); el.style.transition=""; el.style.transform=""; el.addEventListener("transitionend",()=>el.classList.remove("flip"),{once:true}); }); }
 /* Con el filtro en un anfitrión: su celular a la mano, un clic para marcar o para WhatsApp — RLR */
 function anfBarHTML(){ if(!fTab) return ""; const a=anfitriones[fTab]||{}; const cfg=(tableros[fTab]||{}).config||{}; const tel=String(cfg.telAnfitrion||a.tel||"").replace(/\D/g,"").slice(-10); const nom=cfg.anfitrion||a.nombre||fTab; const msg="Hola "+nom+" 👋 Le escribimos de Gorditas Ranitas sobre su pedido. ";
-  return `<div class="anfbar"><span class="anfnom">${a.mesa?"🪑":a.mostrador?"🧾":"🏠"} <b>${esc(nom)}</b>${tel?` · 📱 ${telFmt(tel)}`:` · <i class="mut">sin celular</i>`}</span>${tel?`<a class="btn bl" href="tel:+52${tel}">📞 Llamar</a><a class="btn wa" href="https://api.whatsapp.com/send?phone=52${tel}&text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">💬 WhatsApp</a>`:""}<button class="btn ghost" data-copy="${esc(APP_URL+fTab)}" title="Copiar liga del tablero">🔗</button></div>`; }
+  return `<div class="anfbar"><span class="anfnom">${a.mesa?"🪑":a.mostrador?"🧾":"🏠"} <b>${esc(nom)}</b>${tel?` · 📱 ${telFmt(tel)}`:` · <i class="mut">sin celular</i>`}</span>${tel?`<a class="btn tel" href="tel:+52${tel}">📞 Llamar</a><a class="btn wa" href="https://api.whatsapp.com/send?phone=52${tel}&text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">💬 WhatsApp</a>`:""}<button class="btn ghost" data-copy="${esc(APP_URL+fTab)}" title="Copiar liga del tablero">🔗</button></div>`; }
 function cardHTML(c){
   const suc=SUCURSALES.find(s=>s.id===c.sucursal); const cfg=(tableros[c.slug]||{}).config||{};
   const persons=c.personas.map(p=>{ const L=personLines(p); return L.length?`<div class="pl"><span class="pn">${ROLES[p.rol]||"🙂"} ${esc(nombreDe(p))}</span>${personaFilas(p)}</div>`:""; }).join("")||`<div class="pl"><i>sin productos</i></div>`;
@@ -804,7 +806,7 @@ function cardHTML(c){
 const telFmt=t=>String(t||"").replace(/\D/g,"").slice(-10).replace(/(\d{3})(\d{3})(\d{2})(\d{2})/,"$1 $2 $3 $4");
 const waMsg=(c,slug)=>{ const sn=(SUCURSALES.find(x=>x.id===c.sucursal)||{}).n||""; return "Hola 👋 Le escribimos de Gorditas Ranitas"+(sn?" (Suc. "+sn+")":"")+" sobre el pedido de "+(c.familia||"")+". "; };
 function contactoHTML(c,slug,compacto){ const a=anfitriones[slug]||{}; const cfg=(tableros[slug]||{}).config||{}; const tel=String(cfg.telAnfitrion||a.tel||"").replace(/\D/g,"").slice(-10); if(!tel&&compacto) return "";
-  const btns=tel?`<a class="btn" href="tel:+52${tel}" title="Llamar">📞 ${compacto?"":telFmt(tel)}</a><a class="btn wa" href="https://api.whatsapp.com/send?phone=52${tel}&text=${encodeURIComponent(waMsg(c,slug))}" target="_blank" rel="noopener" title="WhatsApp">💬${compacto?"":" WhatsApp"}</a>`:""; if(compacto) return btns;
+  const btns=tel?`<a class="btn tel" href="tel:+52${tel}" title="Llamar">📞 ${compacto?"":telFmt(tel)}</a><a class="btn wa" href="https://api.whatsapp.com/send?phone=52${tel}&text=${encodeURIComponent(waMsg(c,slug))}" target="_blank" rel="noopener" title="WhatsApp">💬${compacto?"":" WhatsApp"}</a>`:""; if(compacto) return btns;
   const url=APP_URL+slug+(c.id?"?f="+c.id:""); const et={proceso:"🍳 En cola de cocina",armado:"🔥 Armando en cocina"+(c.cocinero?" · "+c.cocinero.nombre:""),espera:"⏳ Espera repartidor",repartiendo:"🛵 Repartiendo",entregado:"✅ Entregado"}[c.etapa||(c.estado==="pedido"?"proceso":"")]||({armando:"✏️ Armando",porpedir:"📋 Por pedir",entregado:"✅ Entregado",archivado:"📚 Historial"}[c.estado]||c.estado);
   return `<div class="origen"><div class="o-h"><b>${a.mesa?"🪑":a.mostrador?"🧾":"🏠"} ${esc(a.nombre||slug)}</b><span class="b">${esc(et)}</span></div>
     <div class="o-row"><a class="o-link" href="${esc(url)}" target="_blank" rel="noopener">🔗 ${esc(url.replace("https://",""))}</a><button class="btn ghost" data-copy="${esc(url)}" title="Copiar liga">📋</button></div>
