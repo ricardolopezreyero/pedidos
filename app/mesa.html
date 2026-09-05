@@ -41,7 +41,7 @@ h1 span{background:#2E9E3E;color:#fff;padding:0 14px;border-radius:12px;display:
 @media print{body{background:#fff}.bar{display:none}.hoja{margin:0;box-shadow:none;width:8.5in;height:11in}}
 </style>
 </head>
-<body>
+<body data-app="equipo">
 <div class="bar"><span id="titulo">Hoja de mesa</span><button onclick="window.print()">🖨 Imprimir / Guardar PDF</button><button id="png" style="background:#2b4a9e">⬇ Descargar QR (PNG)</button><a href="/admin?v=mesas" style="margin-left:6px">← Volver a Mesas</a></div>
 <div class="hoja"><div class="rays"></div>
   <div class="in">
@@ -68,26 +68,48 @@ fetch("https://notion-casa-default-rtdb.firebaseio.com/ranitas/anfitriones/"+enc
 document.getElementById("png").onclick=()=>{ const c=document.querySelector("#qr canvas"); const img=document.querySelector("#qr img"); const src=c?c.toDataURL("image/png"):(img&&img.src); if(!src) return; const a=document.createElement("a"); a.href=src; a.download="qr-"+s+".png"; a.click(); };
 </script>
 <!-- RLR · eye/181218 -->
-<style>/* PWA · RLR */#swUp{position:fixed;left:50%;top:12px;transform:translateX(-50%) translateY(-80px);background:#231F1A;color:#fff;padding:10px 14px 10px 16px;border-radius:999px;font-weight:900;font-size:14px;z-index:9999;display:flex;gap:10px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.3);transition:transform .35s cubic-bezier(.2,.8,.2,1);font-family:'Nunito',system-ui,sans-serif}#swUp.on{transform:translateX(-50%) translateY(0)}#swUp button{border:0;border-radius:999px;padding:7px 12px;font-weight:900;font-size:13px;background:#FFD60A;color:#231F1A;cursor:pointer;font-family:inherit}
-#instPill{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:9998;background:#231F1A;color:#FFD60A;border-radius:999px;padding:10px 12px 10px 16px;font-weight:900;font-size:14px;display:none;gap:10px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.28);font-family:'Nunito',system-ui,sans-serif;max-width:min(92vw,420px)}#instPill.on{display:flex}#instPill b{cursor:pointer}#instPill small{display:block;font-weight:700;color:#eee;font-size:12px;line-height:1.25}#instPill .x{background:none;border:0;color:#aaa;font-size:18px;cursor:pointer;padding:0 2px;line-height:1}
+<style>/* PWA · RLR */
+#instPill{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:9998;background:#231F1A;color:#FFD60A;border-radius:999px;padding:10px 12px 10px 16px;font-weight:900;font-size:14px;display:none;gap:10px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.28);font-family:'Nunito',system-ui,sans-serif;max-width:min(92vw,420px)}#instPill.on{display:flex}#instPill b{cursor:pointer}#instPill .x{background:none;border:0;color:#aaa;font-size:18px;cursor:pointer;padding:0 2px;line-height:1}
+#mInst{position:fixed;inset:0;background:rgba(35,31,26,.7);z-index:9999;display:none;align-items:flex-end;justify-content:center;font-family:'Nunito',system-ui,sans-serif}#mInst.on{display:flex}
+#mInst .box{background:#fff;color:#231F1A;width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.3);animation:instUp .2s ease-out}
+@media(min-width:600px){#mInst{align-items:center;padding:20px}#mInst .box{border-radius:22px}}
+@keyframes instUp{from{transform:translateY(30px);opacity:.5}}
+#mInst h2{margin:0 0 4px;font-size:21px;font-weight:900;display:flex;gap:10px;align-items:center}#mInst h2 img{width:44px;height:44px;border-radius:12px}
+#mInst p{margin:6px 0 12px;font-weight:700;color:#5c5346;font-size:14.5px;line-height:1.45}
+#mInst .st{display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px dashed #EEE3BF;font-weight:800;font-size:15px}#mInst .st:first-of-type{border-top:0}#mInst .st i{flex:none;width:40px;height:40px;border-radius:12px;background:#FFF1B8;display:grid;place-items:center;font-style:normal;font-size:20px}
+#mInst .ib{border:0;border-radius:12px;padding:12px 16px;font-weight:900;font-size:15px;background:#2E9E3E;color:#fff;width:100%;margin-top:8px;cursor:pointer}#mInst .ic{background:transparent;color:#7A736B;border:0;font-weight:800;padding:10px;width:100%;cursor:pointer}
+#mInst .ok{background:#E3F5E6;border-radius:12px;padding:10px 12px;font-weight:800}
 @media(display-mode:standalone),(display-mode:minimal-ui){#instPill{display:none!important}}</style>
 <div id="swUp" role="status" hidden></div>
 <div id="instPill"><b id="instGo">📲 Instalar la app</b><button class="x" id="instNo" title="Ahora no">×</button></div>
+<div id="mInst" role="dialog" aria-modal="true"><div class="box" id="instBox"></div></div>
 <script>
-/* PWA: instala, abre al instante y se actualiza sola — RLR */
-(function(){ const std=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true; const pill=document.getElementById("instPill"), go=document.getElementById("instGo"), no=document.getElementById("instNo"); let defer=null;
+/* PWA: dos apps (familias y equipo), instalables, abren al instante y se actualizan solas — RLR */
+(function(){ const APPN=document.body.dataset.app==="equipo"?{n:"Ranitas Equipo",ic:"/admin-icon-192.png",q:"la app del equipo"}:{n:"Ranitas",ic:"/icon-192.png",q:"Ranitas"};
+  const std=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true; const pill=document.getElementById("instPill"), go=document.getElementById("instGo"), no=document.getElementById("instNo"), m=document.getElementById("mInst"), box=document.getElementById("instBox"); let defer=null;
   const noMostrar=()=>{ try{ return +localStorage.getItem("ranitas-inst-no")>Date.now(); }catch(e){ return false; } };
-  const ios=/iP(hone|ad|od)/.test(navigator.userAgent)&&!window.MSStream;
+  const ua=navigator.userAgent; const ios=/iP(hone|ad|od)/.test(ua)&&!window.MSStream; const android=/Android/.test(ua); const inApp=/FBAN|FBAV|Instagram|Line\/|WhatsApp|; wv\)|\bwv\b|Messenger|Twitter/i.test(ua)||(ios&&!/Safari/.test(ua)); const safari=ios&&/Safari/.test(ua)&&!/CriOS|FxiOS|EdgiOS/.test(ua);
+  function html(){ const h=`<h2><img src="${APPN.ic}" alt="">Instala ${APPN.n}</h2>`;
+    if(std) return h+`<div class="ok">✅ Ya la tienes instalada. Ábrela desde el ícono de la ranita.</div><button class="ic" data-i="cerrar">Cerrar</button>`;
+    if(inApp) return h+`<p>Estás dentro de ${/WhatsApp/i.test(ua)?"WhatsApp":/Instagram/i.test(ua)?"Instagram":/FBAN|FBAV|Messenger/i.test(ua)?"Facebook":"otra app"}. Para instalarla hay que abrirla en el navegador:</p><div class="st"><i>${ios?"⎋":"⋮"}</i><span>Toca ${ios?"el botón de compartir o el ícono de Safari":"los tres puntos ⋮ arriba a la derecha"}</span></div><div class="st"><i>🧭</i><span>Elige <b>${ios?"Abrir en Safari":"Abrir en Chrome"}</b></span></div><div class="st"><i>📲</i><span>Ahí toca <b>Instalar la app</b> otra vez</span></div><button class="ic" data-i="cerrar">Ahora no</button>`;
+    if(defer) return h+`<p>Queda en tu pantalla de inicio con el ícono de la ranita. Abre al instante y funciona aunque falle la señal.</p><button class="ib" data-i="prompt">📲 Instalar ahora</button><button class="ic" data-i="cerrar">Ahora no</button>`;
+    if(ios) return h+`<p>En iPhone se instala desde Safari en tres toques:</p><div class="st"><i>⎋</i><span>Toca <b>Compartir</b> (el cuadrito con la flecha, abajo en el centro)</span></div><div class="st"><i>➕</i><span>Baja y toca <b>Agregar a pantalla de inicio</b></span></div><div class="st"><i>✅</i><span>Toca <b>Agregar</b> arriba a la derecha</span></div>${safari?"":"<p>Si no ves esa opción, abre esta liga en Safari.</p>"}<button class="ic" data-i="cerrar">Listo</button>`;
+    if(android) return h+`<p>En Android se instala desde Chrome:</p><div class="st"><i>⋮</i><span>Toca los tres puntos arriba a la derecha</span></div><div class="st"><i>📲</i><span>Elige <b>Instalar aplicación</b> o <b>Agregar a pantalla de inicio</b></span></div><button class="ic" data-i="cerrar">Listo</button>`;
+    return h+`<p>En computadora, en Chrome o Edge:</p><div class="st"><i>⊕</i><span>Toca el ícono de instalar al final de la barra de dirección</span></div><div class="st"><i>📲</i><span>Confirma <b>Instalar</b></span></div><button class="ic" data-i="cerrar">Listo</button>`; }
+  window.abrirInstalar=function(){ box.innerHTML=html(); m.classList.add("on"); };
+  m.addEventListener("click",async e=>{ if(e.target===m){ m.classList.remove("on"); return; } const b=e.target.closest("[data-i]"); if(!b) return; if(b.dataset.i==="cerrar"){ m.classList.remove("on"); try{ localStorage.setItem("ranitas-inst-no",String(Date.now()+3*864e5)); }catch(x){} return; } if(b.dataset.i==="prompt"&&defer){ defer.prompt(); const r=await defer.userChoice; defer=null; m.classList.remove("on"); pill.classList.remove("on"); if(r&&r.outcome==="accepted"){ try{ localStorage.setItem("ranitas-inst-no",String(Date.now()+365*864e5)); }catch(x){} } } });
   window.addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); defer=e; if(!std&&!noMostrar()) pill.classList.add("on"); });
-  if(ios&&!std&&!noMostrar()){ go.innerHTML="📲 Instalar la app<small>Toca <b>Compartir</b> y luego <b>Agregar a pantalla de inicio</b></small>"; setTimeout(()=>pill.classList.add("on"),4000); }
-  go.addEventListener("click",async()=>{ if(defer){ defer.prompt(); const r=await defer.userChoice; defer=null; pill.classList.remove("on"); if(r&&r.outcome==="accepted") try{ localStorage.setItem("ranitas-inst-no",String(Date.now()+365*864e5)); }catch(e){} } });
+  if((ios||inApp)&&!std&&!noMostrar()){ setTimeout(()=>pill.classList.add("on"),5000); }
+  go.addEventListener("click",()=>abrirInstalar());
   no.addEventListener("click",()=>{ pill.classList.remove("on"); try{ localStorage.setItem("ranitas-inst-no",String(Date.now()+7*864e5)); }catch(e){} });
-  window.addEventListener("appinstalled",()=>{ pill.classList.remove("on"); });
-  if(!("serviceWorker" in navigator)) return; let recargando=false;
+  window.addEventListener("appinstalled",()=>{ pill.classList.remove("on"); m.classList.remove("on"); });
+  document.addEventListener("click",e=>{ if(e.target.closest("[data-instalar]")){ e.preventDefault(); abrirInstalar(); } });
+  if(!("serviceWorker" in navigator)) return;
   const avisar=reg=>{ const w=reg.waiting; if(w) w.postMessage({tipo:"saltar"}); };
-  // Sin recargas automáticas: la versión nueva se activa sola y se usa en la siguiente apertura. Nada de "hay una versión nueva" — RLR
   window.addEventListener("load",()=>{ navigator.serviceWorker.register("/sw").then(reg=>{ if(reg.waiting&&navigator.serviceWorker.controller) avisar(reg); reg.addEventListener("updatefound",()=>{ const nw=reg.installing; if(!nw) return; nw.addEventListener("statechange",()=>{ if(nw.state==="installed"&&navigator.serviceWorker.controller) avisar(reg); }); }); setInterval(()=>reg.update().catch(()=>{}),30*60*1000); document.addEventListener("visibilitychange",()=>{ if(!document.hidden) reg.update().catch(()=>{}); }); }).catch(()=>{}); });
+  fetch("/sw",{cache:"no-store"}).then(r=>r.text()).then(t=>{ const v=(t.match(/VERSION="([^"]+)"/)||[])[1]; if(v){ window.ranitasVer=v; document.querySelectorAll("[data-ver]").forEach(el=>el.textContent="v "+v); } }).catch(()=>{});
 })();
 </script>
+
 </body>
 </html>

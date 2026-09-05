@@ -1,31 +1,81 @@
 {
-  "id": "/",
+  "id": "/?app=familias",
   "name": "Ranitas · Pedidos",
   "short_name": "Ranitas",
-  "description": "Arma el pedido de tu familia en Gorditas Ranitas (Torreón): gorditas de harina o maíz, chilaquiles, café y postres. Todo llega en un solo WhatsApp a la sucursal.",
+  "description": "Pide gorditas en equipo: cada quien pone lo suyo desde su celular y todo llega en un solo WhatsApp a Gorditas Ranitas (Torreón).",
   "start_url": "/?app=1",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "any",
   "background_color": "#FFD60A",
   "theme_color": "#FFD60A",
   "lang": "es-MX",
   "dir": "ltr",
-  "categories": ["food", "shopping"],
-  "launch_handler": { "client_mode": "navigate-existing" },
+  "categories": [
+    "food",
+    "shopping"
+  ],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
   "prefer_related_applications": false,
   "icons": [
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "screenshots": [
-    { "src": "/manual/fam-tablero.png", "sizes": "390x844", "type": "image/png", "form_factor": "narrow", "label": "Tu tablero: cada quien pone lo suyo y todo llega en un WhatsApp" },
-    { "src": "/manual/fam-editor.png", "sizes": "390x844", "type": "image/png", "form_factor": "narrow", "label": "Arma el pedido por persona: harina o maíz, chilaquiles, café y postre" }
+    {
+      "src": "/manual/fam-tablero.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Tu tablero: cada quien pone lo suyo y todo llega en un WhatsApp"
+    },
+    {
+      "src": "/manual/fam-editor.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Arma el pedido por persona: harina o maíz, chilaquiles, café y postre"
+    }
   ],
   "shortcuts": [
-    { "name": "Mis tableros", "short_name": "Tableros", "url": "/?app=1", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
+    {
+      "name": "Mis tableros",
+      "short_name": "Tableros",
+      "url": "/?app=1",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
   ]
 }

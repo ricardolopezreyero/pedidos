@@ -186,7 +186,21 @@ Las reglas de la base están abiertas (lectura y escritura sin login). Es acepta
 
 ---
 
-## 6. PWA: instalar como app
+## 6. Dos apps instalables: Ranitas (clientes) y Ranitas Equipo (restaurante)
+
+Como Uber para pasajeros y Uber para conductores: son dos apps distintas sobre la misma base, siempre web app, nunca tiendas.
+
+| | 🐸 Ranitas · Pedidos | 🐸 Ranitas Equipo |
+|---|---|---|
+| Para quién | Anfitriones y familias | Caja, cocina, reparto, dueño |
+| Se abre en | `/` (y `/<tablero>`) | `/admin` |
+| Manifiesto | `manifest.json`, id `/?app=familias`, ámbito `/` | `admin.json`, id `/admin?app=equipo`, ámbito `/admin` |
+| Ícono y color | Rana sobre amarillo, barra amarilla | Rana sobre oscuro, barra oscura |
+| Instalar | Tarjeta "Instala Ranitas en tu celular" en el inicio, píldora 📲, botón en ⚙ | Liga en la pantalla de contraseña y botón "📲 Instalar la app" en el menú |
+| Cruce | "¿Trabajas en Ranitas? Entra a la app del equipo →" al pie del inicio | "¿Vienes a pedir? Ve a Ranitas Pedidos →" en la contraseña |
+
+La ventana de instalación detecta dónde está la persona: si Chrome ofrece instalar, un botón lo hace directo; en iPhone explica Compartir → Agregar a pantalla de inicio → Agregar; si abrió la liga dentro de WhatsApp, Instagram o Facebook (donde no se puede instalar) le dice cómo abrirla en Safari o Chrome. En el menú del equipo se ve la versión instalada.
+
 
 - Dos apps con su ícono: **Ranitas** (familias, rana sobre amarillo) y **Ranitas Admin** (rana sobre oscuro). Íconos 192/512 normales y maskable, ícono de iPhone, capturas y atajos (Pedidos, Mostrador, Cocina, Reparto) en el manifiesto del admin.
 - El service worker precarga toda la app: abre al instante desde el ícono y funciona sin señal con lo último guardado. Firebase nunca pasa por él.

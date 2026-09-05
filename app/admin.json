@@ -1,34 +1,111 @@
 {
-  "id": "/admin",
-  "name": "Ranitas · Admin",
-  "short_name": "Ranitas Admin",
-  "description": "El restaurante en una app: pedidos en vivo, mostrador, cocina, reparto, mesas, productos y precios de Gorditas Ranitas.",
+  "id": "/admin?app=equipo",
+  "name": "Ranitas Equipo",
+  "short_name": "Ranitas Equipo",
+  "description": "La app del equipo de Gorditas Ranitas: mostrador, cocina, reparto, mesas, recetas y todo el restaurante en vivo.",
   "start_url": "/admin?app=1",
-  "scope": "/",
+  "scope": "/admin",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "any",
   "background_color": "#231F1A",
   "theme_color": "#231F1A",
   "lang": "es-MX",
   "dir": "ltr",
-  "categories": ["business", "food", "productivity"],
-  "launch_handler": { "client_mode": "navigate-existing" },
+  "categories": [
+    "business",
+    "food",
+    "productivity"
+  ],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
   "prefer_related_applications": false,
   "icons": [
-    { "src": "/admin-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/admin-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/admin-icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "/admin-icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/admin-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/admin-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/admin-icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/admin-icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "screenshots": [
-    { "src": "/manual/adm-pedidos.png", "sizes": "1280x800", "type": "image/png", "form_factor": "wide", "label": "Pedidos en vivo, de Armando a Entregado" },
-    { "src": "/manual/adm-cocina-movil.png", "sizes": "390x844", "type": "image/png", "form_factor": "narrow", "label": "Cocina: comal y empaque en el celular" }
+    {
+      "src": "/manual/adm-pedidos.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Pedidos en vivo, de Armando a Entregado"
+    },
+    {
+      "src": "/manual/adm-cocina-movil.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Cocina: comal y empaque en el celular"
+    }
   ],
   "shortcuts": [
-    { "name": "Pedidos", "url": "/admin?v=pedidos&app=1", "icons": [{ "src": "/admin-icon-192.png", "sizes": "192x192" }] },
-    { "name": "Mostrador", "url": "/admin?v=mostrador&app=1", "icons": [{ "src": "/admin-icon-192.png", "sizes": "192x192" }] },
-    { "name": "Cocina", "url": "/admin?v=cocina&app=1", "icons": [{ "src": "/admin-icon-192.png", "sizes": "192x192" }] },
-    { "name": "Reparto", "url": "/admin?v=reparto&app=1", "icons": [{ "src": "/admin-icon-192.png", "sizes": "192x192" }] }
+    {
+      "name": "Pedidos",
+      "url": "/admin?v=pedidos&app=1",
+      "icons": [
+        {
+          "src": "/admin-icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Mostrador",
+      "url": "/admin?v=mostrador&app=1",
+      "icons": [
+        {
+          "src": "/admin-icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Cocina",
+      "url": "/admin?v=cocina&app=1",
+      "icons": [
+        {
+          "src": "/admin-icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Reparto",
+      "url": "/admin?v=reparto&app=1",
+      "icons": [
+        {
+          "src": "/admin-icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
   ]
 }
