@@ -710,11 +710,12 @@ function renderPedidos(){
 function cardHTML(c){
   const suc=SUCURSALES.find(s=>s.id===c.sucursal); const cfg=(tableros[c.slug]||{}).config||{};
   const persons=c.personas.map(p=>{ const L=personLines(p); return L.length?`<div class="pl"><span class="pn">${ROLES[p.rol]||"🙂"} ${esc(nombreDe(p))}</span>${personaFilas(p)}</div>`:""; }).join("")||`<div class="pl"><i>sin productos</i></div>`;
+  const local=!!(c.mesa||c.mostrador||(anfitriones[c.slug]||{}).mesa||(anfitriones[c.slug]||{}).mostrador); const vacia=!lineasDe(c).length; // mesa/mostrador: sin repartidor — RLR
   const A={
-    armando:``,
-    porpedir:``,
-    pedido:(!c.etapa||c.etapa==="proceso"||c.etapa==="armado")?`${c.etapa==="armado"&&c.cocinero?`<span class="b wip">🔥 ${esc(c.cocinero.nombre)}</span>`:""}<button class="btn bl" data-a="etapa" data-v="espera" data-id="${c.id}" data-s="${c.slug}">⏳ Listo, espera repartidor</button>`:
-           c.etapa==="espera"?`<button class="btn v" data-a="etapa" data-v="repartiendo" data-id="${c.id}" data-s="${c.slug}">🛵 Salió a repartir</button><button class="btn ghost" data-a="etapa" data-v="proceso" data-id="${c.id}" data-s="${c.slug}">↩︎</button>`:
+    armando:vacia&&(Date.now()-(c.actualizado||0)>30*60000)?`<button class="btn ghost" data-a="borrarVacio" data-id="${c.id}" data-s="${c.slug}" title="Tarjeta vacía sin actividad">🗑</button>`:``,
+    porpedir:`<button class="btn bl" data-a="tomar" data-id="${c.id}" data-s="${c.slug}" title="La familia ya pidió por teléfono o WhatsApp: pásalo a cocina">📲 Tomar pedido</button>`,
+    pedido:(!c.etapa||c.etapa==="proceso"||c.etapa==="armado")?`${c.etapa==="armado"&&c.cocinero?`<span class="b wip">🔥 ${esc(c.cocinero.nombre)}</span>`:""}<button class="btn bl" data-a="etapa" data-v="espera" data-id="${c.id}" data-s="${c.slug}">${local?"🔔 Listo para entregar":"⏳ Listo, espera repartidor"}</button>`:
+           c.etapa==="espera"?(local?`<button class="btn p" data-a="entregar" data-id="${c.id}" data-s="${c.slug}">✅ Entregado ${c.mesa?"en mesa":"en mostrador"}</button>`:`<button class="btn v" data-a="etapa" data-v="repartiendo" data-id="${c.id}" data-s="${c.slug}">🛵 Salió a repartir</button>`)+`<button class="btn ghost" data-a="etapa" data-v="proceso" data-id="${c.id}" data-s="${c.slug}">↩︎</button>`:
            `<button class="btn p" data-a="entregar" data-id="${c.id}" data-s="${c.slug}">✅ Entregado</button><button class="btn ghost" data-a="etapa" data-v="espera" data-id="${c.id}" data-s="${c.slug}">↩︎</button>`,
     entregado:`<button class="btn" data-a="archivar" data-id="${c.id}" data-s="${c.slug}">📦 Archivar</button><button class="btn ghost" data-a="etapa" data-v="repartiendo" data-id="${c.id}" data-s="${c.slug}" data-back="1">↩︎</button>`,
     archivado:``
@@ -725,7 +726,7 @@ function cardHTML(c){
     ${tagsHTML(c,c.slug,true)}
     <div>${persons}</div>${c.notas?`<div class="notas">📝 ${esc(c.notas)}</div>`:""}
     ${c.estado!=="armando"&&(cfg.direccion||cfg.telAnfitrion)?`<div class="notas contacto">${cfg.direccion?`🏠 ${esc(cfg.direccion)}`:""}${cfg.telAnfitrion?`<span> · 📱 ${telFmt(cfg.telAnfitrion)}</span>`:""}<span class="o-acts">${contactoHTML(c,c.slug,true)}</span></div>`:""}
-    <div class="tot">${esc(totStr(totales(c)))}${costo(c)!=null?` · <b>💰 ${money(costo(c))}</b>`:""}</div><div class="acts">${A}${c.estado!=="archivado"?`<button class="btn y" data-a="editar" data-id="${c.id}" data-s="${c.slug}">✏️ Editar</button>`:""}</div></article>`;
+    <div class="tot">${esc(totStr(totales(c)))}${costo(c)!=null?` · <b>💰 ${money(costo(c))}</b>`:""}</div><div class="acts">${A}${c.estado!=="archivado"?`<button class="btn y" data-a="editar" data-id="${c.id}" data-s="${c.slug}">✏️ Editar</button>`:""}${!vacia?`<button class="btn ghost" data-a="ticket" data-id="${c.id}" data-s="${c.slug}" title="Imprimir comanda">🖨</button>`:""}</div></article>`;
 }
 // Contacto y origen de un pedido: liga del tablero, celular del anfitrión (llamar / WhatsApp), dirección, hora, pago — RLR
 const telFmt=t=>String(t||"").replace(/\D/g,"").slice(-10).replace(/(\d{3})(\d{3})(\d{2})(\d{2})/,"$1 $2 $3 $4");
@@ -1028,7 +1029,23 @@ document.addEventListener("click",e=>{ const fp=e.target.closest("[data-fp]"); i
   if(a==="entregar"){ upd(s,id,{estado:"entregado",etapa:"entregado",entregadoEn:Date.now()}); toast("Entregado ✅"); bit("reparto","entrego","Marcó entregado al cliente",{pedido:id,familia:fam,tablero:s}); }
   if(a==="archivar"){ upd(s,id,{estado:"archivado",archivadoEn:Date.now()}); toast("Archivado 📚"); bit("pedido","archivo","Archivó",{pedido:id,familia:fam,tablero:s}); }
   if(a==="editar"){ abrirEnMostrador(s,id); }
+  if(a==="tomar"){ const c=((tableros[s]||{}).pedidos||{})[id]; if(!c) return; const cfg=(tableros[s]||{}).config||{}; if(!confirm("¿Pasar el pedido de Familia "+(c.familia||"")+" a cocina? Úsalo cuando la familia ya pidió por teléfono o WhatsApp.")) return; upd(s,id,{estado:"pedido",etapa:"proceso",pedidoEn:Date.now(),sucursal:c.sucursal||cfg.sucursal||pSuc||null}); toast("A cocina 🍳"); bit("pedido","ordeno","Tomó el pedido desde admin (la familia pidió por fuera): "+totStr(totales(c)),{pedido:id,familia:fam,tablero:s}); }
+  if(a==="borrarVacio"){ const c=((tableros[s]||{}).pedidos||{})[id]; if(!c||lineasDe(c).length) return; if(!confirm("Esta tarjeta está vacía y sin actividad. ¿Borrarla?")) return; db.ref(ROOT+"/tableros/"+s+"/pedidos/"+id).remove(); toast("Tarjeta vacía borrada"); bit("pedido","borro","Borró una tarjeta vacía desde Pedidos",{pedido:id,familia:fam,tablero:s}); }
+  if(a==="ticket"){ const c=((tableros[s]||{}).pedidos||{})[id]; if(c) imprimirComanda(c); }
 });
+/* Comanda imprimible (ticket angosto, sirve en impresora térmica o carta) — RLR */
+function imprimirComanda(c){ const cfg=(tableros[c.slug]||{}).config||{}; const a=anfitriones[c.slug]||{}; const suc=(SUCURSALES.find(x=>x.id===(c.sucursal||cfg.sucursal))||{}).n||""; const F=c.faltas||{};
+  const LL=lineasDe(c); const per=toArr(c.personas).map((p,pi)=>{ const pid=p.id||("p"+pi); const ls=LL.filter(l=>l.pid===pid); return ls.length?`<div class="p"><b>${ROLES[p.rol]||"🙂"} ${esc(nombreDe(p))}</b>${ls.map(l=>`<div class="l${F[l.k]?" no":""}">${l.cant} ${esc(l.n)}${l.masa?" · "+(l.masa==="maiz"?"🌽 maíz":"🌾 harina"):""}${F[l.k]?" ⛔ no hubo":""}</div>`).join("")}</div>`:""; }).join("");
+  const t=totales(c); const $$=costo(c); const w=window.open("","_blank","width=420,height=720"); if(!w){ toast("Permite ventanas emergentes para imprimir"); return; }
+  w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Comanda · ${esc(c.familia||"")}</title><style>@page{size:80mm auto;margin:4mm}body{font:800 13px/1.35 'Nunito',system-ui,sans-serif;color:#111;margin:0;padding:8px;width:72mm}h1{font-size:18px;margin:0 0 2px}.m{font-size:11px;color:#555;font-weight:700}.p{margin:8px 0;padding-top:6px;border-top:1px dashed #999}.l{padding-left:6px}.l.no{text-decoration:line-through;color:#a00}.n{margin-top:8px;padding:6px;background:#fff3b0;border-radius:6px}.t{margin-top:10px;padding-top:6px;border-top:2px solid #111;font-size:14px}.f{margin-top:10px;font-size:10px;color:#777;text-align:center}</style></head><body onload="print()">
+    <h1>🐸 Ranitas${suc?" · "+esc(suc):""}</h1><div class="m">${c.mesa?"🪑 "+esc(a.nombre||"Mesa"):c.mostrador||a.mostrador?"🧾 Mostrador":"🏠 "+esc(c.tablero||a.nombre||cfg.anfitrion||c.slug||"")} · ${fmtFecha(c.pedidoEn||c.actualizado||Date.now())}</div>
+    <div class="m"><b>Familia ${esc(c.familia||"")}</b>${cfg.entrega?" · ⏰ "+esc(cfg.entrega):""}</div>
+    ${per||"<div class='p'><i>sin productos</i></div>"}
+    ${c.notas?`<div class="n">📝 ${esc(c.notas)}</div>`:""}
+    ${!c.mesa&&(cfg.direccion||cfg.telAnfitrion)?`<div class="p"><div>🏠 ${esc(cfg.direccion||"")}</div>${cfg.telAnfitrion?`<div>📱 ${telFmt(cfg.telAnfitrion)}</div>`:""}${cfg.pago?`<div>💵 ${esc(cfg.pago)}${cfg.pagoCon?" · pago con $"+esc(cfg.pagoCon):""}</div>`:""}</div>`:""}
+    <div class="t">${esc(totStr(t))}${$$!=null?`<br>💰 <b>${money($$)}</b> · ${pagado(c)?"PAGADO":"POR PAGAR"}`:""}</div>
+    <div class="f">Pedido ${esc(c.id)} · ranita.capitaltorreon.com</div></body></html>`); w.document.close();
+  bit("pedido","imprimio","Imprimió la comanda",{pedido:c.id,familia:c.familia,tablero:c.slug}); }
 </script>
 <!-- RLR · eye/181218 -->
 </body>
