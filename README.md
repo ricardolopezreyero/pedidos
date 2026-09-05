@@ -75,7 +75,7 @@ Es **la misma tarjeta** en todos lados: lo que la familia teclea lo ve la caja a
 | 💲 **Precios** | Tabla por sucursal, harina y maíz, copiar de otra sucursal. | Dueño |
 | 👥 **Usuarios** | Claves y vistas permitidas por persona. | Dueño |
 | 🏬 **Sucursales** | Alta de sucursal con todo automático (mesas, mostrador, catálogo, cocina). Solo Maestro. | Dueño |
-| 📖 **Recetas** | Recetario con gramajes (29 recetas base marcadas como supuestas), calculadora que escala a la cantidad que necesites con costo estimado, "lo pedido hoy", editar, duplicar, imprimir. | Dueño, cocina |
+| 📖 **Recetas** | Recetario de casa v2: 33 recetas con gramajes exactos, preparación de ingredientes, paso a paso con tiempos y temperaturas, puntos de control, secretos, conservación y alérgenos. Calculadora que escala con costo estimado, "lo pedido hoy", modo lectura para estudiar (pasos palomeados, subrayado, notas, se retoma donde se quedó) y certificación por cocinero. | Cocina, dueño |
 | 🛒 **Compras** | Lista de compras sumada por insumo y agrupada por proveedor, orden por WhatsApp, marcar como pedida, historial, catálogo de insumos con precio y proveedores con WhatsApp y días de entrega. | Dueño, caja |
 | 📜 **Bitácora** | Registro permanente de absolutamente todo, en vivo, con filtros y búsqueda. | Dueño |
 | 📖 **Manuales** | Manual por perfil con capturas y lenguaje simple. | Todos |
@@ -159,7 +159,8 @@ Cualquier servidor estático sobre `app/` sirve (por ejemplo `python3 -m http.se
 | `reparto/<sucursal>/repartidores/<id>` | `{nombre, creado}` |
 | `admin/usuarios/<id>` | `{nombre, clave, vistas[]}` |
 | `sucursales/<id>` | `{n, tels[], direccion, activa, orden, creado}` |
-| `recetas/<id>` | `{nombre, cat, rinde, unidad, ingredientes[{insumo,cant,unidad}], pasos, tiempo, supuesta}` |
+| `recetas/<id>` | `{nombre, emoji, cat, rinde, unidad, porcion, tiempo, dificultad, ingredientes[{insumo,cant,unidad,prep}], pasos[{t,min,temp}], puntos[], tips[], equipo[], alergenos[], conservacion, ref, validada, version}` |
+| `estudio/<estudiante>/<receta>` | `{pasos{i:true}, marcas{}, nota, ultimo, certificada, nombre, ts}` progreso de lectura y certificación por cocinero |
 | `insumos/<id>` | `{nombre, unidad, precio, proveedor, presentacion}` |
 | `proveedores/<id>` | `{nombre, rubro, wa, dias, notas}` |
 | `compras/lista/<insumo\|unidad>` · `compras/historial/<push>` | lista viva de compras y órdenes ya pedidas |
@@ -231,7 +232,7 @@ El Worker lee el tablero en Firebase, saca el celular del anfitrión y le manda 
 - Activar el SMS (sección 7).
 - Chilaquiles con más opciones de presentación ("ya lo moveremos").
 - Corte diario para Panorama.
-- Recetas: gramajes reales (los base son supuestos), consumo real contra teórico, inventario.
+- Recetas: validar en cocina los gramajes de referencia; consumo real contra teórico; inventario.
 - Reglas de seguridad en Firebase si el sistema crece.
 
 ---
