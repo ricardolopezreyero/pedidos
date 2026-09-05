@@ -149,20 +149,22 @@ label.f input,label.f textarea,label.f select{margin-top:4px;font-weight:700}
 .chip .cnt{background:var(--g);color:#fff;border-radius:999px;padding:1px 7px;font-size:11px;font-weight:900}
 .chip .pic{font-size:11px;letter-spacing:-2px}
 .lines{margin-top:8px}
-.line{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px dashed var(--line)}
+.line{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px dashed var(--line);flex-wrap:wrap}
 .line:first-child{border-top:0}
-.lq{min-width:28px;height:28px;border-radius:9px;background:var(--y);font-weight:900;display:grid;place-items:center;font-size:14px}
-.ln{flex:1;font-weight:800;font-size:14px}
+.lq{min-width:30px;height:32px;border-radius:9px;background:var(--y);font-weight:900;display:grid;place-items:center;font-size:15px}
+.qty{display:inline-flex;align-items:center;gap:3px;flex:none}
+.qty button{width:32px;height:32px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-size:18px;font-weight:900;line-height:1;padding:0}
+.ln{flex:1 1 auto;font-weight:800;font-size:14px;min-width:120px}
 .ln em{font-style:normal;color:var(--mut);font-weight:800;font-size:11px;text-transform:uppercase;margin-left:5px;letter-spacing:.3px}
-.line input.det{width:130px;padding:6px 9px;font-size:13px;border-radius:9px}
-.stp{display:flex;gap:4px}
+.line input.det{flex:1 1 150px;min-width:0;width:auto;padding:7px 9px;font-size:13px;border-radius:9px}
+.stp{display:inline-flex;gap:3px}
 .stp button{width:34px;height:34px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-size:18px;font-weight:900;line-height:1}
 .p-extras{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
 .pill{border:1.5px dashed #cdbf8a;background:#fff;border-radius:999px;padding:7px 12px;font-weight:800;font-size:13px;color:#6b5a00}
 .pill.on{border-style:solid;border-color:var(--g);background:var(--g2);color:var(--g)}
 .sub{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:10px}
 .sub .t{font-weight:900;font-size:13.5px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
-.sub .t button{border:0;background:transparent;color:var(--r);font-weight:800;font-size:12px}
+.sub .t>button{border:0;background:transparent;color:var(--r);font-weight:800;font-size:12px}
 .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0}
 .row .lbl{font-size:12px;font-weight:900;color:var(--mut);width:100%;text-transform:uppercase;letter-spacing:.3px}
 .addp{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:14px 0 4px;font-weight:800;color:var(--mut);font-size:13px}
@@ -317,7 +319,8 @@ function hide(id){ $("#"+id).classList.remove("open"); }
 function getSuc(){ return SUCURSALES.find(s=>s.id===config.sucursal)||SUCURSALES[1]; }
 function getTel(){ const s=getSuc(); return s.tels[Math.min(config.telIdx||0,s.tels.length-1)]; }
 function fmtTel(t){ return t.replace(/(\d{3})(\d{3})(\d{2})(\d{2})/,"$1 $2 $3 $4"); }
-function waLink(tel,text){ return "https://wa.me/52"+tel+"?text="+encodeURIComponent(text); }
+// api.whatsapp.com directo: el redirect de wa.me rompe los emojis (salen como �) — RLR
+function waLink(tel,text){ return "https://api.whatsapp.com/send?phone=52"+tel+"&text="+encodeURIComponent(text); }
 
 function normPersona(p){ p=p||{}; return {id:p.id||uid(),rol:p.rol||"otro",nombre:p.nombre||"",masa:p.masa||"harina",
   gorditas:toArr(p.gorditas).map(l=>({guiso:l.guiso,masa:l.masa||"harina",cant:+l.cant||1,detalle:l.detalle||""})),
@@ -529,9 +532,8 @@ function personaHTML(p,pi){
   const r=rolDe(p); const cnt={}; p.gorditas.forEach(l=>{ cnt[l.guiso]=cnt[l.guiso]||{harina:0,maiz:0}; cnt[l.guiso][l.masa]+=l.cant; });
   const chips=GUISOS.map(g=>{ const c=cnt[g.n]; const b=c?[c.harina?c.harina+"H":"",c.maiz?c.maiz+"M":""].filter(Boolean).join("·"):"";
     return `<button class="chip${c?" has":""}" data-a="addG" data-p="${pi}" data-v="${esc(g.n)}">${esc(g.n)}${g.pic?`<span class="pic">${"🌶".repeat(g.pic)}</span>`:""}${b?`<span class="cnt">${b}</span>`:""}</button>`; }).join("");
-  const lines=p.gorditas.map((l,i)=>`<div class="line"><span class="lq">${l.cant}</span><span class="ln">${esc(l.guiso)}<em>${l.masa==="maiz"?"maíz":"harina"}</em></span>
-    ${l.guiso==="Combinada"?`<input class="det" data-in="gdet" data-p="${pi}" data-i="${i}" value="${esc(l.detalle)}" placeholder="¿de qué?">`:""}
-    <div class="stp"><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="-1">−</button><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="1">+</button></div></div>`).join("");
+  const lines=p.gorditas.map((l,i)=>`<div class="line"><span class="qty"><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="-1">−</button><span class="lq">${l.cant}</span><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="1">+</button></span><span class="ln">${esc(l.guiso)}<em>${l.masa==="maiz"?"maíz":"harina"}</em></span>
+    ${l.guiso==="Combinada"?`<input class="det" data-in="gdet" data-p="${pi}" data-i="${i}" value="${esc(l.detalle)}" placeholder="¿de qué?">`:""}</div>`).join("");
   const openB=ui.open[p.id+"b"]||p.bebidas.length, openP=ui.open[p.id+"p"]||p.postres.length;
   return `<section class="persona">
     <div class="p-head"><span class="p-emoji">${r.e}</span><input class="p-name" data-in="nombre" data-p="${pi}" value="${esc(p.nombre)}" placeholder="Nombre (${r.n})" autocomplete="off">
@@ -553,12 +555,11 @@ function subHTML(p,pi,key,items,title,addA,qtyA,detIn){
   const have={}; p[key].forEach(l=>have[l.nombre]=(have[l.nombre]||0)+l.cant);
   return `<div class="sub"><div class="t">${title}<button data-a="togSec" data-p="${pi}" data-v="${key==="bebidas"?"b":"p"}" data-x="1">quitar</button></div>
     <div class="chips">${items.map(it=>`<button class="chip${have[it.n]?" has":""}" data-a="${addA}" data-p="${pi}" data-v="${esc(it.n)}">${esc(it.n)}${have[it.n]?`<span class="cnt">${have[it.n]}</span>`:""}</button>`).join("")}</div>
-    <div class="lines">${p[key].map((l,i)=>{ const it=items.find(x=>x.n===l.nombre); return `<div class="line"><span class="lq">${l.cant}</span><span class="ln">${esc(l.nombre)}</span>
-      ${detIn&&it&&it.det?`<input class="det" data-in="${detIn}" data-p="${pi}" data-i="${i}" value="${esc(l.detalle)}" placeholder="${esc(it.det)}">`:""}
-      <div class="stp"><button data-a="${qtyA}" data-p="${pi}" data-i="${i}" data-v="-1">−</button><button data-a="${qtyA}" data-p="${pi}" data-i="${i}" data-v="1">+</button></div></div>`; }).join("")}</div></div>`;
+    <div class="lines">${p[key].map((l,i)=>{ const it=items.find(x=>x.n===l.nombre); return `<div class="line"><span class="qty"><button data-a="${qtyA}" data-p="${pi}" data-i="${i}" data-v="-1">−</button><span class="lq">${l.cant}</span><button data-a="${qtyA}" data-p="${pi}" data-i="${i}" data-v="1">+</button></span><span class="ln">${esc(l.nombre)}</span>
+      ${detIn&&it&&it.det?`<input class="det" data-in="${detIn}" data-p="${pi}" data-i="${i}" value="${esc(l.detalle)}" placeholder="${esc(it.det)}">`:""}</div>`; }).join("")}</div></div>`;
 }
 function chilHTML(p,pi){ const c=p.chilaquiles;
-  return `<div class="sub"><div class="t">🍳 Chilaquiles <span class="stp" style="margin-left:auto;margin-right:8px"><button data-a="chQty" data-p="${pi}" data-v="-1">−</button><span class="lq" style="margin:0 2px">${c.cant}</span><button data-a="chQty" data-p="${pi}" data-v="1">+</button></span><button data-a="togChil" data-p="${pi}">quitar</button></div>
+  return `<div class="sub"><div class="t">🍳 Chilaquiles <span class="qty" style="margin-left:auto;margin-right:8px"><button data-a="chQty" data-p="${pi}" data-v="-1">−</button><span class="lq">${c.cant}</span><button data-a="chQty" data-p="${pi}" data-v="1">+</button></span><button data-a="togChil" data-p="${pi}">quitar</button></div>
     <div class="row"><span class="lbl">1 · Salsa</span>${SALSAS.map(s=>`<button class="chip${c.salsa===s?" on":""}" data-a="chSet" data-p="${pi}" data-k="salsa" data-v="${esc(s)}">${esc(s)}</button>`).join("")}</div>
     <div class="row"><span class="lbl">2 · Queso</span>${QUESOS.map(s=>`<button class="chip${c.queso===s?" on":""}" data-a="chSet" data-p="${pi}" data-k="queso" data-v="${esc(s)}">${esc(s)}</button>`).join("")}</div>
     <div class="row"><span class="lbl">3 · Agrega (opcional)</span>${EXTRAS.map(s=>`<button class="chip${c.extras.includes(s)?" on":""}" data-a="chExtra" data-p="${pi}" data-v="${esc(s)}">${esc(s)}</button>`).join("")}
@@ -585,7 +586,7 @@ function marcar(id,estado){ const c=pedidos[id]; if(!c) return; c.estado=estado;
 /* ---------- compartir ---------- */
 async function compartir(){ const text="🐸 Pide tus gorditas Ranitas aquí: "+APP_URL+"\nArma el pedido de tu familia y yo lo mando a la sucursal.";
   try{ if(navigator.share){ await navigator.share({title:"Ranitas · Pedidos",text}); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
-  try{ await navigator.clipboard.writeText(text); toast("Liga copiada 🔗"); }catch(e){ window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank"); } }
+  try{ await navigator.clipboard.writeText(text); toast("Liga copiada 🔗"); }catch(e){ window.open("https://api.whatsapp.com/send?text="+encodeURIComponent(text),"_blank"); } }
 
 /* ---------- config ---------- */
 function renderCfg(){ $("#cfgBody").innerHTML=`
