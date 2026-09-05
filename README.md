@@ -227,6 +227,17 @@ El Worker lee el tablero en Firebase, saca el celular del anfitrión y le manda 
 
 ---
 
+## 8b. Detalles para que el equipo goce el sistema
+
+- Saludo por hora con el nombre en el menú lateral.
+- 🔔 Sonido suave cuando entra un pedido a la cola de Cocina o de Reparto (se apaga con el botón).
+- **Deshacer** en las acciones grandes: Listo en cocina, Entregado, Mandar a cocina desde Mostrador. El aviso dura 8 segundos con el botón ↩︎.
+- Reconocimiento: "✅ Salió Treviño · 7 hoy, Lupe" y mensajes en hitos (1, 5, 10, 20, 30, 50) para cocineros y repartidores; en Panorama, "🏅 Equipo de hoy" con ⭐ para quien más sacó.
+- Cocina: "✓ Marcar todo el comal listo" y "🔥 Tomar el siguiente" desde el aviso.
+- Reparto: "🛵 Voy en camino" manda al cliente un WhatsApp con el nombre del repartidor.
+- Pantallas vacías con mensajes que rotan ("Sin pedidos en cola 🎉 Respira y toma agua 💧").
+- "📖 ¿Cómo se usa?" en Mostrador, Cocina, Reparto y Mesas abre el manual de esa pantalla.
+
 ## 9. Pendientes conocidos
 
 - Activar el SMS (sección 7).
