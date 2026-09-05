@@ -8,5 +8,5 @@
     "FIREBASE_URL": "https://notion-casa-default-rtdb.firebaseio.com",
     "APP_URL": "https://ranita.capitaltorreon.com/"
   }
-  // Secretos (wrangler secret put): TELNYX_API_KEY, TELNYX_FROM (número Telnyx en E.164, ej. +18325551234)
+  // Secretos (wrangler secret put): TWILIO_CLIENT_ID, TWILIO_CLIENT_SECRET, TWILIO_ACCOUNT_SID, TWILIO_FROM (E.164) o TWILIO_MESSAGING_SERVICE
 }
