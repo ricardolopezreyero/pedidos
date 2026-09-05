@@ -292,6 +292,14 @@ button.tag.click{cursor:pointer}button.tag.click:hover{border-style:dashed;borde
 .fch span{background:#f2ecd6;border-radius:999px;padding:0 6px;font-size:11px}
 .fch.on{background:var(--ink);color:var(--y);border-color:var(--ink)}.fch.on span{background:rgba(255,214,10,.25)}
 .fch.porpagar.on{background:#92400E;color:#FEF3C7;border-color:#92400E}.fch.pagado.on,.fch.entregado.on{background:#166534;color:#DCFCE7;border-color:#166534}
+/* tarjeta: persona con filas por tipo, etiqueta a la izquierda — RLR */
+.pl{display:block;margin:6px 0}
+.pl .pn{font-weight:900;display:block;margin-bottom:2px}
+.pg{display:grid;grid-template-columns:82px 1fr;gap:6px;align-items:start;padding:2px 0 2px 4px;font-size:13px}
+.pg .mt{margin:0;justify-content:center;width:100%;white-space:nowrap}
+.pg .mt.m-o{background:#F3EFE2;color:#5a4a00}
+.pg .pi{font-weight:700;line-height:1.35}
+.acts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:center}
 /* bitácora */
 .live{font-size:12px;color:var(--g);background:var(--g2);border-radius:999px;padding:3px 10px;margin-left:8px;vertical-align:middle;animation:pulse 1.6s infinite}
 .bchips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
@@ -693,10 +701,10 @@ function renderPedidos(){
 }
 function cardHTML(c){
   const suc=SUCURSALES.find(s=>s.id===c.sucursal); const cfg=(tableros[c.slug]||{}).config||{};
-  const persons=c.personas.map(p=>{ const L=personLines(p); return L.length?`<div class="pl">${ROLES[p.rol]||"🙂"} <b>${esc(nombreDe(p))}</b>: ${L.map(lineaHTML).join(" · ")}</div>`:""; }).join("")||`<div class="pl"><i>sin productos</i></div>`;
+  const persons=c.personas.map(p=>{ const L=personLines(p); return L.length?`<div class="pl"><span class="pn">${ROLES[p.rol]||"🙂"} ${esc(nombreDe(p))}</span>${personaFilas(p)}</div>`:""; }).join("")||`<div class="pl"><i>sin productos</i></div>`;
   const A={
-    armando:`<span class="b wip">✏️ armando…</span>`,
-    porpedir:`<span class="b ok">✅ Lista · el anfitrión aún no manda el WhatsApp</span>`,
+    armando:``,
+    porpedir:``,
     pedido:(!c.etapa||c.etapa==="proceso"||c.etapa==="armado")?`${c.etapa==="armado"&&c.cocinero?`<span class="b wip">🔥 ${esc(c.cocinero.nombre)}</span>`:""}<button class="btn bl" data-a="etapa" data-v="espera" data-id="${c.id}" data-s="${c.slug}">⏳ Listo, espera repartidor</button>`:
            c.etapa==="espera"?`<button class="btn v" data-a="etapa" data-v="repartiendo" data-id="${c.id}" data-s="${c.slug}">🛵 Salió a repartir</button><button class="btn ghost" data-a="etapa" data-v="proceso" data-id="${c.id}" data-s="${c.slug}">↩︎</button>`:
            `<button class="btn p" data-a="entregar" data-id="${c.id}" data-s="${c.slug}">✅ Entregado</button><button class="btn ghost" data-a="etapa" data-v="espera" data-id="${c.id}" data-s="${c.slug}">↩︎</button>`,
@@ -705,7 +713,7 @@ function cardHTML(c){
   }[c.estado]||"";
   return `<article class="pc${flash[c.id]?" flash":""}">
     <div class="pc-top"><h3>Familia ${esc(c.familia||"sin nombre")}</h3><span class="when">${fmtRel(c.actualizado)}</span></div>
-    <div class="badges">${c.mesa?`<span class="b mesa">🪑 MESA · prioridad</span>`:""}${Object.keys(c.faltas||{}).length?`<span class="b wip">⛔ no hubo: ${esc([...new Set(lineasDe(c).filter(l=>(c.faltas||{})[l.k]).map(l=>l.n))].join(", "))}</span>`:""}<span class="b tab">🏠 ${esc(c.tablero)}</span>${suc?`<span class="b suc">📍 ${esc(suc.n)}</span>`:""}${c.estado==="pedido"?`<span class="b">📲 ${fmtFecha(c.pedidoEn)}</span>`:""}${c.estado==="entregado"?`<span class="b ok">🛵 ${fmtFecha(c.entregadoEn)}</span>`:""}${cfg.entrega?`<span class="b">⏰ ${esc(cfg.entrega)}</span>`:""}</div>
+    <div class="badges">${c.estado==="armando"?`<span class="b wip">✏️ armando…</span>`:c.estado==="porpedir"?`<span class="b ok">✅ Lista · aún sin WhatsApp</span>`:""}${c.mesa?`<span class="b mesa">🪑 MESA · prioridad</span>`:""}${Object.keys(c.faltas||{}).length?`<span class="b wip">⛔ no hubo: ${esc([...new Set(lineasDe(c).filter(l=>(c.faltas||{})[l.k]).map(l=>l.n))].join(", "))}</span>`:""}<span class="b tab">🏠 ${esc(c.tablero)}</span>${suc?`<span class="b suc">📍 ${esc(suc.n)}</span>`:""}${c.estado==="pedido"?`<span class="b">📲 ${fmtFecha(c.pedidoEn)}</span>`:""}${c.estado==="entregado"?`<span class="b ok">🛵 ${fmtFecha(c.entregadoEn)}</span>`:""}${cfg.entrega?`<span class="b">⏰ ${esc(cfg.entrega)}</span>`:""}</div>
     ${tagsHTML(c,c.slug,true)}
     <div>${persons}</div>${c.notas?`<div class="notas">📝 ${esc(c.notas)}</div>`:""}
     ${c.estado!=="armando"&&(cfg.direccion||cfg.telAnfitrion)?`<div class="notas contacto">${cfg.direccion?`🏠 ${esc(cfg.direccion)}`:""}${cfg.telAnfitrion?`<span> · 📱 ${telFmt(cfg.telAnfitrion)}</span>`:""}<span class="o-acts">${contactoHTML(c,c.slug,true)}</span></div>`:""}
@@ -854,6 +862,9 @@ const kit={miId:QS.get("coc")||localStorage.getItem("ranitas-cocinero-id")||"",v
 const mins=ts=>ts?Math.max(0,Math.round((Date.now()-ts)/60000)):0;
 const lineKey=(p,cat,i)=>p.id+":"+cat+":"+i;
 // Líneas del pedido con clave estable, para marcar avance
+// Filas por persona: 🌾 harina · 🌽 maíz · 🍳🍰☕ otros, con la etiqueta a la izquierda — RLR
+function personaFilas(p){ const H=[],M=[],O=[]; toArr(p.gorditas).forEach(l=>(l.masa==="maiz"?M:H).push(l.cant+" "+l.guiso+(l.detalle?" ("+l.detalle+")":""))); if(p.chilaquiles){ const c=p.chilaquiles; O.push((c.cant>1?c.cant+" ":"")+"🍳 Chilaquiles"+(c.salsa?" "+c.salsa.toLowerCase():"")+(c.queso?" · "+c.queso.toLowerCase():"")+(toArr(c.extras).length?" + "+toArr(c.extras).map(x=>x==="Guiso favorito"?(c.guiso?"guiso de "+c.guiso.toLowerCase():"guiso favorito"):x.toLowerCase()).join(" + "):"")); } toArr(p.postres).forEach(l=>O.push(l.cant+" 🍰 "+l.nombre)); toArr(p.bebidas).forEach(l=>O.push(l.cant+" ☕ "+l.nombre+(l.detalle?" ("+l.detalle+")":"")));
+  const fila=(cls,tag,arr)=>arr.length?`<div class="pg"><span class="mt ${cls}">${tag}</span><span class="pi">${esc(arr.join(" · "))}</span></div>`:""; return fila("m-h","🌾 Harina",H)+fila("m-m","🌽 Maíz",M)+fila("m-o","Otros",O); }
 function lineasDe(c){ const L=[]; toArr(c.personas).forEach((p,pi)=>{ const pid=p.id||("p"+pi); toArr(p.gorditas).forEach((l,i)=>L.push({k:pid+":g:"+i,pid,per:nombreDe(p),cat:"g",n:l.guiso+(l.detalle?" ("+l.detalle+")":""),masa:l.masa==="maiz"?"maiz":"harina",cant:+l.cant||0}));
   if(p.chilaquiles){ const ch=p.chilaquiles; const ex=toArr(ch.extras).map(x=>x==="Guiso favorito"?(ch.guiso?"guiso "+ch.guiso.toLowerCase():"guiso favorito"):x.toLowerCase()); L.push({k:pid+":ch:0",pid,per:nombreDe(p),cat:"ch",n:"Chilaquiles "+(ch.salsa?ch.salsa.toLowerCase():"")+(ch.queso?" · "+ch.queso.toLowerCase():"")+(ex.length?" + "+ex.join(" + "):""),masa:"",cant:+ch.cant||1}); }
   toArr(p.bebidas).forEach((l,i)=>L.push({k:pid+":b:"+i,pid,per:nombreDe(p),cat:"b",n:l.nombre+(l.detalle?" ("+l.detalle+")":""),masa:"",cant:+l.cant||0}));

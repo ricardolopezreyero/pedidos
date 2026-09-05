@@ -204,6 +204,14 @@ body.is-home .suc,body.is-home #btnCall,body.is-home #btnShare,body.is-home #btn
 .cnt.mh{background:#c98a00!important}.cnt.mm{background:#1d4ed8!important}
 .seg button.on.sh{background:#7a4f00;color:#FFE9A8}.seg button.on.sm{background:#1d4ed8;color:#DBEAFE}
 .line.mh{border-left:4px solid #c98a00;padding-left:8px}.line.mm{border-left:4px solid #1d4ed8;padding-left:8px}
+/* tarjeta: persona con filas por tipo, etiqueta a la izquierda — RLR */
+.pl{display:block;margin:6px 0}
+.pl .pn{font-weight:900;display:block;margin-bottom:2px}
+.pg{display:grid;grid-template-columns:82px 1fr;gap:6px;align-items:start;padding:2px 0 2px 4px;font-size:13px}
+.pg .mt{margin:0;justify-content:center;width:100%;white-space:nowrap}
+.pg .mt.m-o{background:#F3EFE2;color:#5a4a00}
+.pg .pi{font-weight:700;line-height:1.35}
+.acts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:center}
 .caret{display:inline-block;color:var(--r);font-weight:900;animation:blink .9s steps(2,start) infinite;margin-left:1px}
 @keyframes blink{to{visibility:hidden}}
 .persons{display:flex;flex-direction:column;gap:4px;font-size:13.5px}
@@ -666,6 +674,9 @@ function personLines(p){ const L=[];
   return L; }
 const masaTag=m=>`<span class="mt ${m==="maiz"?"m-m":"m-h"}">${m==="maiz"?"🌽 Maíz":"🌾 Harina"}</span>`;
 const lineaHTML=t=>esc(t).replace(/ · (🌾 harina|🌽 maíz)$/,(_,x)=>" "+masaTag(x.includes("maíz")?"maiz":"harina"));
+// Filas por persona: 🌾 harina · 🌽 maíz · 🍳🍰☕ otros, con la etiqueta a la izquierda — RLR
+function personaFilas(p){ const H=[],M=[],O=[]; toArr(p.gorditas).forEach(l=>(l.masa==="maiz"?M:H).push(l.cant+" "+l.guiso+(l.detalle?" ("+l.detalle+")":""))); if(p.chilaquiles){ const c=p.chilaquiles; O.push((c.cant>1?c.cant+" ":"")+"🍳 Chilaquiles"+(c.salsa?" "+c.salsa.toLowerCase():"")+(c.queso?" · "+c.queso.toLowerCase():"")+(toArr(c.extras).length?" + "+toArr(c.extras).map(x=>x==="Guiso favorito"?(c.guiso?"guiso de "+c.guiso.toLowerCase():"guiso favorito"):x.toLowerCase()).join(" + "):"")); } toArr(p.postres).forEach(l=>O.push(l.cant+" 🍰 "+l.nombre)); toArr(p.bebidas).forEach(l=>O.push(l.cant+" ☕ "+l.nombre+(l.detalle?" ("+l.detalle+")":"")));
+  const fila=(cls,tag,arr)=>arr.length?`<div class="pg"><span class="mt ${cls}">${tag}</span><span class="pi">${esc(arr.join(" · "))}</span></div>`:""; return fila("m-h","🌾 Harina",H)+fila("m-m","🌽 Maíz",M)+fila("m-o","Otros",O); }
 function lineasDe(c){ const L=[]; toArr(c.personas).forEach((p,pi)=>{ const pid=p.id||("p"+pi); toArr(p.gorditas).forEach((l,i)=>L.push({k:pid+":g:"+i,per:nombreDe(p),n:l.guiso})); if(p.chilaquiles) L.push({k:pid+":ch:0",per:nombreDe(p),n:"Chilaquiles"}); toArr(p.bebidas).forEach((l,i)=>L.push({k:pid+":b:"+i,per:nombreDe(p),n:l.nombre})); toArr(p.postres).forEach((l,i)=>L.push({k:pid+":po:"+i,per:nombreDe(p),n:l.nombre})); }); return L; }
 function noHubo(c){ const f=c.faltas||{}; return lineasDe(c).filter(l=>f[l.k]).map(l=>l.n+" ("+l.per+")"); }
 function totales(c){ const t={g:0,h:0,m:0,ch:0,b:0,po:0,per:0};
@@ -802,7 +813,7 @@ function cardHTML(c){
   if(mine.has(c.id)) badges.push(`<span class="b tuyo">tu pedido</span>`);
   const nh=noHubo(c); if(nh.length) badges.push(`<span class="b wip">⛔ Cocina no tuvo: ${esc([...new Set(nh)].join(", "))}${c.estado==="pedido"&&(!c.etapa||c.etapa==="proceso")?" · puedes cambiarlo":""}</span>`);
   const falt=(c.estado==="armando"||c.estado==="porpedir")?faltantes(c):[]; if(falt.length) badges.push(`<span class="b wip">⛔ Agotado: ${esc(falt.map(f=>f.split(": ")[1]).filter((x,i,a)=>a.indexOf(x)===i).join(", "))}</span>`);
-  const persons=c.personas.map(p=>{ const L=personLines(p); const f=fl.per[p.id]; return `<div class="pl${f?" flash":""}">${rolDe(p).e} <b>${esc(nombreDe(p))}</b>: ${L.length?`<span class="l">${L.map(lineaHTML).join(" · ")}</span>`:"<i>sin nada aún</i>"}${f&&typing.length?`<span class="caret">▍</span>`:""}</div>`; }).join("")||`<div class="pl"><i>Sin personas todavía</i></div>`;
+  const persons=c.personas.map(p=>{ const L=personLines(p); const f=fl.per[p.id]; return `<div class="pl${f?" flash":""}"><span class="pn">${rolDe(p).e} ${esc(nombreDe(p))}${f&&typing.length?`<span class="caret">▍</span>`:""}${L.length?"":' <i style="font-weight:600;color:var(--mut)">· sin nada aún</i>'}</span>${personaFilas(p)}</div>`; }).join("")||`<div class="pl"><i>Sin personas todavía</i></div>`;
   const H=host&&!MESA(), M=mine.has(c.id);
   const A={
     armando:`<button class="btn y" data-a="edit" data-id="${c.id}">✏️ Editar</button><button class="btn" data-a="ligaFam" data-id="${c.id}" title="Liga de esta familia">🔗</button>${H||M?`<button class="btn r" data-a="del" data-id="${c.id}">🗑</button>`:""}`,
