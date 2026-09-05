@@ -794,9 +794,10 @@ function cardsIn(est,todas){ return Object.values(pedidos).filter(c=>colDe(c)===
 const activos=()=>Object.values(pedidos).filter(c=>c.estado==="pedido");   // todo lo que está en cocina o en camino
 let _rbPend=false; function renderBoard(){ if(_rbPend) return; _rbPend=true; setTimeout(()=>{ _rbPend=false; renderBoardNow(); },0); }   // agrupa ráfagas de eventos en un solo pintado (también en segundo plano) — RLR
 /* FLIP: las tarjetas que cambian de lugar se deslizan en vez de brincar — RLR */
-function flipAntes(root){ const m={}; if(!root) return m; root.querySelectorAll("[data-id]").forEach(el=>{ const r=el.getBoundingClientRect(); m[el.dataset.id]=[r.left,r.top]; }); return m; }
-function flipDespues(root,antes){ if(!root||matchMedia("(prefers-reduced-motion:reduce)").matches) return; const mov=[]; root.querySelectorAll("[data-id]").forEach(el=>{ const a=antes[el.dataset.id]; if(!a||el.classList.contains("moved")) return; const r=el.getBoundingClientRect(); const dx=a[0]-r.left, dy=a[1]-r.top; if(Math.abs(dx)<1&&Math.abs(dy)<1) return; el.style.transition="none"; el.style.transform=`translate(${dx}px,${dy}px)`; mov.push(el); });
-  if(!mov.length) return; void root.offsetHeight; mov.forEach(el=>{ el.classList.add("flip"); el.style.transition=""; el.style.transform=""; el.addEventListener("transitionend",()=>el.classList.remove("flip"),{once:true}); }); }
+let flipCtx="";
+function flipAntes(root){ const m={}; if(!root||document.querySelector(".modal.open")) { flipCtx=""; return m; } flipCtx=ui.tab+"|"+Math.round(scrollY); root.querySelectorAll("article[data-id],.rstop[data-id]").forEach(el=>{ const r=el.getBoundingClientRect(); m[el.dataset.id]=[r.left,r.top]; }); return m; }
+function flipDespues(root,antes){ if(!root||!flipCtx||flipCtx!==ui.tab+"|"+Math.round(scrollY)||document.querySelector(".modal.open")||matchMedia("(prefers-reduced-motion:reduce)").matches) return; const mov=[]; root.querySelectorAll("article[data-id],.rstop[data-id]").forEach(el=>{ const a=antes[el.dataset.id]; if(!a||el.classList.contains("moved")) return; const r=el.getBoundingClientRect(); const dx=a[0]-r.left, dy=a[1]-r.top; if(Math.abs(dx)<1&&Math.abs(dy)<1||Math.abs(dy)>260) return; el.style.transition="none"; el.style.transform=`translate(${dx}px,${dy}px)`; mov.push(el); });
+  if(!mov.length) return; void root.offsetHeight; mov.forEach(el=>{ el.classList.add("flip"); el.style.transition=""; el.style.transform=""; el.addEventListener("transitionend",()=>{ el.classList.remove("flip"); el.removeAttribute("style"); },{once:true}); }); }
 function renderBoardNow(){
   // ¿Qué cambió desde el último render? (solo brillan los cambios que vienen de OTRA pantalla)
   const snap={}; const now=Date.now(); ui.flash=ui.flash||{};
@@ -822,7 +823,7 @@ function renderBoardNow(){
   $("#tabs").innerHTML=EST.map(e=>`<button class="tab${ui.tab===e.id?" on":""}${counts[e.id]?" has":" zero"}" data-a="tab" data-v="${e.id}" title="${e.n}"><span class="ic">${e.e}</span><span class="lb">${e.n}</span>${counts[e.id]?`<span class="n">${counts[e.id]}</span>`:""}</button>`).join("");
   { const on=$("#tabs .tab.on"); if(on&&on.scrollIntoView) try{ on.scrollIntoView({inline:"center",block:"nearest"}); }catch(e){} }
   const antes=flipAntes($("#board"));
-  $("#board").innerHTML=EST.map(e=>{
+  reconcileBoard($("#board"),EST.map(e=>{
     const cards=cardsIn(e.id);
     let tools="";
     if(e.id==="armando"){
@@ -836,9 +837,20 @@ function renderBoardNow(){
     return `<section class="col${ui.tab===e.id?" on":""}" data-col="${e.id}">
       <div class="col-head"><span>${e.e} ${e.n}<span class="n">${cards.length}</span></span></div>${tools}
       <div class="cards">${cards.length?cards.map(cardHTML).join(""):emptyHTML(e.id)}</div></section>`;
-  }).join("");
+  }).join(""));
   flipDespues($("#board"),antes);
 }
+/* Redibuja SOLO lo que cambió: las tarjetas iguales se quedan tal cual (sin parpadeo, sin reiniciar animaciones, sin brincos de scroll) — RLR */
+function reconcileBoard(root,html){ const tpl=document.createElement("div"); tpl.innerHTML=html; const nuevas=[...tpl.children], viejas=[...root.children];
+  if(viejas.length!==nuevas.length||viejas.some((v,i)=>v.dataset.col!==nuevas[i].dataset.col)){ root.innerHTML=html; return; }
+  nuevas.forEach((nc,i)=>{ const oc=viejas[i]; if(oc.className!==nc.className) oc.className=nc.className;
+    const nParts=[...nc.children].filter(x=>!x.classList.contains("cards")), oParts=[...oc.children].filter(x=>!x.classList.contains("cards"));
+    if(nParts.map(x=>x.outerHTML).join("")!==oParts.map(x=>x.outerHTML).join("")){ const cardsEl=oc.querySelector(".cards"); oParts.forEach(x=>x.remove()); nParts.forEach(x=>oc.insertBefore(x,cardsEl)); }
+    const nCards=nc.querySelector(".cards"), oCards=oc.querySelector(".cards"); if(!nCards||!oCards){ oc.replaceWith(nc); return; }
+    const nKids=[...nCards.children], oKids=[...oCards.children]; const key=x=>x.dataset.id||("~"+x.className);
+    if(nKids.map(key).join("|")===oKids.map(key).join("|")){ nKids.forEach((nk,j)=>{ const ok=oKids[j]; if(ok.outerHTML!==nk.outerHTML) ok.replaceWith(nk); }); }
+    else { const mapa={}; oKids.forEach(x=>{ if(x.dataset.id) mapa[x.dataset.id]=x; }); oCards.replaceChildren(...nKids.map(nk=>{ const ok=nk.dataset.id&&mapa[nk.dataset.id]; return ok&&ok.outerHTML===nk.outerHTML?ok:nk; })); }
+  }); }
 function topGuisos(){ const m={}; Object.values(pedidos).filter(c=>c.estado==="archivado"||c.estado==="entregado").forEach(c=>c.personas.forEach(p=>p.gorditas.forEach(l=>{ m[l.guiso]=(m[l.guiso]||0)+l.cant; })));
   return Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,3); }
 function emptyHTML(est){ const t={armando:["🫓",MESA()?"Toca <b>+ Pedido</b> para empezar.":"Nadie está armando pedido.<br>Toca <b>+ Pedido de familia</b>."],porpedir:["📋","Cuando una familia da <b>Listo</b>, su pedido cae aquí esperando que se mande."],pedido:["📲","Pedidos ya mandados a la sucursal, en espera de que la cocina los tome."],cocina:["🔥","Cuando un cocinero toma tu pedido, la tarjeta se mueve aquí sola."],camino:["🛵","Cuando sale con el repartidor, la tarjeta pasa aquí."],entregado:["✅","Cuando lleguen las gorditas, aquí quedan entregadas."],archivado:["📚","El historial guarda los pedidos para repetirlos en la próxima invitación."]}[est];
