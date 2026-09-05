@@ -189,6 +189,7 @@ tr.tot td{font-weight:900;background:var(--y3)}
 .posrep{margin:-4px 0 12px;border:1.5px dashed #b9a7e6;border-radius:12px;background:#f6f2ff}
 /* reparto */
 .b.rep{background:#ede4ff;color:#5b21b6}
+.btn.otrafam{width:100%;margin:0 0 8px;font-size:13.5px;padding:10px}
 .anfbar{flex:1 1 100%;display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;margin-top:2px}
 .anfbar .anfnom{margin-right:auto;font-weight:800;font-size:14px}.anfbar .btn{font-size:14px;padding:9px 14px}
 a.btn,a.btn:hover,a.kbtn{text-decoration:none!important}
@@ -478,13 +479,16 @@ const CATC=c=>CATALOGO.find(g=>g.c===c).items;
 const ETAPAS=[
   {id:"armando",   n:"✏️ Armando",              k:1, f:c=>c.estado==="armando"},
   {id:"porpedir",  n:"📋 Por pedir",            k:1, f:c=>c.estado==="porpedir"},
-  {id:"proceso",   n:"🍳 En proceso",            k:2, f:c=>c.estado==="pedido"&&(!c.etapa||c.etapa==="proceso")},
-  {id:"armado",    n:"🔥 Armando en cocina",     k:2, f:c=>c.estado==="pedido"&&c.etapa==="armado"},
+  {id:"pedido",    n:"📲 Pedido",                k:2, f:c=>c.estado==="pedido"&&(!c.etapa||c.etapa==="proceso")},
+  {id:"proceso",   n:"🍳 En proceso",            k:2, f:c=>c.estado==="pedido"&&c.etapa==="armado"&&!comalListo(c)},
+  {id:"armado",    n:"🔥 Armando en cocina",     k:2, f:c=>c.estado==="pedido"&&c.etapa==="armado"&&comalListo(c)},
   {id:"espera",    n:"⏳ Espera de repartidor",  k:3, f:c=>c.estado==="pedido"&&c.etapa==="espera"},
   {id:"repartiendo",n:"🛵 Repartiendo",          k:4, f:c=>c.estado==="pedido"&&c.etapa==="repartiendo"},
   {id:"entregado", n:"✅ Entregado",             k:5, f:c=>c.estado==="entregado"},
   {id:"archivado", n:"📚 Historial",             k:6, f:c=>c.estado==="archivado"}
 ];
+// Comal terminado (todo palomeado o marcado "no hubo") o ya empezó el empaque → la cocina ya tiene las gorditas y las está acomodando — RLR
+function comalListo(c){ const av=c.avance||{}, fal=c.faltas||{}; if(Object.keys(c.empaque||{}).length) return true; const L=lineasDe(c); return L.length>0&&L.every(l=>av[l.k]||fal[l.k]); }
 const SID=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const $=s=>document.querySelector(s);
 // Bitácora: registro permanente de todo lo que se mueve en el sistema — RLR
@@ -579,7 +583,7 @@ function demoBase(){ const now=Date.now(), H=3600e3, M=60e3; const G=CATALOGO[0]
     card(b1,suc,F(),"armando",null,RI(3,14)); card("mostrador-"+suc,suc,"Pedido "+(nPed++),"armando",null,RI(1,6),{mostrador:true}); card("mostrador-"+suc,suc,"Pedido "+(nPed++),"armando",null,RI(1,3),{mostrador:true}); card("mesa-"+suc+"-5",suc,"Mesa 5","armando",null,RI(1,4),{mesa:true});
     card(b2,suc,F(),"porpedir",null,RI(15,28));
     card(b1,suc,F(),"pedido","proceso",RI(12,24)); card("mostrador-"+suc,suc,"Pedido "+(nPed++),"pedido","proceso",RI(5,10),{mostrador:true}); card("mesa-"+suc+"-3",suc,"Mesa 3","pedido","proceso",RI(3,7),{mesa:true});
-    card(b2,suc,F(),"pedido","armado",RI(25,34),{avance:{"p1:g:0":true,"p2:g:0":true}}); card("mesa-"+suc+"-2",suc,"Mesa 2","pedido","armado",RI(10,16),{mesa:true,avance:{"p1:g:0":true}});
+    card(b2,suc,F(),"pedido","armado",RI(25,34),{avance:{"p1:g:0":true,"p2:g:0":true}}); card("mesa-"+suc+"-2",suc,"Mesa 2","pedido","armado",RI(10,16),{mesa:true,avance:{"p1:g:0":true},empaque:{p1:true}}); card(b1,suc,F(),"pedido","armado",RI(20,28),{empaque:{p1:true}});
     card(b1,suc,F(),"pedido","espera",RI(30,44)); card(b2,suc,F(),"pedido","espera",RI(20,30)); card("mostrador-"+suc,suc,"Pedido "+(nPed++),"pedido","espera",RI(20,36),{mostrador:true});
     card(b1,suc,F(),"pedido","repartiendo",RI(45,55)); card(b2,suc,F(),"pedido","repartiendo",RI(40,50));
     card(b1,suc,F(),"entregado",null,RI(70,90)); card("mostrador-"+suc,suc,"Pedido "+(nPed++),"entregado",null,RI(80,100),{mostrador:true}); card(b2,suc,F(),"entregado",null,RI(60,75)); });
@@ -611,7 +615,8 @@ function demoPaso(){ if(!DEMO) return; demoTick++; const now=Date.now(); const a
     if(n(c=>c.estado==="porpedir")<1) mk(b(),suc,F(),"porpedir",null,RI(6,12));
     if(n(c=>c.estado==="pedido"&&(!c.etapa||c.etapa==="proceso"))<2) mk(b(),suc,F(),"pedido","proceso",RI(8,14));
     if(n(c=>c.estado==="pedido"&&c.etapa==="proceso"&&c.mesa)<1) (()=>{ const m=RI(1,6); mk("mesa-"+suc+"-"+m,suc,"Mesa "+m,"pedido","proceso",RI(2,5),{mesa:true}); })();
-    if(n(c=>c.estado==="pedido"&&c.etapa==="armado")<1) mk(b(),suc,F(),"pedido","armado",RI(15,25),{avance:{"p1:g:0":true}});
+    if(n(c=>c.estado==="pedido"&&c.etapa==="armado"&&!comalListo(c))<1) mk(b(),suc,F(),"pedido","armado",RI(15,25),{avance:{"p1:g:0":true}});
+    if(n(c=>c.estado==="pedido"&&c.etapa==="armado"&&comalListo(c))<1) mk(b(),suc,F(),"pedido","armado",RI(20,28),{empaque:{p1:true}});
     if(n(c=>c.estado==="pedido"&&c.etapa==="espera"&&dom(c))<2) mk(b(),suc,F(),"pedido","espera",RI(20,30));
     if(n(c=>c.estado==="pedido"&&c.etapa==="repartiendo")<1) mk(b(),suc,F(),"pedido","repartiendo",RI(35,45));
     if(n(c=>c.estado==="armando"&&c.mostrador)<2) mk("mostrador-"+suc,suc,"Pedido "+RI(20,99),"armando",null,RI(1,3),{mostrador:true});
@@ -768,10 +773,10 @@ function renderPedidos(){
   const cardsAll=filtradas().filter(c=>coincide(c,q)); const cards=cardsAll.filter(pasaPago); const snap={}; const now=Date.now(); Object.keys(flash).forEach(k=>{ if(now-flash[k]>1600) delete flash[k]; });
   const colPrev=prevCol; prevCol={}; cards.forEach(c=>{ snap[c.id]=JSON.stringify(c); const col=colDeAdmin(c); prevCol[c.id]=col; if(!first&&c._w!==SID&&prev[c.id]!==snap[c.id]) flash[c.id]=now; if(!first&&colPrev[c.id]&&colPrev[c.id]!==col) moved[c.id]=now; }); prev=snap; first=false; Object.keys(moved).forEach(k=>{ if(now-moved[k]>900) delete moved[k]; });
   const antes=flipAntes($("#main"));
-  const Tc=sumT(cards.filter(ETAPAS[2].f));
+  const Tc=sumT(cards.filter(c=>c.estado==="pedido"&&(!c.etapa||c.etapa==="proceso"||c.etapa==="armado")));
   $("#main").innerHTML=`<div class="top"><h1>📋 Pedidos</h1><input class="buscar" id="q" value="${esc(q)}" placeholder="🔎 Buscar familia, persona, guiso, tablero…"><span class="sp"></span>${filtrosHTML()}${anfBarHTML()}<div class="sub">🍳 En cocina ahora: ${esc(totStr(Tc))} · toca los botones para avanzar cada pedido; las familias lo ven al instante.${q?` · <b>${cards.length}</b> resultado${cards.length===1?"":"s"} para "${esc(q)}"`:""}</div></div>
   ${filtroPagoHTML(cardsAll)}
-  <div class="board">${ETAPAS.map(e=>{ const cs=cards.filter(e.f).sort(e.k===3?(a,b)=>(b.entregadoEn||b.archivadoEn||b.actualizado||0)-(a.entregadoEn||a.archivadoEn||a.actualizado||0):(a,b)=>(turno(a)-turno(b))); /* por turnos: el más antiguo arriba, el nuevo entra abajo; Historial al revés — RLR */ return `<section class="col k${e.k}"><div class="col-head"><span>${e.n}</span><span class="n">${cs.length}</span></div><div class="cards">${cs.length?cs.map(cardHTML).join(""):`<div class="empty">Nada por aquí</div>`}</div></section>`; }).join("")}</div>`;
+  <div class="board">${ETAPAS.map(e=>{ const cs=cards.filter(e.f).sort(e.k>=5?(a,b)=>(b.entregadoEn||b.archivadoEn||b.actualizado||0)-(a.entregadoEn||a.archivadoEn||a.actualizado||0):(a,b)=>(turno(a)-turno(b))); /* por turnos: el más antiguo arriba, el nuevo entra abajo; Historial al revés — RLR */ return `<section class="col k${e.k}"><div class="col-head"><span>${e.n}</span><span class="n">${cs.length}</span></div>${e.id==="armando"&&fTab&&!(anfitriones[fTab]||{}).mostrador?`<button class="btn p otrafam" data-otrafam="${esc(fTab)}">➕ Otra familia en este tablero</button>`:""}<div class="cards">${cs.length?cs.map(cardHTML).join(""):`<div class="empty">Nada por aquí</div>`}</div></section>`; }).join("")}</div>`;
   flipDespues($("#main"),antes);
 }
 const turno=c=>({armando:c.creado,porpedir:c.listoEn||c.actualizado,pedido:c.pedidoEn,entregado:c.entregadoEn,archivado:c.archivadoEn}[c.estado])||c.creado||c.actualizado||0;
@@ -782,14 +787,14 @@ function flipDespues(root,antes){ if(!root||matchMedia("(prefers-reduced-motion:
   if(!mov.length) return; void root.offsetHeight; mov.forEach(el=>{ el.classList.add("flip"); el.style.transition=""; el.style.transform=""; el.addEventListener("transitionend",()=>el.classList.remove("flip"),{once:true}); }); }
 /* Con el filtro en un anfitrión: su celular a la mano, un clic para marcar o para WhatsApp — RLR */
 function anfBarHTML(){ if(!fTab) return ""; const a=anfitriones[fTab]||{}; const cfg=(tableros[fTab]||{}).config||{}; const tel=String(cfg.telAnfitrion||a.tel||"").replace(/\D/g,"").slice(-10); const nom=cfg.anfitrion||a.nombre||fTab; const msg="Hola "+nom+" 👋 Le escribimos de Gorditas Ranitas sobre su pedido. ";
-  return `<div class="anfbar"><span class="anfnom">${a.mesa?"🪑":a.mostrador?"🧾":"🏠"} <b>${esc(nom)}</b>${tel?` · 📱 ${telFmt(tel)}`:` · <i class="mut">sin celular</i>`}</span>${tel?`<a class="btn tel" href="tel:+52${tel}">📞 Llamar</a><a class="btn wa" href="https://api.whatsapp.com/send?phone=52${tel}&text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">💬 WhatsApp</a>`:""}<button class="btn ghost" data-copy="${esc(APP_URL+fTab)}" title="Copiar liga del tablero">🔗</button></div>`; }
+  const sn=(SUCURSALES.find(x=>x.id===cfg.sucursal)||{}).n; return `<div class="anfbar"><span class="anfnom">${a.mesa?"🪑":a.mostrador?"🧾":"🏠"} <b>${esc(nom)}</b>${tel?` · 📱 ${telFmt(tel)}`:` · <i class="mut">sin celular</i>`}${sn?` <span class="b suc">📍 ${esc(sn)}</span>`:""}${cfg.direccion?` <span class="mut">· 🏠 ${esc(cfg.direccion)}</span>`:""}</span>${tel?`<a class="btn tel" href="tel:+52${tel}">📞 Llamar</a><a class="btn wa" href="https://api.whatsapp.com/send?phone=52${tel}&text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">💬 WhatsApp</a>`:""}<button class="btn ghost" data-copy="${esc(APP_URL+fTab)}" title="Copiar liga del tablero">🔗</button></div>`; }
 function cardHTML(c){
   const suc=SUCURSALES.find(s=>s.id===c.sucursal); const cfg=(tableros[c.slug]||{}).config||{};
   const persons=c.personas.map(p=>{ const L=personLines(p); return L.length?`<div class="pl"><span class="pn">${ROLES[p.rol]||"🙂"} ${esc(nombreDe(p))}</span>${personaFilas(p)}</div>`:""; }).join("")||`<div class="pl"><i>sin productos</i></div>`;
   const local=!!(c.mesa||c.mostrador||(anfitriones[c.slug]||{}).mesa||(anfitriones[c.slug]||{}).mostrador); const vacia=!lineasDe(c).length; // mesa/mostrador: sin repartidor — RLR
   const A={
-    armando:vacia&&(Date.now()-(c.actualizado||0)>30*60000)?`<button class="btn ghost" data-a="borrarVacio" data-id="${c.id}" data-s="${c.slug}" title="Tarjeta vacía sin actividad">🗑</button>`:``,
-    porpedir:`<button class="btn bl" data-a="tomar" data-id="${c.id}" data-s="${c.slug}" title="La familia ya pidió por teléfono o WhatsApp: pásalo a cocina">📲 Tomar pedido</button>`,
+    armando:(vacia?"":`<button class="btn bl" data-a="listo" data-id="${c.id}" data-s="${c.slug}" title="Pasa a Por pedir, como cuando la familia toca Listo">📋 Listo, por pedir</button>`)+(vacia&&(Date.now()-(c.actualizado||0)>30*60000)?`<button class="btn ghost" data-a="borrarVacio" data-id="${c.id}" data-s="${c.slug}" title="Tarjeta vacía sin actividad">🗑</button>`:``),
+    porpedir:`<button class="btn bl" data-a="tomar" data-id="${c.id}" data-s="${c.slug}" title="La familia ya pidió por teléfono o WhatsApp: pásalo a Pedido">📲 Pedido</button><button class="btn ghost" data-a="desListo" data-id="${c.id}" data-s="${c.slug}" title="Regresar a Armando">↩︎</button>`,
     pedido:(!c.etapa||c.etapa==="proceso"||c.etapa==="armado")?`${c.etapa==="armado"&&c.cocinero?`<span class="b wip">🔥 ${esc(c.cocinero.nombre)}</span>`:""}<button class="btn bl" data-a="etapa" data-v="espera" data-id="${c.id}" data-s="${c.slug}">${local?"🔔 Listo para entregar":"⏳ Listo, espera repartidor"}</button>`:
            c.etapa==="espera"?(local?`<button class="btn p" data-a="entregar" data-id="${c.id}" data-s="${c.slug}">✅ Entregado ${c.mesa?"en mesa":"en mostrador"}</button>`:`<button class="btn v" data-a="etapa" data-v="repartiendo" data-id="${c.id}" data-s="${c.slug}">🛵 Salió a repartir</button>`)+`<button class="btn ghost" data-a="etapa" data-v="proceso" data-id="${c.id}" data-s="${c.slug}">↩︎</button>`:
            `<button class="btn p" data-a="entregar" data-id="${c.id}" data-s="${c.slug}">✅ Entregado</button><button class="btn ghost" data-a="etapa" data-v="espera" data-id="${c.id}" data-s="${c.slug}">↩︎</button>`,
@@ -1177,7 +1182,7 @@ document.addEventListener("click",e=>{
 document.addEventListener("change",e=>{ const cb=e.target; if(!cb.dataset||!cb.dataset.uid) return; const u=usuarios[cb.dataset.uid]; const vs=new Set(toArr(u.vistas)); if(cb.checked) vs.add(cb.dataset.vista); else vs.delete(cb.dataset.vista); db.ref(ROOT+"/admin/usuarios/"+cb.dataset.uid+"/vistas").set([...vs]); bit("usuario","vistas",(cb.checked?"Dio":"Quitó")+" la vista "+cb.dataset.vista+" a "+(u.nombre||"")); });
 
 /* ---------- acciones del kanban ---------- */
-document.addEventListener("click",e=>{ const fp=e.target.closest("[data-fp]"); if(fp){ fPago=fp.dataset.fp; render(); return; } if(vista==="pedidos"){ const cp=e.target.closest("[data-copy]"); if(cp){ navigator.clipboard.writeText(cp.dataset.copy).then(()=>toast("Liga copiada")); return; } } const el=e.target.closest("[data-a]"); if(!el) return; const {a,v,id,s}=el.dataset;
+document.addEventListener("click",e=>{ const fp=e.target.closest("[data-fp]"); if(fp){ fPago=fp.dataset.fp; render(); return; } if(vista==="pedidos"){ const cp=e.target.closest("[data-copy]"); if(cp){ navigator.clipboard.writeText(cp.dataset.copy).then(()=>toast("Liga copiada")); return; } const of=e.target.closest("[data-otrafam]"); if(of){ vista="mostrador"; nuevaFamiliaEnTablero(of.dataset.otrafam); syncUrl(); render(); return; } } const el=e.target.closest("[data-a]"); if(!el) return; const {a,v,id,s}=el.dataset;
   if(a==="pagoMenu"){ pagoMenu=pagoMenu===id||!id?null:id; render(); if(vista==="mostrador") renderMostrador(); return; }
   if(a==="pagar"||a==="despagar"){ const c=((tableros[s]||{}).pedidos||{})[id]||(pos.card&&pos.card.id===id?pos.card:null); const pago=a==="pagar"?{estado:"pagado",metodo:v,ts:Date.now(),por:(yo&&yo.nombre)||"admin"}:{estado:"pendiente",ts:Date.now()}; pagoMenu=null;
     if(pos.card&&pos.card.id===id){ pos.card.pago=pago; guardarPos(true); renderMostrador(); } else if(s){ upd(s,id,{pago}); }
@@ -1187,7 +1192,9 @@ document.addEventListener("click",e=>{ const fp=e.target.closest("[data-fp]"); i
   if(a==="entregar"){ const c=((tableros[s]||{}).pedidos||{})[id]||{}; upd(s,id,{estado:"entregado",etapa:"entregado",entregadoEn:Date.now()}); toast("Entregado ✅"); bit("reparto","entrego",c.mesa?"Entregó en la mesa":c.mostrador?"Entregó en mostrador":c.repartidor?"Entregó en la puerta del cliente ("+mins(c.salioEn)+" min desde que salió)":"Marcó entregado al cliente",{pedido:id,familia:fam,tablero:s}); }
   if(a==="archivar"){ upd(s,id,{estado:"archivado",archivadoEn:Date.now()}); toast("Archivado 📚"); bit("pedido","archivo","Archivó",{pedido:id,familia:fam,tablero:s}); }
   if(a==="editar"){ abrirEnMostrador(s,id); }
-  if(a==="tomar"){ const c=((tableros[s]||{}).pedidos||{})[id]; if(!c) return; const cfg=(tableros[s]||{}).config||{}; if(!confirm("¿Pasar el pedido de "+(c.familia||"")+" a cocina? Úsalo cuando la familia ya pidió por teléfono o WhatsApp.")) return; upd(s,id,{estado:"pedido",etapa:"proceso",pedidoEn:Date.now(),sucursal:c.sucursal||cfg.sucursal||pSuc||null}); toast("A cocina 🍳"); bit("pedido","ordeno","Tomó el pedido desde admin (la familia pidió por fuera): "+totStr(totales(c)),{pedido:id,familia:fam,tablero:s}); }
+  if(a==="listo"){ const c=((tableros[s]||{}).pedidos||{})[id]; if(!c) return; upd(s,id,{estado:"porpedir",listo:true,listoEn:Date.now()}); toast("📋 Listo · por pedir"); bit("pedido","listo","Marcó Listo → Por pedir desde admin ("+totStr(totales(c))+")",{pedido:id,familia:fam,tablero:s}); }
+  if(a==="desListo"){ upd(s,id,{estado:"armando",listo:false}); toast("De vuelta a Armando"); bit("pedido","desListo","Regresó a Armando desde admin",{pedido:id,familia:fam,tablero:s}); }
+  if(a==="tomar"){ const c=((tableros[s]||{}).pedidos||{})[id]; if(!c) return; const cfg=(tableros[s]||{}).config||{}; if(!confirm("¿Marcar el pedido de "+(c.familia||"")+" como pedido? Úsalo cuando la familia ya lo pidió por teléfono o WhatsApp; la cocina lo verá en su cola.")) return; upd(s,id,{estado:"pedido",etapa:"proceso",pedidoEn:Date.now(),sucursal:c.sucursal||cfg.sucursal||pSuc||null}); toast("📲 Pedido · ya lo ve la cocina"); bit("pedido","ordeno","Tomó el pedido desde admin (la familia pidió por fuera): "+totStr(totales(c)),{pedido:id,familia:fam,tablero:s}); }
   if(a==="borrarVacio"){ const c=((tableros[s]||{}).pedidos||{})[id]; if(!c||lineasDe(c).length) return; if(!confirm("Esta tarjeta está vacía y sin actividad. ¿Borrarla?")) return; db.ref(ROOT+"/tableros/"+s+"/pedidos/"+id).remove(); toast("Tarjeta vacía borrada"); bit("pedido","borro","Borró una tarjeta vacía desde Pedidos",{pedido:id,familia:fam,tablero:s}); }
   if(a==="ticket"){ const c=((tableros[s]||{}).pedidos||{})[id]; if(c) imprimirComanda(c); }
 });
