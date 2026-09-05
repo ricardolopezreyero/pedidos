@@ -33,6 +33,7 @@ header select{background:#fff;color:var(--ink);border:0;border-radius:10px;paddi
 .col-head{font-weight:900;font-size:14.5px;padding:6px 6px 10px;display:flex;justify-content:space-between;align-items:center}
 .col-head .n{background:#fff;border-radius:999px;padding:1px 8px;font-size:12px;color:var(--mut)}
 .col.k1 .col-head{color:#8a5a00}.col.k2 .col-head{color:var(--r)}.col.k3 .col-head{color:var(--b)}.col.k4 .col-head{color:#7c3aed}.col.k5 .col-head{color:var(--g)}.col.k6 .col-head{color:var(--mut)}
+.col.k6{background:rgba(70,55,10,.14)}
 .cards{display:flex;flex-direction:column;gap:8px}
 .card{background:#fff;border-radius:14px;box-shadow:var(--sh);padding:10px 12px;border-left:5px solid var(--y)}
 .card.flash{animation:fl 1.6s ease-out}
@@ -87,6 +88,7 @@ const ROLES={papa:"👨",mama:"👩",hijo:"👦",hija:"👧",otro:"🙂"};
 // Etapas del restaurante dentro de "Pedido": proceso → espera → repartiendo. Las familias solo ven Pedido/Entregado.
 const COLS=[
   {id:"armando",   n:"✏️ Armando",              k:1, f:c=>c.estado==="armando"},
+  {id:"porpedir",  n:"📋 Por pedir",            k:1, f:c=>c.estado==="porpedir"},
   {id:"proceso",   n:"🍳 En proceso",            k:2, f:c=>c.estado==="pedido"&&(!c.etapa||c.etapa==="proceso")},
   {id:"espera",    n:"⏳ Espera de repartidor",  k:3, f:c=>c.estado==="pedido"&&c.etapa==="espera"},
   {id:"repartiendo",n:"🛵 Repartiendo",          k:4, f:c=>c.estado==="pedido"&&c.etapa==="repartiendo"},
@@ -143,7 +145,7 @@ function render(){
   const enCocina=cards.filter(c=>c.estado==="pedido"&&(!c.etapa||c.etapa==="proceso")); const T={g:0,h:0,m:0,ch:0,b:0,po:0}; enCocina.forEach(c=>{ const t=totales(c); Object.keys(T).forEach(k=>T[k]+=t[k]); });
   const kit={}; enCocina.forEach(c=>c.personas.forEach(p=>toArr(p.gorditas).forEach(l=>{ const k=l.guiso; kit[k]=kit[k]||{h:0,m:0}; kit[k][l.masa==="maiz"?"m":"h"]+=+l.cant||0; })));
   const top=Object.entries(kit).sort((a,b)=>(b[1].h+b[1].m)-(a[1].h+a[1].m)).slice(0,6).map(([k,v])=>k+" "+[v.h?v.h+"H":"",v.m?v.m+"M":""].filter(Boolean).join("·")).join(" · ");
-  $("#stats").innerHTML=`<div class="stat"><b>${cards.filter(c=>c.estado==="armando").length}</b>armando</div><div class="stat"><b>${enCocina.length}</b>en cocina · ${esc(totStr(T))}</div><div class="stat"><b>${cards.filter(c=>c.estado==="pedido"&&c.etapa==="espera").length}</b>esperan repartidor</div><div class="stat"><b>${cards.filter(c=>c.estado==="pedido"&&c.etapa==="repartiendo").length}</b>en camino</div>${top?`<div class="stat">🧮 ${esc(top)}</div>`:""}`;
+  $("#stats").innerHTML=`<div class="stat"><b>${cards.filter(c=>c.estado==="armando").length}</b>armando</div><div class="stat"><b>${cards.filter(c=>c.estado==="porpedir").length}</b>por pedir</div><div class="stat"><b>${enCocina.length}</b>en cocina · ${esc(totStr(T))}</div><div class="stat"><b>${cards.filter(c=>c.estado==="pedido"&&c.etapa==="espera").length}</b>esperan repartidor</div><div class="stat"><b>${cards.filter(c=>c.estado==="pedido"&&c.etapa==="repartiendo").length}</b>en camino</div>${top?`<div class="stat">🧮 ${esc(top)}</div>`:""}`;
   $("#board").innerHTML=COLS.map(col=>{ const cs=cards.filter(col.f).sort((a,b)=>(b.actualizado||0)-(a.actualizado||0));
     return `<section class="col k${col.k}"><div class="col-head"><span>${col.n}</span><span class="n">${cs.length}</span></div><div class="cards">${cs.length?cs.map(cardHTML).join(""):`<div class="empty">Nada por aquí</div>`}</div></section>`; }).join("");
 }
@@ -151,7 +153,8 @@ function cardHTML(c){
   const suc=SUCURSALES.find(s=>s.id===c.sucursal); const cfg=(tableros[c.slug]||{}).config||{};
   const persons=c.personas.map(p=>{ const L=personLines(p); return L.length?`<div class="pl">${ROLES[p.rol]||"🙂"} <b>${esc(nombreDe(p))}</b>: ${esc(L.join(" · "))}</div>`:""; }).join("")||`<div class="pl"><i>sin productos</i></div>`;
   const A={
-    armando:`<span class="b ${c.listo?"ok":"wip"}">${c.listo?"✅ Familia lista":"✏️ armando…"}</span>`,
+    armando:`<span class="b wip">✏️ armando…</span>`,
+    porpedir:`<span class="b ok">✅ Lista · el anfitrión aún no manda el WhatsApp</span>`,
     pedido:(!c.etapa||c.etapa==="proceso")?`<button class="btn bl" data-a="etapa" data-v="espera" data-id="${c.id}" data-s="${c.slug}">⏳ Listo, espera repartidor</button>`:
            c.etapa==="espera"?`<button class="btn v" data-a="etapa" data-v="repartiendo" data-id="${c.id}" data-s="${c.slug}">🛵 Salió a repartir</button><button class="btn ghost" data-a="etapa" data-v="proceso" data-id="${c.id}" data-s="${c.slug}">↩︎</button>`:
            `<button class="btn p" data-a="entregar" data-id="${c.id}" data-s="${c.slug}">✅ Entregado</button><button class="btn ghost" data-a="etapa" data-v="espera" data-id="${c.id}" data-s="${c.slug}">↩︎</button>`,

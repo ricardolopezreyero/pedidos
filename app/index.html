@@ -77,6 +77,9 @@ header{position:sticky;top:0;z-index:20;background:var(--y);padding:10px 12px;di
 .board{padding:10px;display:block}
 .col{display:none}
 .col.on{display:block}
+.col[data-col="archivado"]{background:rgba(70,55,10,.14)!important}
+.col[data-col="archivado"] .card{background:#FAF6E8;box-shadow:none;border:1px solid #E6DCB8;opacity:.9}
+.col[data-col="archivado"] .col-head{color:#5a4a1a}
 .col-head{display:flex;align-items:center;justify-content:space-between;padding:8px 4px 10px;font-weight:900;font-size:16px}
 .col-head .n{background:#fff;border-radius:999px;padding:2px 9px;font-size:12px;color:var(--mut);margin-left:6px}
 .col-tools{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
@@ -85,7 +88,7 @@ header{position:sticky;top:0;z-index:20;background:var(--y);padding:10px 12px;di
 .empty span{font-size:28px;display:block;margin-bottom:6px}
 @media(min-width:960px){
   .tabs{display:none}
-  .board{display:grid;grid-template-columns:repeat(4,minmax(250px,1fr));gap:14px;padding:14px;align-items:start}
+  .board{display:grid;grid-template-columns:repeat(5,minmax(240px,1fr));gap:12px;padding:14px;align-items:start;overflow-x:auto}
   .col{display:block;background:rgba(255,255,255,.45);border-radius:18px;padding:8px;min-height:60vh}
 }
 
@@ -373,6 +376,7 @@ const QUESOS=["Asadero","Chihuahua"];
 const EXTRAS=["Huevo estrellado","Huevo revuelto","Guiso favorito"];
 const ESTADOS=[
   {id:"armando",  n:"Armando",  e:"✏️"},
+  {id:"porpedir", n:"Por pedir",e:"📋"},
   {id:"pedido",   n:"Pedido",   e:"📲"},
   {id:"entregado",n:"Entregado",e:"🛵"},
   {id:"archivado",n:"Historial",e:"📚"}
@@ -422,7 +426,7 @@ function normPersona(p){ p=p||{}; return {id:p.id||uid(),rol:p.rol||"otro",nombr
   bebidas:toArr(p.bebidas).map(l=>({nombre:l.nombre,cant:+l.cant||1,detalle:l.detalle||""})),
   postres:toArr(p.postres).map(l=>({nombre:l.nombre,cant:+l.cant||1})),
   chilaquiles:p.chilaquiles?{salsa:p.chilaquiles.salsa||"",queso:p.chilaquiles.queso||"",extras:toArr(p.chilaquiles.extras),guiso:p.chilaquiles.guiso||"",cant:+p.chilaquiles.cant||1}:null}; }
-function normCard(c){ c=c||{}; return Object.assign({},c,{id:c.id,familia:c.familia||"",estado:c.estado||"armando",notas:c.notas||"",listo:!!c.listo,
+function normCard(c){ c=c||{}; const est=(c.estado||"armando")==="armando"&&c.listo?"porpedir":(c.estado||"armando"); return Object.assign({},c,{id:c.id,familia:c.familia||"",estado:est,notas:c.notas||"",listo:!!c.listo,
   creado:c.creado||Date.now(),actualizado:c.actualizado||c.creado||Date.now(),personas:toArr(c.personas).map(normPersona)}); }
 
 /* ---------- persistencia (local + Firebase) — RLR ---------- */
@@ -612,7 +616,7 @@ $("#sucSel").addEventListener("change",e=>{ config.sucursal=e.target.value; conf
 $("#sucTel").addEventListener("change",e=>{ if(e.target.id==="telSel"){ config.telIdx=+e.target.value; saveConfig(); } });
 
 /* ---------- tablero ---------- */
-const sorters={armando:(a,b)=>a.creado-b.creado,pedido:(a,b)=>(b.pedidoEn||0)-(a.pedidoEn||0),entregado:(a,b)=>(b.entregadoEn||0)-(a.entregadoEn||0),archivado:(a,b)=>(b.archivadoEn||0)-(a.archivadoEn||0)};
+const sorters={armando:(a,b)=>a.creado-b.creado,porpedir:(a,b)=>(a.listoEn||a.actualizado)-(b.listoEn||b.actualizado),pedido:(a,b)=>(b.pedidoEn||0)-(a.pedidoEn||0),entregado:(a,b)=>(b.entregadoEn||0)-(a.entregadoEn||0),archivado:(a,b)=>(b.archivadoEn||0)-(a.archivadoEn||0)};
 function cardsIn(est){ return Object.values(pedidos).filter(c=>c.estado===est).sort(sorters[est]); }
 function renderBoard(){
   // ¿Qué cambió desde el último render? (solo brillan los cambios que vienen de OTRA pantalla)
@@ -621,23 +625,23 @@ function renderBoard(){
   Object.values(pedidos).forEach(c=>{ const per={}; c.personas.forEach(p=>per[p.id]=nombreDe(p)+"|"+personLines(p).join("|")); snap[c.id]={j:JSON.stringify(c),per,listo:c.listo,estado:c.estado};
     const prev=prevSnap[c.id]; if(firstRender||c._w===SID) return;
     // Aviso al anfitrión: una familia acaba de dar "Listo" (o llegó una familia nueva)
-    if(host&&c.estado==="armando"){ if(prev&&!prev.listo&&c.listo){ toast("✅ Familia "+(c.familia||"sin nombre")+" ya quedó"); beep(); } else if(!prev){ toast("🐸 Familia "+(c.familia||"nueva")+" está armando su pedido"); } }
+    if(host){ if(prev&&prev.estado==="armando"&&c.estado==="porpedir"){ toast("✅ Familia "+(c.familia||"sin nombre")+" ya quedó · lista para pedir"); beep(); } else if(!prev&&c.estado==="armando"){ toast("🐸 Familia "+(c.familia||"nueva")+" está armando su pedido"); } }
     if(!prev){ ui.flash[c.id]={card:true,per:{},ts:now}; return; }
     if(prev.j!==snap[c.id].j){ const f=ui.flash[c.id]||{card:true,per:{}}; f.card=true; f.ts=now; Object.keys(per).forEach(k=>{ if(prev.per[k]!==per[k]) f.per[k]=true; }); ui.flash[c.id]=f; } });
   prevSnap=snap; firstRender=false;
   const counts={}; ESTADOS.forEach(e=>counts[e.id]=cardsIn(e.id).length);
-  const arm=cardsIn("armando"), listas=arm.filter(c=>c.listo).length;
-  document.title=(arm.length?"("+listas+"/"+arm.length+") ":"")+"Ranitas · Pedidos";
+  const arm=cardsIn("armando"), porp=cardsIn("porpedir"), listas=porp.length, tot=arm.length+porp.length;
+  document.title=(tot?"("+listas+"/"+tot+") ":"")+"Ranitas · Pedidos";
   $("#tabs").innerHTML=ESTADOS.map(e=>`<button class="tab${ui.tab===e.id?" on":""}" data-a="tab" data-v="${e.id}">${e.e} ${e.n}<span class="n">${counts[e.id]}</span></button>`).join("");
   $("#board").innerHTML=ESTADOS.map(e=>{
     const cards=cardsIn(e.id);
     let tools="";
     if(e.id==="armando"){
-      const hint=localStorage.getItem("ranitas-hint")?"":`<div class="hint">🐸 <div>${host?`<b>Modo anfitrión.</b> Comparte la liga 🔗, espera los ✅ de cada familia y manda todo junto por WhatsApp.`:`<b>¿Cómo funciona?</b> Toca <b>+ Pedido de familia</b>, pon a cada quien con sus gorditas y dale <b>Listo</b>. ${esc(config.anfitrion||"El anfitrión")} manda todo junto a la sucursal por WhatsApp.`}</div><button data-a="hideHint" title="Cerrar">✕</button></div>`;
+      const hint=localStorage.getItem("ranitas-hint")?"":`<div class="hint">🐸 <div>${host?`<b>Modo anfitrión.</b> Comparte la liga 🔗, espera los ✅ de cada familia y manda todo junto por WhatsApp.`:`<b>¿Cómo funciona?</b> Toca <b>+ Pedido de familia</b>, pon a cada quien con sus gorditas y dale <b>Listo</b>: tu pedido pasa a <b>Por pedir</b> y ${esc(config.anfitrion||"el anfitrión")} manda todo junto a la sucursal por WhatsApp.`}</div><button data-a="hideHint" title="Cerrar">✕</button></div>`;
       const ci=cierreInfo(); const cierre=ci?`<div class="cierre${ci.pasado?" past":""}">⏰ ${ci.pasado?`Los pedidos cerraron a las ${ci.hora}`:`Cierre de pedidos a las ${ci.hora} · <b>${ci.min<60?"quedan "+ci.min+" min":"quedan "+Math.floor(ci.min/60)+" h "+(ci.min%60)+" min"}</b>`}</div>`:"";
-      tools=`<div class="col-tools">${hint}${cierre}<button class="btn y big" data-a="nuevo">➕ Pedido de familia</button>
-        ${host?`<button class="btn wa big" data-a="enviarTodo" ${cards.length?"":"disabled"}>📲 Mandar todo por WhatsApp <span class="sm">· ${listas} de ${cards.length} lista${cards.length===1?"":"s"} · Suc. ${esc(getSuc().n)}</span></button>`:""}</div>`;
+      tools=`<div class="col-tools">${hint}${cierre}<button class="btn y big" data-a="nuevo">➕ Pedido de familia</button></div>`;
     }
+    if(e.id==="porpedir"&&host){ tools=`<div class="col-tools"><button class="btn wa big" data-a="enviarTodo" ${cards.length?"":"disabled"}>📲 Mandar todo por WhatsApp <span class="sm">· ${cards.length} familia${cards.length===1?"":"s"} lista${cards.length===1?"":"s"}${arm.length?" · "+arm.length+" armando":""} · Suc. ${esc(getSuc().n)}</span></button></div>`; }
     if(e.id==="pedido"&&cards.length){ tools=`<div class="col-tools"><button class="btn big" data-a="reparto" data-v="todos">📋 Lista de reparto <span class="sm">· para entregar a cada quien cuando llegue</span></button>${host?`<button class="btn p big" data-a="llegoTodo">🛵 Llegó todo <span class="sm">· marcar ${cards.length} como entregado${cards.length===1?"":"s"}</span></button>`:""}</div>`; }
     if(e.id==="archivado"){ const top=topGuisos(); if(top.length) tools=`<div class="hint" style="margin-bottom:10px">🏆 <div><b>Lo más pedido:</b> ${esc(top.map(x=>x[0]+" ("+x[1]+")").join(" · "))}</div></div>`; }
     return `<section class="col${ui.tab===e.id?" on":""}" data-col="${e.id}">
@@ -647,13 +651,14 @@ function renderBoard(){
 }
 function topGuisos(){ const m={}; Object.values(pedidos).filter(c=>c.estado==="archivado"||c.estado==="entregado").forEach(c=>c.personas.forEach(p=>p.gorditas.forEach(l=>{ m[l.guiso]=(m[l.guiso]||0)+l.cant; })));
   return Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,3); }
-function emptyHTML(est){ const t={armando:["🫓","Nadie está armando pedido.<br>Toca <b>+ Pedido de familia</b>."],pedido:["📲","Aquí aparecen los pedidos ya mandados a la sucursal."],entregado:["🛵","Cuando lleguen las gorditas, márcalas como entregadas."],archivado:["📚","El historial guarda los pedidos para repetirlos en la próxima invitación."]}[est];
+function emptyHTML(est){ const t={armando:["🫓","Nadie está armando pedido.<br>Toca <b>+ Pedido de familia</b>."],porpedir:["📋","Cuando una familia da <b>Listo</b>, su pedido cae aquí esperando que se mande."],pedido:["📲","Aquí aparecen los pedidos ya mandados a la sucursal."],entregado:["🛵","Cuando lleguen las gorditas, márcalas como entregadas."],archivado:["📚","El historial guarda los pedidos para repetirlos en la próxima invitación."]}[est];
   return `<div class="empty"><span>${t[0]}</span>${t[1]}</div>`; }
 function cardHTML(c){
   const t=totales(c); const suc=SUCURSALES.find(s=>s.id===c.sucursal);
   const badges=[]; const typing=typingOn(c.id); const fl=(ui.flash||{})[c.id]||{per:{}};
   if(typing.length) badges.push(`<span class="b live">✏️ ${esc((typing[0].fam||c.familia)?"Familia "+(typing[0].fam||c.familia):"Alguien")} está escribiendo…</span>`);
-  else if(c.estado==="armando") badges.push(c.listo?`<span class="b ok">✅ Listo</span>`:`<span class="b wip">✏️ Armando…</span>`);
+  else if(c.estado==="armando") badges.push(`<span class="b wip">✏️ Armando…</span>`);
+  else if(c.estado==="porpedir") badges.push(`<span class="b ok">✅ Listo para pedir</span>`);
   if(c.estado==="pedido"){ badges.push(`<span class="b ok">📲 Pedido ${fmtFecha(c.pedidoEn)}</span>`); const et={proceso:"🍳 En cocina",espera:"⏳ Esperando repartidor",repartiendo:"🛵 En camino"}[c.etapa||"proceso"]; if(et) badges.push(`<span class="b${c.etapa==="repartiendo"?" live":""}">${et}</span>`); }
   if(c.estado==="entregado") badges.push(`<span class="b ok">🛵 Entregado ${fmtFecha(c.entregadoEn)}</span>`);
   if(c.estado==="archivado") badges.push(`<span class="b">📚 ${fmtFecha(c.pedidoEn||c.archivadoEn||c.creado,false)}</span>`);
@@ -662,8 +667,9 @@ function cardHTML(c){
   const persons=c.personas.map(p=>{ const L=personLines(p); const f=fl.per[p.id]; return `<div class="pl${f?" flash":""}">${rolDe(p).e} <b>${esc(nombreDe(p))}</b>: ${L.length?`<span class="l">${esc(L.join(" · "))}</span>`:"<i>sin nada aún</i>"}${f&&typing.length?`<span class="caret">▍</span>`:""}</div>`; }).join("")||`<div class="pl"><i>Sin personas todavía</i></div>`;
   const H=host, M=mine.has(c.id);
   const A={
-    armando:`<button class="btn y" data-a="edit" data-id="${c.id}">✏️ Editar</button>${H?`<button class="btn wa" data-a="enviarUno" data-id="${c.id}">📲</button><button class="btn p" data-a="marcar" data-id="${c.id}" data-v="pedido">✅ Ya se pidió</button>`:""}${H||M?`<button class="btn r" data-a="del" data-id="${c.id}">🗑</button>`:""}`,
-    pedido:`<button class="btn" data-a="reparto" data-id="${c.id}">📋 Reparto</button>${H?`<button class="btn" data-a="verMsg" data-id="${c.id}">📄</button><button class="btn p" data-a="marcar" data-id="${c.id}" data-v="entregado">🛵 Entregado</button><button class="btn ghost" data-a="marcar" data-id="${c.id}" data-v="armando">↩︎</button>`:""}`,
+    armando:`<button class="btn y" data-a="edit" data-id="${c.id}">✏️ Editar</button>${H||M?`<button class="btn r" data-a="del" data-id="${c.id}">🗑</button>`:""}`,
+    porpedir:`<button class="btn y" data-a="edit" data-id="${c.id}">✏️ Editar</button>${H?`<button class="btn wa" data-a="enviarUno" data-id="${c.id}">📲</button><button class="btn p" data-a="marcar" data-id="${c.id}" data-v="pedido">✅ Ya se pidió</button>`:""}${H||M?`<button class="btn r" data-a="del" data-id="${c.id}">🗑</button>`:""}`,
+    pedido:`<button class="btn" data-a="reparto" data-id="${c.id}">📋 Reparto</button>${H?`<button class="btn" data-a="verMsg" data-id="${c.id}">📄</button><button class="btn p" data-a="marcar" data-id="${c.id}" data-v="entregado">🛵 Entregado</button><button class="btn ghost" data-a="marcar" data-id="${c.id}" data-v="porpedir">↩︎</button>`:""}`,
     entregado:`<button class="btn" data-a="reparto" data-id="${c.id}">📋 Reparto</button><button class="btn y" data-a="repetir" data-id="${c.id}">🔁 Repetir</button>${H?`<button class="btn p" data-a="marcar" data-id="${c.id}" data-v="archivado">📦 Archivar</button><button class="btn ghost" data-a="marcar" data-id="${c.id}" data-v="pedido">↩︎</button>`:""}`,
     archivado:`<button class="btn y" data-a="repetir" data-id="${c.id}">🔁 Repetir este pedido</button>${H?`<button class="btn r" data-a="del" data-id="${c.id}">🗑</button>`:""}`
   }[c.estado];
@@ -688,7 +694,7 @@ function crearPedido(from){
   if(from) toast("Pedido copiado de Familia "+(from.familia||"sin nombre")+". Ajusta lo que cambie.");
 }
 function familiasHistorial(){ const m={};
-  Object.values(pedidos).filter(c=>c.estado!=="armando").forEach(c=>{ const k=(c.familia||"").trim().toLowerCase(); if(!k) return; const ts=c.pedidoEn||c.actualizado; if(!m[k]||ts>m[k].ts) m[k]={c,ts}; });
+  Object.values(pedidos).filter(c=>c.estado!=="armando"&&c.estado!=="porpedir").forEach(c=>{ const k=(c.familia||"").trim().toLowerCase(); if(!k) return; const ts=c.pedidoEn||c.actualizado; if(!m[k]||ts>m[k].ts) m[k]={c,ts}; });
   return Object.values(m).sort((a,b)=>b.ts-a.ts).map(x=>x.c); }
 function openNuevo(){
   const fams=familiasHistorial();
@@ -726,9 +732,9 @@ function closeEditor(listo,confirmado){ if(!ui.draft) return; clearTimeout(saveT
     if(!confirmado){ openConfirm(d); return; }
     hide("mConf");
   }
-  d.listo=!!listo;
-  ui.editing=null; ui.draft=null; saveCard(d); hide("mEditor"); clearPresence(id);
-  if(listo) toast("¡Listo! Pedido de Familia "+(d.familia||"sin nombre")+" guardado ✅"); }
+  d.listo=!!listo; if(d.estado==="armando"||d.estado==="porpedir"){ d.estado=listo?"porpedir":"armando"; if(listo) d.listoEn=Date.now(); }
+  ui.editing=null; ui.draft=null; saveCard(d); hide("mEditor"); clearPresence(id); if(listo) ui.tab="porpedir";
+  if(listo) toast("¡Listo! Familia "+(d.familia||"sin nombre")+" pasa a Por pedir ✅"); }
 function renderEditor(){
   const d=ui.draft; const body=$("#edBody"); const st=body.scrollTop;
   // Recordar dónde estaba el cursor para no perder el foco si el render viene de otra pantalla — RLR
@@ -747,7 +753,7 @@ const NOTAS_RAPIDAS=["Sin cebolla","Salsa aparte","Salsa extra 🌶","Sin picant
 function tieneNota(d,x){ return (d.notas||"").toLowerCase().includes(x.toLowerCase()); }
 // Dos personas de la misma familia abrieron "+ Pedido": avisar para no mandar la familia dos veces — RLR
 function checkDup(){ const d=ui.draft; const w=$("#dupWarn"); if(!d||!w) return; const k=(d.familia||"").trim().toLowerCase();
-  const otro=k?Object.values(pedidos).find(c=>c.id!==d.id&&c.estado==="armando"&&(c.familia||"").trim().toLowerCase()===k):null;
+  const otro=k?Object.values(pedidos).find(c=>c.id!==d.id&&(c.estado==="armando"||c.estado==="porpedir")&&(c.familia||"").trim().toLowerCase()===k):null;
   w.innerHTML=otro?`<div class="warn" style="margin-top:8px">⚠️ Ya hay un pedido de <b>Familia ${esc(otro.familia)}</b> armándose (${esc(totStr(totales(otro)))}). <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><button class="btn y" data-a="irDuplicado" data-id="${otro.id}">Abrir ese y no duplicar</button><button class="btn ghost" data-a="ignorarDup">Es otra familia</button></div></div>`:""; }
 function personaHTML(p,pi){
   const r=rolDe(p); const cnt={}; p.gorditas.forEach(l=>{ cnt[l.guiso]=cnt[l.guiso]||{harina:0,maiz:0}; cnt[l.guiso][l.masa]+=l.cant; });
@@ -792,8 +798,8 @@ function chilHTML(p,pi){ const c=p.chilaquiles;
 /* ---------- mensaje / envío ---------- */
 function openMessage(cards,markIds){
   const msg=buildMessage(cards); ui.msgIds=markIds; ui.msgText=msg; $("#mMsg h2").textContent="📲 Mensaje para WhatsApp";
-  const pend=cards.filter(c=>c.estado==="armando"&&!c.listo);
-  $("#msgBody").innerHTML=`${pend.length?`<div class="warn">⚠️ Todavía armando: ${esc(pend.map(c=>"Familia "+(c.familia||"sin nombre")).join(", "))}. Puedes mandar de todas formas.</div>`:""}
+  const pend=cardsIn("armando").filter(c=>!cards.includes(c));
+  $("#msgBody").innerHTML=`${pend.length?`<div class="warn">⚠️ Todavía armando (no van en este mensaje): ${esc(pend.map(c=>"Familia "+(c.familia||"sin nombre")).join(", "))}.</div>`:""}
     <div style="font-weight:800;color:var(--mut);font-size:13px;margin-bottom:6px">Va a: 📍 ${esc(getSuc().n)} · 📲 ${fmtTel(getTel())}</div><textarea class="msg" readonly>${esc(msg)}</textarea>`;
   $("#msgFoot").innerHTML=`<button class="btn" data-a="copiar">📋 Copiar</button><a class="btn wa" href="${waLink(getTel(),msg)}" target="_blank" rel="noopener" data-a="abrirWa">📲 Abrir WhatsApp</a>
     ${markIds?`<button class="btn p" data-a="marcarVarios">✅ Ya se pidió (${markIds.length})</button>`:""}`;
@@ -811,6 +817,7 @@ function marcar(id,estado){ const c=pedidos[id]; if(!c) return; c.estado=estado;
   if(estado==="entregado") c.entregadoEn=Date.now();
   if(estado==="archivado") c.archivadoEn=Date.now();
   if(estado==="armando"){ c.listo=false; delete c.pedidoEn; }
+  if(estado==="porpedir"){ c.listo=true; c.listoEn=c.listoEn||Date.now(); delete c.pedidoEn; delete c.etapa; }
   saveCard(c); }
 
 /* ---------- compartir ---------- */
@@ -856,8 +863,8 @@ document.addEventListener("click",e=>{
     case "repetir": hide("mNuevo"); crearPedido(pedidos[id]); break;
     case "edit": openEditor(id); break;
     case "del": { const c=pedidos[id]; if(c&&confirm("¿Eliminar el pedido de Familia "+(c.familia||"sin nombre")+"?")){ deleteCard(id); toast("Pedido eliminado"); } break; }
-    case "marcar": if(v==="pedido"&&pedidos[id]&&!pedidos[id].listo&&!confirm("Familia "+(pedidos[id].familia||"sin nombre")+" todavía no da Listo. ¿Marcar como pedido de todas formas?")) break; marcar(id,v); if(v==="pedido"){ ui.tab="pedido"; toast("Marcado como pedido 📲"); } if(v==="entregado"){ ui.tab="entregado"; toast("¡Buen provecho! 🛵"); } if(v==="archivado"){ ui.tab="archivado"; toast("Archivado. Lo puedes repetir cuando quieras 🔁"); } renderBoard(); break;
-    case "enviarTodo": { const cards=cardsIn("armando"); if(!cards.length) return; openMessage(cards,cards.map(c=>c.id)); break; }
+    case "marcar": marcar(id,v); if(v==="pedido"){ ui.tab="pedido"; toast("Marcado como pedido 📲"); } if(v==="entregado"){ ui.tab="entregado"; toast("¡Buen provecho! 🛵"); } if(v==="archivado"){ ui.tab="archivado"; toast("Archivado. Lo puedes repetir cuando quieras 🔁"); } renderBoard(); break;
+    case "enviarTodo": { const cards=cardsIn("porpedir"); if(!cards.length) return; openMessage(cards,cards.map(c=>c.id)); break; }
     case "enviarUno": openMessage([pedidos[id]],[id]); break;
     case "verMsg": { const c=pedidos[id]; ui.msgIds=null; $("#mMsg h2").textContent="📲 Mensaje para WhatsApp"; ui.msgText=c.mensaje||buildMessage([c]);
       $("#msgBody").innerHTML=`<textarea class="msg" readonly>${esc(ui.msgText)}</textarea>`;
