@@ -746,7 +746,7 @@ function buildMessage(cards){
   L.push("");
   const kit={}, beb={}, pos={}; let ch=0, g=0, h=0, m=0, costoTotal=0;
   cards.forEach(c=>{
-    L.push("👨‍👩‍👧‍👦 *FAMILIA "+(c.familia||"SIN NOMBRE").toUpperCase()+"*");
+    L.push("👨‍👩‍👧‍👦 *"+(c.familia||"SIN NOMBRE").toUpperCase()+"*");
     c.personas.forEach(p=>{ const lines=personLines(p); if(!lines.length) return;
       L.push("• *"+nombreDe(p)+"*"+(p.nombre?" ("+rolDe(p).n.toLowerCase()+")":""));
       lines.forEach(l=>L.push("    "+l));
@@ -759,13 +759,8 @@ function buildMessage(cards){
     const $c=costo(c); if($c!=null){ costoTotal+=$c; L.push("    💰 Total: "+money($c)); }
     L.push("");
   });
-  L.push("🧮 *RESUMEN PARA COCINA*");
-  if(g) L.push("🫓 Gorditas: "+g+" (🌾 "+h+" harina · 🌽 "+m+" maíz)");
-  Object.keys(kit).sort((a,b)=>(kit[b].h+kit[b].m)-(kit[a].h+kit[a].m)||a.localeCompare(b)).forEach(k=>{ const v=kit[k]; const parts=[]; if(v.h) parts.push("🌾 "+v.h+" harina"); if(v.m) parts.push("🌽 "+v.m+" maíz"); L.push("    · "+k+": "+parts.join(", ")); });
-  if(ch) L.push("🍳 Chilaquiles: "+ch);
-  const pk=Object.keys(pos); if(pk.length) L.push("🍰 Postres: "+pk.reduce((a,k)=>a+pos[k],0)+" ("+pk.map(k=>pos[k]+" "+k.toLowerCase()).join(", ")+")");
-  const bk=Object.keys(beb); if(bk.length) L.push("☕ Bebidas: "+bk.reduce((a,k)=>a+beb[k],0)+" ("+bk.map(k=>beb[k]+" "+k.toLowerCase()).join(", ")+")");
-  if(hayPrecios()) L.push("💰 TOTAL DEL PEDIDO: "+money(costoTotal));
+  // Sin "resumen para cocina": el WhatsApp es solo para tomar el pedido; el desglose lo ve la cocina en su pantalla — RLR
+  if(hayPrecios()&&cards.length>1) L.push("💰 *TOTAL: "+money(costoTotal)+"*");
   L.push("");
   L.push("¡Gracias! 🐸");
   return L.join("\n");
