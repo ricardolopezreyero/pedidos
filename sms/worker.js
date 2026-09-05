@@ -11,9 +11,11 @@ const gorditas=c=>arr(c.personas).reduce((a,p)=>a+arr(p.gorditas).reduce((b,l)=>
 // Twilio: token OAuth (client_credentials) y envío por la API de mensajes
 async function twilioToken(env){ const r=await fetch("https://preview-iam.twilio.com/v1/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({grant_type:"client_credentials",client_id:env.TWILIO_CLIENT_ID,client_secret:env.TWILIO_CLIENT_SECRET})});
   const d=await r.json().catch(()=>({})); if(!r.ok||!d.access_token) throw new Error("token twilio: "+JSON.stringify(d)); return d.access_token; }
-async function enviarTwilio(env,to,text){ let token; try{ token=await twilioToken(env); }catch(e){ return {error:"twilio-token",detail:String(e.message)}; }
+async function enviarTwilio(env,to,text){ let auth;
+  if(env.TWILIO_AUTH_TOKEN){ auth="Basic "+btoa(env.TWILIO_ACCOUNT_SID+":"+env.TWILIO_AUTH_TOKEN); }   // credenciales clásicas (Account SID + Auth Token)
+  else { try{ auth="Bearer "+await twilioToken(env); }catch(e){ return {error:"twilio-token",detail:String(e.message)}; } }   // app OAuth (necesita permiso messages/create)
   const form=new URLSearchParams({To:to,Body:text}); if(env.TWILIO_MESSAGING_SERVICE) form.set("MessagingServiceSid",env.TWILIO_MESSAGING_SERVICE); else form.set("From",env.TWILIO_FROM);
-  const r=await fetch("https://api.twilio.com/2010-04-01/Accounts/"+env.TWILIO_ACCOUNT_SID+"/Messages.json",{method:"POST",headers:{"Authorization":"Bearer "+token,"Content-Type":"application/x-www-form-urlencoded"},body:form});
+  const r=await fetch("https://api.twilio.com/2010-04-01/Accounts/"+env.TWILIO_ACCOUNT_SID+"/Messages.json",{method:"POST",headers:{"Authorization":auth,"Content-Type":"application/x-www-form-urlencoded"},body:form});
   const d=await r.json().catch(()=>({})); if(!r.ok) return {error:"twilio",status:r.status,detail:d}; return {sid:d.sid,status:d.status}; }
 
 export default {
@@ -25,7 +27,7 @@ export default {
     let body; try{ body=await req.json(); }catch(e){ return json({error:"json"},400); }
     const slug=String(body.slug||"").replace(/[^a-z0-9-]/g,""), cardId=String(body.cardId||"").replace(/[^A-Za-z0-9_-]/g,""), evento=body.evento;
     if(!slug||!cardId||!["nueva","lista","todas"].includes(evento)) return json({error:"params"},400);
-    if(!env.TWILIO_CLIENT_ID||!env.TWILIO_CLIENT_SECRET||!env.TWILIO_ACCOUNT_SID) return json({error:"faltan secretos TWILIO_CLIENT_ID / TWILIO_CLIENT_SECRET / TWILIO_ACCOUNT_SID"},500);
+    if(!env.TWILIO_ACCOUNT_SID||!(env.TWILIO_AUTH_TOKEN||(env.TWILIO_CLIENT_ID&&env.TWILIO_CLIENT_SECRET))) return json({error:"faltan secretos: TWILIO_ACCOUNT_SID y TWILIO_AUTH_TOKEN (o TWILIO_CLIENT_ID + TWILIO_CLIENT_SECRET)"},500);
     if(!env.TWILIO_FROM&&!env.TWILIO_MESSAGING_SERVICE) return json({error:"falta TWILIO_FROM (número E.164) o TWILIO_MESSAGING_SERVICE"},500);
 
     const fb=p=>fetch(env.FIREBASE_URL+"/ranitas/"+p+".json").then(r=>r.json());
