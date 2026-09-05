@@ -609,7 +609,7 @@ function attachBoard(){
       }
       pedidos=next; cacheLocal(); renderBoard();
       if(ui.editing&&pedidos[ui.editing]&&pedidos[ui.editing].estado==="pedido"&&pedidos[ui.editing].etapa&&pedidos[ui.editing].etapa!=="proceso"){ const idc=ui.editing; ui.editing=null; ui.draft=null; hide("mEditor"); hide("mConf"); clearPresence(idc); toast("🔥 La cocina ya tomó este pedido; ya no se puede cambiar aquí."); }
-      if(FAM&&!ui.fOpened&&pedidos[FAM]){ ui.fOpened=true; const c=pedidos[FAM]; mine.add(FAM); saveMine(); if(c.estado==="armando"||c.estado==="porpedir"){ openEditor(FAM); toast("Pedido de Familia "+(c.familia||"")+" · pon lo tuyo 👇"); } else { ui.tab=c.estado; renderBoard(); } }
+      if(FAM&&!ui.fOpened&&pedidos[FAM]){ ui.fOpened=true; const c=pedidos[FAM]; mine.add(FAM); saveMine(); if(c.estado==="armando"||c.estado==="porpedir"){ openEditor(FAM); toast("Pedido de "+(c.familia||"")+" · pon lo tuyo 👇"); } else { ui.tab=c.estado; renderBoard(); } }
       // Limpieza automática (solo anfitrión): lo entregado hace más de 12 h se va al historial solo
       if(host&&!MESA()&&(!ui._sweep||Date.now()-ui._sweep>60000)){ ui._sweep=Date.now(); const lim=Date.now()-12*3600e3; Object.values(pedidos).filter(c=>c.estado==="entregado"&&(c.entregadoEn||0)<lim).forEach(c=>marcar(c.id,"archivado")); }
     });
