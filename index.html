@@ -80,6 +80,17 @@ header{position:sticky;top:0;z-index:20;background:var(--y);padding:10px 12px;di
 .b.wip{background:var(--r2);color:var(--r)}
 .b.tuyo{background:var(--y);color:#5a4a00}
 .b.suc{background:#eef3ff;color:#2b4a9e}
+.b.live{background:var(--r);color:#fff;animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.55}}
+.online{font-size:12px;font-weight:800;color:#6b5a00;margin-left:6px;white-space:nowrap}
+/* destello cuando otra pantalla cambia algo — RLR */
+.card.flash{animation:cardflash 1.8s ease-out}
+@keyframes cardflash{0%{box-shadow:0 0 0 4px var(--y),0 10px 28px rgba(228,50,43,.25);background:#FFF6C4}100%{box-shadow:var(--sh);background:#fff}}
+.card.typing{border-color:var(--r)}
+.pl.flash{animation:plflash 1.8s ease-out;border-radius:6px}
+@keyframes plflash{0%{background:#FFE98A}100%{background:transparent}}
+.caret{display:inline-block;color:var(--r);font-weight:900;animation:blink .9s steps(2,start) infinite;margin-left:1px}
+@keyframes blink{to{visibility:hidden}}
 .persons{display:flex;flex-direction:column;gap:4px;font-size:13.5px}
 .pl b{font-weight:900}
 .pl i{color:var(--mut)}
@@ -171,7 +182,7 @@ textarea.msg{width:100%;min-height:46vh;font-family:ui-monospace,SFMono-Regular,
 <body>
 
 <header>
-  <div class="brand">🐸 <span><b>Ranitas</b> <small>Pedidos</small></span><span class="dot" id="dot" title="Conexión"></span></div>
+  <div class="brand">🐸 <span><b>Ranitas</b> <small>Pedidos</small></span><span class="dot" id="dot" title="Conexión"></span><span class="online" id="online"></span></div>
   <div class="suc">
     <select id="sucSel" title="Sucursal"></select>
     <div class="tel" id="sucTel"></div>
@@ -278,9 +289,11 @@ const ESTADOS=[
 
 /* ---------- estado ---------- */
 let pedidos={}, config={sucursal:"vinedos",telIdx:0,anfitrion:"Ricardo",telAnfitrion:"",direccion:""};
-let ui={tab:"armando",editing:null,draft:null,open:{},msgIds:null,msgText:""};
+let ui={tab:"armando",editing:null,draft:null,open:{},msgIds:null,msgText:"",lastLocalEdit:0,presence:{},online:{}};
 let mine=new Set(JSON.parse(localStorage.getItem("ranitas-mine")||"[]"));
-let db=null, online=false, saveTimer=null;
+let db=null, online=false, saveTimer=null, presTimer=0;
+const SID=Date.now().toString(36)+Math.random().toString(36).slice(2,6);                  // id de esta pantalla (presencia / autor de cada cambio) — RLR
+let prevSnap={}, firstRender=true;  // para detectar qué cambió y hacerlo brillar
 
 try{ pedidos=JSON.parse(localStorage.getItem("ranitas-pedidos")||"{}")||{}; }catch(e){}
 try{ config=Object.assign(config,JSON.parse(localStorage.getItem("ranitas-config")||"{}")); }catch(e){}
@@ -317,22 +330,40 @@ function normCard(c){ c=c||{}; return Object.assign({},c,{id:c.id,familia:c.fami
 /* ---------- persistencia (local + Firebase) — RLR ---------- */
 function cacheLocal(){ try{ localStorage.setItem("ranitas-pedidos",JSON.stringify(pedidos)); localStorage.setItem("ranitas-config",JSON.stringify(config)); }catch(e){} }
 function saveMine(){ localStorage.setItem("ranitas-mine",JSON.stringify([...mine])); }
-function saveCard(card,silent){ card.actualizado=Date.now(); pedidos[card.id]=card; cacheLocal();
+function saveCard(card,silent){ card.actualizado=Date.now(); card._w=SID; pedidos[card.id]=card; cacheLocal();
   if(db) db.ref(PATH+"/pedidos/"+card.id).set(clone(card)).catch(()=>{});
   if(!silent) renderBoard(); }
 function deleteCard(id){ delete pedidos[id]; cacheLocal(); if(db) db.ref(PATH+"/pedidos/"+id).remove().catch(()=>{}); renderBoard(); }
 function saveConfig(){ cacheLocal(); if(db) db.ref(PATH+"/config").set(clone(config)).catch(()=>{}); renderHeader(); }
-function queueSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(()=>{ if(ui.draft) saveCard(ui.draft); },500); }
+function queueSave(){ ui.lastLocalEdit=Date.now(); touchPresence(); clearTimeout(saveTimer); saveTimer=setTimeout(()=>{ if(ui.draft) saveCard(ui.draft); },120); }
+
+/* ---------- presencia en vivo (quién está escribiendo / quién está viendo) — RLR ---------- */
+function presRef(){ return (db&&ui.editing)?db.ref(PATH+"/presence/"+ui.editing+"/"+SID):null; }
+function setPresence(){ const r=presRef(); if(!r) return; r.set({ts:Date.now(),fam:(ui.draft&&ui.draft.familia)||""}).catch(()=>{}); r.onDisconnect().remove(); }
+function touchPresence(){ const now=Date.now(); if(now-presTimer<700) return; presTimer=now; setPresence(); }
+function clearPresence(id){ if(db&&id) db.ref(PATH+"/presence/"+id+"/"+SID).remove().catch(()=>{}); }
+function heartbeat(){ if(!db) return; const r=db.ref(PATH+"/online/"+SID); r.set({ts:Date.now()}).catch(()=>{}); r.onDisconnect().remove(); }
+function typingOn(id){ const p=ui.presence[id]||{}; const now=Date.now();
+  return Object.keys(p).filter(k=>k!==SID&&now-(p[k].ts||0)<6000).map(k=>p[k]); }
+function onlineCount(){ const now=Date.now(); return Object.values(ui.online).filter(o=>now-(o.ts||0)<3*60000).length; }
 
 function initFirebase(){
   try{
     firebase.initializeApp(FIREBASE_CONFIG); db=firebase.database();
-    db.ref(".info/connected").on("value",s=>{ online=!!s.val(); renderHeader(); });
+    db.ref(".info/connected").on("value",s=>{ online=!!s.val(); if(online){ heartbeat(); if(ui.editing) setPresence(); } renderHeader(); });
+    db.ref(PATH+"/presence").on("value",s=>{ ui.presence=s.val()||{}; renderBoard(); });
+    db.ref(PATH+"/online").on("value",s=>{ ui.online=s.val()||{}; renderHeader(); });
+    setInterval(heartbeat,45000);
     db.ref(PATH+"/config").on("value",s=>{ const v=s.val(); if(v) config=Object.assign({},config,v); else db.ref(PATH+"/config").set(clone(config)).catch(()=>{}); cacheLocal(); renderHeader(); if($("#mCfg").classList.contains("open")) renderCfg(); });
     db.ref(PATH+"/pedidos").on("value",s=>{
       const v=s.val()||{}; const next={};
       Object.keys(v).forEach(k=>{ next[k]=normCard(Object.assign({id:k},v[k])); });
-      if(ui.editing&&ui.draft) next[ui.editing]=ui.draft;   // mi borrador manda mientras edito
+      if(ui.editing&&ui.draft){
+        const rem=next[ui.editing];
+        // Otra pantalla cambió la tarjeta que tengo abierta y yo llevo >1.2 s sin teclear: adopto su versión sin perder el foco.
+        if(rem&&rem._w&&rem._w!==SID&&Date.now()-ui.lastLocalEdit>1200&&JSON.stringify(rem)!==JSON.stringify(ui.draft)){ ui.draft=clone(rem); ui.draft.listo=false; renderEditor(); }
+        else next[ui.editing]=ui.draft;   // mi borrador manda mientras escribo
+      }
       pedidos=next; cacheLocal(); renderBoard();
     });
   }catch(e){ db=null; renderHeader(); }
@@ -391,6 +422,7 @@ function buildMessage(cards){
 /* ---------- header ---------- */
 function renderHeader(){
   $("#dot").className="dot"+(online?" on":""); $("#dot").title=online?"Sincronizado en vivo":"Sin conexión (guardado local)";
+  const n=onlineCount(); $("#online").textContent=online&&n>1?"👀 "+n+" en línea":(online?"👀 solo tú":"sin conexión");
   $("#sucSel").innerHTML=SUCURSALES.map(s=>`<option value="${s.id}"${s.id===config.sucursal?" selected":""}>📍 ${s.n}</option>`).join("");
   const s=getSuc(); const idx=Math.min(config.telIdx||0,s.tels.length-1);
   $("#sucTel").innerHTML="📲 "+(s.tels.length>1?`<select id="telSel">${s.tels.map((t,i)=>`<option value="${i}"${i===idx?" selected":""}>${fmtTel(t)}</option>`).join("")}</select>`:fmtTel(s.tels[0]));
@@ -402,6 +434,14 @@ $("#sucTel").addEventListener("change",e=>{ if(e.target.id==="telSel"){ config.t
 const sorters={armando:(a,b)=>a.creado-b.creado,pedido:(a,b)=>(b.pedidoEn||0)-(a.pedidoEn||0),entregado:(a,b)=>(b.entregadoEn||0)-(a.entregadoEn||0),archivado:(a,b)=>(b.archivadoEn||0)-(a.archivadoEn||0)};
 function cardsIn(est){ return Object.values(pedidos).filter(c=>c.estado===est).sort(sorters[est]); }
 function renderBoard(){
+  // ¿Qué cambió desde el último render? (solo brillan los cambios que vienen de OTRA pantalla)
+  const snap={}; const now=Date.now(); ui.flash=ui.flash||{};
+  Object.keys(ui.flash).forEach(k=>{ if(now-ui.flash[k].ts>1800) delete ui.flash[k]; });   // el destello dura 1.8 s aunque haya otros renders
+  Object.values(pedidos).forEach(c=>{ const per={}; c.personas.forEach(p=>per[p.id]=nombreDe(p)+"|"+personLines(p).join("|")); snap[c.id]={j:JSON.stringify(c),per};
+    const prev=prevSnap[c.id]; if(firstRender||c._w===SID) return;
+    if(!prev){ ui.flash[c.id]={card:true,per:{},ts:now}; return; }
+    if(prev.j!==snap[c.id].j){ const f=ui.flash[c.id]||{card:true,per:{}}; f.card=true; f.ts=now; Object.keys(per).forEach(k=>{ if(prev.per[k]!==per[k]) f.per[k]=true; }); ui.flash[c.id]=f; } });
+  prevSnap=snap; firstRender=false;
   const counts={}; ESTADOS.forEach(e=>counts[e.id]=cardsIn(e.id).length);
   $("#tabs").innerHTML=ESTADOS.map(e=>`<button class="tab${ui.tab===e.id?" on":""}" data-a="tab" data-v="${e.id}">${e.e} ${e.n}<span class="n">${counts[e.id]}</span></button>`).join("");
   $("#board").innerHTML=ESTADOS.map(e=>{
@@ -421,22 +461,23 @@ function emptyHTML(est){ const t={armando:["🫓","Nadie está armando pedido.<b
   return `<div class="empty"><span>${t[0]}</span>${t[1]}</div>`; }
 function cardHTML(c){
   const t=totales(c); const suc=SUCURSALES.find(s=>s.id===c.sucursal);
-  const badges=[];
-  if(c.estado==="armando") badges.push(c.listo?`<span class="b ok">✅ Listo</span>`:`<span class="b wip">✏️ Armando…</span>`);
+  const badges=[]; const typing=typingOn(c.id); const fl=(ui.flash||{})[c.id]||{per:{}};
+  if(typing.length) badges.push(`<span class="b live">✏️ ${esc((typing[0].fam||c.familia)?"Familia "+(typing[0].fam||c.familia):"Alguien")} está escribiendo…</span>`);
+  else if(c.estado==="armando") badges.push(c.listo?`<span class="b ok">✅ Listo</span>`:`<span class="b wip">✏️ Armando…</span>`);
   if(c.estado==="pedido") badges.push(`<span class="b ok">📲 Pedido ${fmtFecha(c.pedidoEn)}</span>`);
   if(c.estado==="entregado") badges.push(`<span class="b ok">🛵 Entregado ${fmtFecha(c.entregadoEn)}</span>`);
   if(c.estado==="archivado") badges.push(`<span class="b">📚 ${fmtFecha(c.pedidoEn||c.archivadoEn||c.creado,false)}</span>`);
   if(suc&&c.estado!=="armando") badges.push(`<span class="b suc">📍 ${esc(suc.n)}</span>`);
   if(mine.has(c.id)) badges.push(`<span class="b tuyo">tu pedido</span>`);
-  const persons=c.personas.map(p=>{ const L=personLines(p); return `<div class="pl">${rolDe(p).e} <b>${esc(nombreDe(p))}</b>: ${L.length?`<span class="l">${esc(L.join(" · "))}</span>`:"<i>sin nada aún</i>"}</div>`; }).join("")||`<div class="pl"><i>Sin personas todavía</i></div>`;
+  const persons=c.personas.map(p=>{ const L=personLines(p); const f=fl.per[p.id]; return `<div class="pl${f?" flash":""}">${rolDe(p).e} <b>${esc(nombreDe(p))}</b>: ${L.length?`<span class="l">${esc(L.join(" · "))}</span>`:"<i>sin nada aún</i>"}${f&&typing.length?`<span class="caret">▍</span>`:""}</div>`; }).join("")||`<div class="pl"><i>Sin personas todavía</i></div>`;
   const A={
     armando:`<button class="btn y" data-a="edit" data-id="${c.id}">✏️ Editar</button><button class="btn wa" data-a="enviarUno" data-id="${c.id}">📲</button><button class="btn p" data-a="marcar" data-id="${c.id}" data-v="pedido">✅ Ya se pidió</button><button class="btn r" data-a="del" data-id="${c.id}">🗑</button>`,
     pedido:`<button class="btn" data-a="verMsg" data-id="${c.id}">📄 Mensaje</button><button class="btn p" data-a="marcar" data-id="${c.id}" data-v="entregado">🛵 Entregado</button><button class="btn ghost" data-a="marcar" data-id="${c.id}" data-v="armando">↩︎</button>`,
     entregado:`<button class="btn p" data-a="marcar" data-id="${c.id}" data-v="archivado">📦 Archivar</button><button class="btn y" data-a="repetir" data-id="${c.id}">🔁 Repetir</button><button class="btn ghost" data-a="marcar" data-id="${c.id}" data-v="pedido">↩︎</button>`,
     archivado:`<button class="btn y" data-a="repetir" data-id="${c.id}">🔁 Repetir este pedido</button><button class="btn r" data-a="del" data-id="${c.id}">🗑</button>`
   }[c.estado];
-  return `<article class="card${mine.has(c.id)?" mine":""}">
-    <div class="card-top"><h3>Familia ${esc(c.familia||"sin nombre")}</h3><span class="when">${fmtRel(c.actualizado)}</span></div>
+  return `<article class="card${mine.has(c.id)?" mine":""}${fl.card?" flash":""}${typing.length?" typing":""}">
+    <div class="card-top"><h3>Familia ${esc(c.familia||"sin nombre")}${fl.card&&typing.length&&!Object.keys(fl.per).length?`<span class="caret">▍</span>`:""}</h3><span class="when">${typing.length?"en vivo":fmtRel(c.actualizado)}</span></div>
     <div class="badges">${badges.join("")}</div>
     <div class="persons">${persons}</div>
     ${c.notas?`<div class="notas">📝 ${esc(c.notas)}</div>`:""}
@@ -465,19 +506,23 @@ function openNuevo(){
 }
 
 /* ---------- editor — RLR ---------- */
-function openEditor(id){ const c=pedidos[id]; if(!c) return; ui.editing=id; ui.draft=clone(c); ui.draft.listo=false; ui.open={}; $("#edBody").scrollTop=0; renderEditor(); $("#edBody").scrollTop=0; show("mEditor");
+function openEditor(id){ const c=pedidos[id]; if(!c) return; ui.editing=id; ui.draft=clone(c); ui.draft.listo=false; ui.open={}; ui.lastLocalEdit=0; $("#edBody").scrollTop=0; renderEditor(); $("#edBody").scrollTop=0; show("mEditor"); presTimer=0; setPresence();
   if(!ui.draft.familia){ setTimeout(()=>{ const i=$("#edBody input[data-in=familia]"); if(i) i.focus(); },150); } }
 function closeEditor(listo){ if(!ui.draft) return; clearTimeout(saveTimer);
-  const d=ui.draft; d.familia=(d.familia||"").trim(); d.listo=!!listo;
-  ui.editing=null; ui.draft=null; saveCard(d); hide("mEditor");
+  const d=ui.draft; d.familia=(d.familia||"").trim(); d.listo=!!listo; const id=ui.editing;
+  ui.editing=null; ui.draft=null; saveCard(d); hide("mEditor"); clearPresence(id);
   if(listo) toast("¡Listo! Pedido de Familia "+(d.familia||"sin nombre")+" guardado ✅"); }
 function renderEditor(){
   const d=ui.draft; const body=$("#edBody"); const st=body.scrollTop;
+  // Recordar dónde estaba el cursor para no perder el foco si el render viene de otra pantalla — RLR
+  const ae=document.activeElement; const fk=(ae&&ae.dataset&&ae.dataset.in&&body.contains(ae))?{in:ae.dataset.in,p:ae.dataset.p,i:ae.dataset.i,s:ae.selectionStart,e:ae.selectionEnd}:null;
   body.innerHTML=`<label class="f fam">Familia<input data-in="familia" value="${esc(d.familia)}" placeholder="Apellido (ej. Garza)" autocomplete="off"></label>
     ${d.personas.map((p,pi)=>personaHTML(p,pi)).join("")}
     <div class="addp">Agregar: ${ROLES.map(r=>`<button class="btn" data-a="addPersona" data-v="${r.id}">${r.e} ${r.n}</button>`).join("")}</div>
     <label class="f">Notas para el pedido<input data-in="notas" value="${esc(d.notas)}" placeholder="Ej. sin cebolla, salsa aparte…" autocomplete="off"></label>`;
   body.scrollTop=st; updateSum();
+  if(fk){ let sel=`[data-in="${fk.in}"]`; if(fk.p!=null) sel+=`[data-p="${fk.p}"]`; if(fk.i!=null) sel+=`[data-i="${fk.i}"]`;
+    const el=body.querySelector(sel); if(el){ el.focus({preventScroll:true}); try{ el.setSelectionRange(fk.s,fk.e); }catch(e){} } }
 }
 function updateSum(){ if(ui.draft) $("#edSum").textContent=totStr(totales(ui.draft)); }
 function personaHTML(p,pi){
@@ -607,6 +652,8 @@ document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ if($("#mEditor").
 Object.keys(pedidos).forEach(k=>pedidos[k]=normCard(Object.assign({id:k},pedidos[k])));
 renderHeader(); renderBoard(); initFirebase();
 setInterval(()=>{ if(!ui.editing) renderBoard(); },60000);   // refresca "hace X min"
+setInterval(()=>{ if(Object.keys(ui.presence).length||Object.keys(ui.flash||{}).length) renderBoard(); },2500);   // apaga "escribiendo…" cuando paran
+window.addEventListener("beforeunload",()=>{ if(ui.editing) clearPresence(ui.editing); });
 </script>
 <!-- RLR · Ricardo López Reyero · eye/181218 -->
 </body>
