@@ -255,6 +255,8 @@ El Worker lee el tablero en Firebase, saca el celular del anfitrión y le manda 
 | Gordita Nutella · Gordita Cajeta | $30 |
 | Brownie · Pay | $32 |
 
+**Servicio a domicilio: $60 por pedido** (clave `envio` en el catálogo de cada sucursal, editable en Precios). Por defecto el tablero está en "🏪 Yo paso por el pedido"; la palanca "🛵 A mi casa" del tablero (o la opción en ⚙ Configuración) prende el envío, pide la dirección si falta, y el WhatsApp sale con "A DOMICILIO", la dirección, el envío y el total. Solo los pedidos con envío prendido entran a la cola de Reparto; los demás aparecen en "Recogen en sucursal".
+
 Regla: las familias **solo ven el total** de su pedido (en la tarjeta, en la confirmación y en el WhatsApp), nunca el precio por producto; al pedir no hay precios en los botones para que sea simple. El menú completo con precios se consulta con el botón 📋 del encabezado. El admin edita precios por sucursal en Precios; un campo vacío usa el del menú impreso.
 
 Gorditas: Chicharrón prensado, Chicharrón pella, Carne con chile, Picadillo, Guiso verde, Discada, Choriqueso, Rajas con crema, Rajas con crema y queso, Frijoles, Frijoles con queso, Huevo verde, Huevo rojo, Papas rojas, Asado, Deshebrada, Queso, Barbacoa, Combinada. Chilaquiles con salsa (Verde cremosa, Roja, Verde tomatillo, Chipotle con crema, La más picosa), queso (Asadero, Chihuahua) y agregados (Huevo estrellado, Huevo revuelto, Guiso favorito). Postres: Gordita Nutella, Gordita Cajeta, Brownie, Pay. Bebidas: Café de olla, Café de grano, Jugo de naranja, Refresco. Todo se prende, apaga y se le pone precio y picor desde el admin; el catálogo base vive en `CATALOGO` dentro de `admin.html` e `index.html`.

@@ -178,6 +178,11 @@ button.tag.click:hover{border-style:dashed;border-color:var(--ink)}
 .rep-line.done::before{content:"☑  "}
 /* home / barra del tablero — RLR */
 .bar{background:#fff;border-bottom:1px solid var(--line);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-weight:800;font-size:13.5px}
+.modo{flex:1 1 100%;display:flex;background:#f2ecd6;border-radius:12px;padding:3px;gap:3px}
+.modo .mb{flex:1;border:0;background:transparent;border-radius:10px;padding:8px 6px;font-weight:800;font-size:12.5px;color:var(--mut);white-space:nowrap}
+.modo .mb small{font-weight:900;color:var(--g)}
+.modo .mb.on{background:var(--ink);color:var(--y)}.modo .mb.on small{color:var(--y)}
+.btn.sm{font-size:12px;padding:6px 10px}
 .linkbtn{border:1.5px dashed #cdbf8a;background:var(--y3);border-radius:999px;padding:5px 11px;font-weight:800;font-size:12.5px;color:#6b5a00;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 body.is-mesa #btnCfg,body.is-mesa #btnShare,body.is-mesa .linkbtn{display:none!important}
 body.is-mesa .suc select{pointer-events:none;opacity:.85}
@@ -500,7 +505,9 @@ const disponible=(c,name,masa)=>{ const v=cat[catKey(c,name)]; if(!v) return tru
 const picDe=(name,cat)=>{ cat=cat||"g"; const nm=cat==="sal"?normSalsa(name):name; const v=menu[cat+"_"+slugify(nm)]; if(v&&v.pic!=null) return +v.pic; if(cat==="sal") return SALSAS_PIC[nm]||0; const g=GUISOS.find(x=>x.n===name); return g?g.pic:0; };
 const picTxt=(name,cat)=>{ const n=picDe(name,cat); return n?" "+"🌶".repeat(n):""; };
 // Precios desde el catálogo de la sucursal (harina y maíz por separado). Solo se muestra el TOTAL y solo si el admin lo activa (config.mostrarPrecios) — RLR
-const PRECIOS_BASE={g:27,"g_barbacoa":36,"g_combinada":28,ch:110,"ex_huevo-estrellado":15,"ex_huevo-revuelto":15,"ex_guiso-favorito":25,"b_cafe-de-olla":42,"b_cafe-de-grano":42,"b_jugo-de-naranja":56,"b_refresco":35,"po_gordita-nutella":30,"po_gordita-cajeta":30,"po_brownie":32,"po_pay":32};   // menú impreso sep-2026 — RLR
+const PRECIOS_BASE={g:27,"g_barbacoa":36,"g_combinada":28,ch:110,"ex_huevo-estrellado":15,"ex_huevo-revuelto":15,"ex_guiso-favorito":25,"b_cafe-de-olla":42,"b_cafe-de-grano":42,"b_jugo-de-naranja":56,"b_refresco":35,"po_gordita-nutella":30,"po_gordita-cajeta":30,"po_brownie":32,"po_pay":32,envio:60};   // menú impreso sep-2026 — RLR
+const envioPrecio=()=>{ const v=cat.envio||{}; return v.precio!=null&&v.precio!==""?+v.precio:PRECIOS_BASE.envio; };
+const aDomicilio=()=>!MESA()&&config.entregaModo==="domicilio";   // por defecto se pasa a recoger; el envío se prende con la palanca — RLR
 const precioBase=(c,name)=>{ const k=catKey(c,name); return PRECIOS_BASE[k]!=null?PRECIOS_BASE[k]:(PRECIOS_BASE[c]!=null?PRECIOS_BASE[c]:null); };
 function precioDe(c,name,masa){ const v=cat[catKey(c,name)]||{}; if(c==="g"&&masa==="maiz"&&v.precioM!=null&&v.precioM!=="") return +v.precioM; if(v.precio!=null&&v.precio!=="") return +v.precio; return precioBase(c,name); }
 function suscribirCatalogo(){ if(!db||!SLUG||config.sucursal===catSuc) return; if(catRef) catRef.off(); catSuc=config.sucursal; catRef=db.ref(ROOT+"/catalogo/"+catSuc);
@@ -738,7 +745,7 @@ function buildMessage(cards){
   L.push("🐸 *PEDIDO RANITAS GORDITAS*");
   L.push("📍 Suc. "+suc.n+" · "+fmtFecha(Date.now()));
   if(config.anfitrion) L.push("👤 "+config.anfitrion+(config.telAnfitrion?" · "+config.telAnfitrion:""));
-  if(config.direccion) L.push("🏠 Entregar en: "+config.direccion);
+  if(aDomicilio()){ L.push("🛵 *A DOMICILIO* (+"+money(envioPrecio())+" de envío)"); L.push("🏠 Entregar en: "+((config.direccion||"").trim()||"⚠️ falta la dirección")); } else L.push("🏪 Pasan a recoger a la sucursal");
   L.push("⏰ Para: "+((config.entrega||"").trim()||"lo antes posible"));
   L.push("💵 Pago: "+pagoStr());
   const T={g:0,h:0,m:0,ch:0,b:0,po:0}; cards.forEach(c=>{ const t=totales(c); Object.keys(T).forEach(k=>T[k]+=t[k]); });
@@ -760,7 +767,8 @@ function buildMessage(cards){
     L.push("");
   });
   // Sin "resumen para cocina": el WhatsApp es solo para tomar el pedido; el desglose lo ve la cocina en su pantalla — RLR
-  if(hayPrecios()&&cards.length>1) L.push("💰 *TOTAL: "+money(costoTotal)+"*");
+  if(hayPrecios()&&aDomicilio()) L.push("🛵 Envío: "+money(envioPrecio()));
+  if(hayPrecios()&&(cards.length>1||aDomicilio())) L.push("💰 *TOTAL: "+money(costoTotal+(aDomicilio()?envioPrecio():0))+"*");
   L.push("");
   L.push("¡Gracias! 🐸");
   return L.join("\n");
@@ -770,7 +778,7 @@ function buildMessage(cards){
 function renderHeader(){
   $("#dot").className="dot"+(online?" on":""); $("#dot").title=online?"Sincronizado en vivo":"Sin conexión (guardado local)";
   if(MESA()){ document.body.classList.add("is-mesa"); if(ui.anf.activa===false&&!ui._mesaOff){ ui._mesaOff=1; toast("Esta mesa ya no está activa. Pide en caja 🙏"); } }
-  if(SLUG&&ui.anf){ $("#bar").hidden=false; $("#bar").innerHTML=`<span>${MESA()?"🪑":"🏠"} ${MESA()?"":"Tablero de "}<b>${esc(ui.anf.nombre)}</b>${host?` <span class="b tuyo">anfitrión</span>`:""}</span><button class="linkbtn" data-a="copiarLiga" title="Copiar liga">🔗 ${esc(APP_URL.replace("https://",""))}${esc(SLUG)}</button>`; }
+  if(SLUG&&ui.anf){ $("#bar").hidden=false; $("#bar").innerHTML=`<span>${MESA()?"🪑":"🏠"} ${MESA()?"":"Tablero de "}<b>${esc(ui.anf.nombre)}</b>${host?` <span class="b tuyo">anfitrión</span>`:""}</span><button class="linkbtn" data-a="copiarLiga" title="Copiar liga">🔗 ${esc(APP_URL.replace("https://",""))}${esc(SLUG)}</button>${MESA()?"":`<div class="modo" title="¿Cómo llega el pedido?"><button class="mb${aDomicilio()?"":" on"}" data-a="modo" data-v="recoger">🏪 Yo paso por el pedido</button><button class="mb${aDomicilio()?" on":""}" data-a="modo" data-v="domicilio">🛵 A mi casa <small>+${money(envioPrecio())}</small></button></div>${aDomicilio()&&!(config.direccion||"").trim()?`<button class="btn r sm" data-a="abrirCfg">⚠️ Falta tu dirección · ponla aquí</button>`:""}`}`; }
   const n=onlineCount(); $("#online").innerHTML=online?(n>1?"👀 "+n+"<span class=\"long\"> en línea</span>":"👀<span class=\"long\"> solo tú</span>"):"<span class=\"long\">sin conexión</span>";
   $("#sucSel").innerHTML=SUCURSALES.map(s=>`<option value="${s.id}"${s.id===config.sucursal?" selected":""}>📍 ${s.n}</option>`).join("");
   const s=getSuc(); const idx=Math.min(config.telIdx||0,s.tels.length-1);
@@ -994,7 +1002,7 @@ function openMessage(cards,markIds){
   const msg=buildMessage(cards); ui.msgIds=markIds; ui.msgText=msg; $("#mMsg h2").textContent="📲 Mensaje para WhatsApp";
   const pend=cardsIn("armando",true).filter(c=>!cards.includes(c));
   const conFalta=cards.filter(c=>faltantes(c).length);
-  $("#msgBody").innerHTML=`${conFalta.length?`<div class="warn">⛔ Productos agotados en Suc. ${esc(getSuc().n)}: ${esc(conFalta.map(c=>(c.familia||"sin nombre")+" ("+faltantes(c).join("; ")+")").join(" · "))}. Hay que ajustar esos pedidos antes de mandar.</div>`:""}${pend.length?`<div class="warn">⚠️ Todavía armando (no van en este mensaje): ${esc(pend.map(c=>(c.familia||"sin nombre")).join(", "))}.</div>`:""}
+  $("#msgBody").innerHTML=`${aDomicilio()&&!(config.direccion||"").trim()?`<div class="warn">🛵 Pediste a domicilio pero <b>falta la dirección</b>. <button class="btn sm" data-a="abrirCfg">Ponerla ahora</button></div>`:""}${conFalta.length?`<div class="warn">⛔ Productos agotados en Suc. ${esc(getSuc().n)}: ${esc(conFalta.map(c=>(c.familia||"sin nombre")+" ("+faltantes(c).join("; ")+")").join(" · "))}. Hay que ajustar esos pedidos antes de mandar.</div>`:""}${pend.length?`<div class="warn">⚠️ Todavía armando (no van en este mensaje): ${esc(pend.map(c=>(c.familia||"sin nombre")).join(", "))}.</div>`:""}
     <div style="font-weight:800;color:var(--mut);font-size:13px;margin-bottom:6px">Va a: 📍 ${esc(getSuc().n)} · 📲 ${fmtTel(getTel())}</div><textarea class="msg" readonly>${esc(msg)}</textarea>`;
   $("#msgFoot").innerHTML=`<button class="btn" data-a="copiar">📋 Copiar</button><a class="btn wa" href="${waLink(getTel(),msg)}" target="_blank" rel="noopener" data-a="abrirWa">📲 Abrir WhatsApp</a>
     ${markIds?`<button class="btn p" data-a="marcarVarios" ${conFalta.length?"disabled":""}>✅ Ya se pidió (${markIds.length})</button>`:""}`;
@@ -1029,6 +1037,7 @@ async function compartirFamilia(id,fam){ const url=famUrl(id); const text="🐸 
 function renderCfg(){ $("#cfgBody").innerHTML=`
   <label class="f">Anfitrión (quien manda el pedido)<input data-cfg="anfitrion" value="${esc(config.anfitrion)}" placeholder="Ricardo"></label>
   <label class="f">Teléfono del anfitrión (para el mensaje)<input data-cfg="telAnfitrion" value="${esc(config.telAnfitrion)}" placeholder="871 000 00 00" inputmode="tel"></label>
+  <label class="f">¿Cómo llega el pedido?<select data-cfg="entregaModo"><option value="recoger"${config.entregaModo!=="domicilio"?" selected":""}>🏪 Yo paso por el pedido a la sucursal</option><option value="domicilio"${config.entregaModo==="domicilio"?" selected":""}>🛵 Mándamelo a mi casa (+${money(envioPrecio())} de envío)</option></select></label>
   <label class="f">Dirección de entrega<textarea data-cfg="direccion" rows="3" placeholder="Calle, número, colonia · referencias">${esc(config.direccion)}</textarea></label>
   <label class="f">Sucursal para pedir<select data-cfg="sucursal">${SUCURSALES.map(s=>`<option value="${s.id}"${s.id===config.sucursal?" selected":""}>${s.n} · ${s.tels.map(fmtTel).join(" / ")}</option>`).join("")}</select></label>
   <div class="cfg2">
@@ -1049,7 +1058,8 @@ function renderMenu(){ const $m=money; const off=(c,n)=>!disponible(c,n); const 
   $("#menuBody").innerHTML=`<div class="mn-h">🫓 Gorditas <small>harina o maíz${iguales?" · mismo precio":""}</small></div>${gord}
     <div class="mn-h">🍳 Chilaquiles <b>${$m(precioDe("ch","Chilaquiles"))}</b></div><div class="mn-sub">Salsa: ${SALSAS.map(x=>esc(x)+(picDe(x,"sal")?" "+"🌶".repeat(picDe(x,"sal")):"")).join(" · ")}<br>Queso: ${QUESOS.join(" · ")}</div>${EXTRAS.map(x=>fila("＋ "+x,precioDe("ex",x),"",off("ex",x))).join("")}
     <div class="mn-h">🍰 Postres</div>${POSTRES.map(x=>fila(x.n,precioDe("po",x.n),"",off("po",x.n))).join("")}
-    <div class="mn-h">☕ Bebidas</div>${BEBIDAS.map(x=>fila(x.n,precioDe("b",x.n),"",off("b",x.n))).join("")}`;
+    <div class="mn-h">☕ Bebidas</div>${BEBIDAS.map(x=>fila(x.n,precioDe("b",x.n),"",off("b",x.n))).join("")}
+    ${MESA()?"":`<div class="mn-h">🛵 Servicio a domicilio <b>${$m(envioPrecio())}</b></div><div class="mn-sub">Se cobra una vez por pedido. Si pasas por tu pedido a la sucursal, no tiene costo. Se elige con la palanca de arriba del tablero.</div>`}`;
   $("#menuSuc").textContent="📍 "+getSuc().n+" · lo tachado está agotado hoy"; }
 $("#btnMenu").addEventListener("click",()=>{ renderMenu(); show("mMenu"); });
 $("#btnShare").addEventListener("click",compartir);
@@ -1086,7 +1096,9 @@ document.addEventListener("click",e=>{
     case "copiar": navigator.clipboard.writeText(ui.msgText).then(()=>toast("Mensaje copiado 📋"),()=>{ const t=$("#msgBody textarea"); t.select(); document.execCommand("copy"); toast("Mensaje copiado 📋"); }); break;
     case "abrirWa": break;
     case "marcarVarios": { bit("pedido","whatsapp","Mandó el WhatsApp a Suc. "+getSuc().n+" con "+(ui.msgIds||[]).length+" familia(s): "+(ui.msgIds||[]).map(x=>(pedidos[x]||{}).familia).filter(Boolean).join(", ")); (ui.msgIds||[]).forEach(x=>{ const c=pedidos[x]; if(c){ c.mensaje=ui.msgText; marcar(x,"pedido"); } }); hide("mMsg"); ui.tab="pedido"; renderBoard(); toast("Pedido registrado 📲 · "+ui.msgIds.length+" familia"+(ui.msgIds.length===1?"":"s")); break; }
-    case "close": hide(v); if(v==="mCfg"){ saveConfig(); renderBoard(); } break;
+    case "close": hide(v); if(v==="mCfg"){ saveConfig(); renderHeader(); renderBoard(); } break;
+    case "modo": { config.entregaModo=v; saveConfig(); bit("config","entrega",v==="domicilio"?"Pidió a domicilio (+"+money(envioPrecio())+")":"Pasa a recoger a la sucursal"); renderHeader(); renderBoard(); if(v==="domicilio"&&!(config.direccion||"").trim()){ _cfgPrev=clone(config); renderCfg(); show("mCfg"); const t=$("#cfgBody [data-cfg=direccion]"); if(t) setTimeout(()=>t.focus(),150); toast("🏠 Pon la dirección para el envío"); } break; }
+    case "abrirCfg": { _cfgPrev=clone(config); renderCfg(); show("mCfg"); const t=$("#cfgBody [data-cfg=direccion]"); if(t) setTimeout(()=>t.focus(),150); break; }
     case "closeEditor": closeEditor(v==="1"); break;
     case "notaChip": { const has=tieneNota(d,v); const parts=(d.notas||"").split(/,\s*/).map(x=>x.trim()).filter(Boolean); d.notas=(has?parts.filter(x=>x.toLowerCase()!==v.toLowerCase()):parts.concat([v])).join(", "); R(); break; }
     case "irDuplicado": { const cur=ui.editing; const vacio=!d.personas.some(p=>personLines(p).length); ui.editing=null; ui.draft=null; clearTimeout(saveTimer); hide("mEditor"); clearPresence(cur); if(vacio&&mine.has(cur)) deleteCard(cur); openEditor(id); toast("Editando el pedido que ya existía"); break; }
