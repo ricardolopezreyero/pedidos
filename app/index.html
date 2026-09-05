@@ -200,6 +200,10 @@ body.is-home .suc,body.is-home #btnCall,body.is-home #btnShare,body.is-home #btn
 .conf-per ul{margin:4px 0 0;padding-left:18px;font-weight:700;font-size:14.5px;line-height:1.5}
 .conf-none{font-size:13px;color:var(--mut);font-weight:700;margin-top:2px}
 .conf-tot{margin-top:8px;font-weight:900;color:var(--g);font-size:14px}
+.tot .total{color:var(--g);font-weight:900;margin-left:6px}
+.mn-h{display:flex;justify-content:space-between;align-items:baseline;font-weight:900;font-size:16px;margin:14px 0 6px;padding-bottom:4px;border-bottom:2px solid var(--y)}.mn-h:first-child{margin-top:0}.mn-h small{font-weight:700;color:var(--mut);font-size:12px}
+.mn-row{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px dashed var(--line);font-weight:700;font-size:14.5px}.mn-row b{color:var(--ink)}.mn-row small{font-size:12px}.mn-row.off{opacity:.45;text-decoration:line-through}
+.mn-sub{font-size:12.5px;color:var(--mut);font-weight:700;margin:2px 0 6px;line-height:1.5}
 /* masa: harina ámbar 🌾 · maíz azul 🌽 — misma identidad en todo el sistema — RLR */
 .mt{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:1px 6px;margin-left:5px;vertical-align:middle;font-style:normal}
 .mt.m-h{background:#FFE3A0;color:#7a4f00}.mt.m-m{background:#DBEAFE;color:#1d4ed8}
@@ -326,7 +330,7 @@ textarea.msg{width:100%;min-height:46vh;font-family:ui-monospace,SFMono-Regular,
     <div class="tel" id="sucTel"></div>
   </div>
   <div class="hbtns">
-    <a class="ib" id="btnCall" title="Llamar a la sucursal" href="#">📞</a><button class="ib" id="btnShare" title="Compartir liga">🔗</button>
+    <a class="ib" id="btnCall" title="Llamar a la sucursal" href="#">📞</a><button class="ib" id="btnShare" title="Compartir liga">🔗</button><button class="ib" id="btnMenu" title="Menú y precios">📋</button>
     <button class="ib" id="btnCfg" title="Configuración">⚙️</button>
   </div>
 </header>
@@ -377,6 +381,13 @@ textarea.msg{width:100%;min-height:46vh;font-family:ui-monospace,SFMono-Regular,
 </div>
 
 <!-- Config -->
+<div class="modal" id="mMenu">
+  <div class="sheet">
+    <div class="head"><h2>📋 Menú</h2><button class="x" data-a="close" data-v="mMenu">✕</button></div>
+    <div class="body" id="menuBody"></div>
+    <div class="foot"><div class="sum" id="menuSuc"></div><button class="btn p" data-a="close" data-v="mMenu">Cerrar</button></div>
+  </div>
+</div>
 <div class="modal" id="mCfg">
   <div class="sheet">
     <div class="head"><h2>⚙️ Configuración</h2><button class="x" data-a="close" data-v="mCfg">✕</button></div>
@@ -430,8 +441,9 @@ const goTo=sl=>{ location.href=LOCAL?location.pathname+"?t="+sl:"/"+sl; };
 let SUCURSALES=[
   {id:"sanatorio",n:"Sanatorio Español",tels:["8717189478","8715093598"]},
   {id:"vinedos",  n:"Viñedos",          tels:["8712036783","8714189903"]},
-  {id:"juarez",   n:"Juárez",           tels:["8719432960"]},
-  {id:"ibero",    n:"Villas de la Ibero",tels:["8719757123"]}
+  {id:"juarez",   n:"Juárez",           tels:["8719432960","8713326391"]},
+  {id:"ibero",    n:"Villas de la Ibero",tels:["8719757123","8714334785"]},
+  {id:"independencia",n:"Independencia",tels:["8717240720"]}
 ];
 function aplicarSucursales(v){ const arr=Object.entries(v||{}).filter(([k,x])=>x&&x.activa!==false).map(([k,x])=>({id:k,n:x.n||k,tels:(Array.isArray(x.tels)?x.tels:Object.values(x.tels||{})).filter(Boolean),orden:x.orden||0,creado:x.creado||0})).sort((a,b)=>(a.orden-b.orden)||(a.creado-b.creado)); if(arr.length) SUCURSALES=arr; }
 const ROLES=[
@@ -479,7 +491,9 @@ const disponible=(c,name,masa)=>{ const v=cat[catKey(c,name)]; if(!v) return tru
 const picDe=(name,cat)=>{ cat=cat||"g"; const nm=cat==="sal"?normSalsa(name):name; const v=menu[cat+"_"+slugify(nm)]; if(v&&v.pic!=null) return +v.pic; if(cat==="sal") return SALSAS_PIC[nm]||0; const g=GUISOS.find(x=>x.n===name); return g?g.pic:0; };
 const picTxt=(name,cat)=>{ const n=picDe(name,cat); return n?" "+"🌶".repeat(n):""; };
 // Precios desde el catálogo de la sucursal (harina y maíz por separado). Solo se muestra el TOTAL y solo si el admin lo activa (config.mostrarPrecios) — RLR
-function precioDe(c,name,masa){ const v=cat[catKey(c,name)]||{}; if(c==="g"&&masa==="maiz"&&v.precioM!=null&&v.precioM!=="") return +v.precioM; return v.precio!=null&&v.precio!==""?+v.precio:null; }
+const PRECIOS_BASE={g:27,"g_barbacoa":36,"g_combinada":28,ch:110,"ex_huevo-estrellado":15,"ex_huevo-revuelto":15,"ex_guiso-favorito":25,"b_cafe-de-olla":42,"b_cafe-de-grano":42,"b_jugo-de-naranja":56,"b_refresco":35,"po_gordita-nutella":30,"po_gordita-cajeta":30,"po_brownie":32,"po_pay":32};   // menú impreso sep-2026 — RLR
+const precioBase=(c,name)=>{ const k=catKey(c,name); return PRECIOS_BASE[k]!=null?PRECIOS_BASE[k]:(PRECIOS_BASE[c]!=null?PRECIOS_BASE[c]:null); };
+function precioDe(c,name,masa){ const v=cat[catKey(c,name)]||{}; if(c==="g"&&masa==="maiz"&&v.precioM!=null&&v.precioM!=="") return +v.precioM; if(v.precio!=null&&v.precio!=="") return +v.precio; return precioBase(c,name); }
 function suscribirCatalogo(){ if(!db||!SLUG||config.sucursal===catSuc) return; if(catRef) catRef.off(); catSuc=config.sucursal; catRef=db.ref(ROOT+"/catalogo/"+catSuc);
   catRef.on("value",s=>{ const antes=cat; cat=s.val()||{}; renderBoard(); if(ui.draft) renderEditor();
     // Se acabó algo: avisar a quien lo trae en su pedido sin mandar o en lo que está escribiendo — RLR
@@ -699,8 +713,8 @@ function totStr(t){ const s=[]; if(t.g) s.push("🫓 "+t.g+" gordita"+(t.g>1?"s"
 function totCorto(t){ const s=[]; if(t.g) s.push(t.g+" gordita"+(t.g>1?"s":"")); if(t.ch) s.push(t.ch+" chilaquiles"); if(t.po) s.push(t.po+" postre"+(t.po>1?"s":"")); if(t.b) s.push(t.b+" bebida"+(t.b>1?"s":"")); return s.join(" · "); }
 // Precios opcionales (⚙️): si Ricardo los captura, se estima cuánto es por familia y en total — RLR
 const num=v=>{ const x=parseFloat(String(v||"").replace(/[^0-9.]/g,"")); return isNaN(x)?0:x; };
-function hayPrecios(){ return !!config.mostrarPrecios&&Object.values(cat).some(v=>v&&(v.precio!=null&&v.precio!==""||v.precioM!=null&&v.precioM!="")); }
-function costo(c){ if(!hayPrecios()) return null; let t=0; toArr(c.personas).forEach(p=>{ toArr(p.gorditas).forEach(l=>{ t+=(precioDe("g",l.guiso,l.masa)||0)*(+l.cant||0); }); if(p.chilaquiles) t+=(precioDe("ch","Chilaquiles")||0)*(+p.chilaquiles.cant||1); toArr(p.bebidas).forEach(l=>{ t+=(precioDe("b",l.nombre)||0)*(+l.cant||0); }); toArr(p.postres).forEach(l=>{ t+=(precioDe("po",l.nombre)||0)*(+l.cant||0); }); }); return t; }
+function hayPrecios(){ return true; }   // siempre hay precio (catálogo de la sucursal o menú base); solo se enseña el TOTAL, nunca por producto — RLR
+function costo(c){ if(!hayPrecios()) return null; let t=0; toArr(c.personas).forEach(p=>{ toArr(p.gorditas).forEach(l=>{ t+=(precioDe("g",l.guiso,l.masa)||0)*(+l.cant||0); }); if(p.chilaquiles){ const n=+p.chilaquiles.cant||1; t+=(precioDe("ch","Chilaquiles")||0)*n; toArr(p.chilaquiles.extras).forEach(x=>{ t+=(precioDe("ex",x)||0)*n; }); } toArr(p.bebidas).forEach(l=>{ t+=(precioDe("b",l.nombre)||0)*(+l.cant||0); }); toArr(p.postres).forEach(l=>{ t+=(precioDe("po",l.nombre)||0)*(+l.cant||0); }); }); return t; }
 const money=x=>"$"+Math.round(x).toLocaleString("es-MX");
 function cierreInfo(){ const c=(config.cierre||"").trim(); const m=/^(\d{1,2}):(\d{2})$/.exec(c); if(!m) return null;
   const d=new Date(); d.setHours(+m[1],+m[2],0,0); const diff=Math.round((d-Date.now())/60000);
@@ -733,7 +747,7 @@ function buildMessage(cards){
       p.postres.forEach(l=>{ pos[l.nombre]=(pos[l.nombre]||0)+l.cant; });
     });
     if(c.notas) L.push("    📝 "+c.notas);
-    const $c=costo(c); if($c!=null){ costoTotal+=$c; L.push("    💰 aprox. "+money($c)); }
+    const $c=costo(c); if($c!=null){ costoTotal+=$c; L.push("    💰 Total: "+money($c)); }
     L.push("");
   });
   L.push("🧮 *RESUMEN PARA COCINA*");
@@ -742,7 +756,7 @@ function buildMessage(cards){
   if(ch) L.push("🍳 Chilaquiles: "+ch);
   const pk=Object.keys(pos); if(pk.length) L.push("🍰 Postres: "+pk.reduce((a,k)=>a+pos[k],0)+" ("+pk.map(k=>pos[k]+" "+k.toLowerCase()).join(", ")+")");
   const bk=Object.keys(beb); if(bk.length) L.push("☕ Bebidas: "+bk.reduce((a,k)=>a+beb[k],0)+" ("+bk.map(k=>beb[k]+" "+k.toLowerCase()).join(", ")+")");
-  if(hayPrecios()) L.push("💰 Total aprox.: "+money(costoTotal));
+  if(hayPrecios()) L.push("💰 TOTAL DEL PEDIDO: "+money(costoTotal));
   L.push("");
   L.push("¡Gracias! 🐸");
   return L.join("\n");
@@ -845,7 +859,7 @@ function cardHTML(c){
     ${tagsHTML(c,host&&!MESA())}
     <div class="persons">${persons}</div>
     ${c.notas?`<div class="notas">📝 ${esc(c.notas)}</div>`:""}
-    <div class="tot">${esc(totStr(t))}${$c!=null?`<span>💰 aprox. ${money($c)}</span>`:""}</div>
+    <div class="tot">${esc(totStr(t))}${$c?`<span class="total">💰 Total ${money($c)}</span>`:""}</div>
     <div class="acts">${A}</div></article>`;
 }
 
@@ -892,7 +906,7 @@ function openConfirm(d){ const v=validarDraft(d); const $c=costo(d);
     ${v.err.length?`<div class="warn">⚠️ Falta resolver:<br>${v.err.map(esc).join("<br>")}</div>`:""}
     ${d.personas.map(p=>{ const L=personLines(p); return `<div class="conf-per${L.length?"":" none"}"><div class="conf-nom">${rolDe(p).e} ${esc(nombreDe(p))}</div>${L.length?`<ul>${L.map(l=>`<li>${lineaHTML(l)}</li>`).join("")}</ul>`:`<div class="conf-none">Sin pedido esta vez</div>`}</div>`; }).join("")}
     ${d.notas?`<div class="notas">📝 ${esc(d.notas)}</div>`:""}
-    <div class="conf-tot">${esc(totStr(totales(d)))}${$c!=null?` · 💰 aprox. ${money($c)}`:""}</div>`;
+    <div class="conf-tot">${esc(totStr(totales(d)))}${$c?` · 💰 Total ${money($c)}`:""}</div>`;
   $("#confFoot").innerHTML=`<button class="btn ghost" data-a="close" data-v="mConf">✏️ Seguir editando</button><button class="btn p" data-a="confirmar" ${v.err.length?"disabled":""}>${MESA()?"🍳 Ordenar":d.estado==="pedido"?"💾 Guardar cambio":"✅ Confirmar pedido"}</button>`;
   show("mConf"); }
 function closeEditor(listo,confirmado){ if(!ui.draft) return; clearTimeout(saveTimer);
@@ -1023,6 +1037,16 @@ function renderCfg(){ $("#cfgBody").innerHTML=`
   <label class="f hostrow"><input type="checkbox" data-a="hostToggle" ${host?"checked":""}> <span><b>Soy el anfitrión</b> (solo en esta pantalla): ver los botones de mandar por WhatsApp y mover pedidos. Se confirma con el celular del anfitrión${ui.anf?" ("+esc(ui.anf.nombre)+")":""}.</span></label>
   <p style="font-size:12.5px;color:var(--mut);font-weight:700">Servicio a domicilio en las 4 sucursales (también Uber Eats, DiDi Food y Rappi). Los cambios se guardan solos. <a href="/manual#anfitrion" target="_blank" style="color:var(--g)">📖 ¿Cómo se usa?</a></p>`; }
 $("#btnCfg").addEventListener("click",()=>{ _cfgPrev=clone(config); renderCfg(); show("mCfg"); });
+/* Menú limpio con precios (solo para consultar; al pedir no estorban) — RLR */
+function renderMenu(){ const $m=money; const off=(c,n)=>!disponible(c,n); const fila=(n,pr,extra,o)=>`<div class="mn-row${o?" off":""}"><span>${esc(n)}${extra||""}</span><b>${pr!=null?$m(pr):"—"}</b></div>`;
+  const gH=precioDe("g","Picadillo","harina"), gM=precioDe("g","Picadillo","maiz"); const iguales=gH===gM;
+  const gord=GUISOS.map(g=>{ const h=precioDe("g",g.n,"harina"), m=precioDe("g",g.n,"maiz"); const pic=picDe(g.n); return fila(g.n,h,(pic?` <small>${"🌶".repeat(pic)}</small>`:"")+(h!==m?` <small class="mut">· 🌽 maíz ${$m(m)}</small>`:""),off("g",g.n)); }).join("");
+  $("#menuBody").innerHTML=`<div class="mn-h">🫓 Gorditas <small>harina o maíz${iguales?" · mismo precio":""}</small></div>${gord}
+    <div class="mn-h">🍳 Chilaquiles <b>${$m(precioDe("ch","Chilaquiles"))}</b></div><div class="mn-sub">Salsa: ${SALSAS.map(x=>esc(x)+(picDe(x,"sal")?" "+"🌶".repeat(picDe(x,"sal")):"")).join(" · ")}<br>Queso: ${QUESOS.join(" · ")}</div>${EXTRAS.map(x=>fila("＋ "+x,precioDe("ex",x),"",off("ex",x))).join("")}
+    <div class="mn-h">🍰 Postres</div>${POSTRES.map(x=>fila(x.n,precioDe("po",x.n),"",off("po",x.n))).join("")}
+    <div class="mn-h">☕ Bebidas</div>${BEBIDAS.map(x=>fila(x.n,precioDe("b",x.n),"",off("b",x.n))).join("")}`;
+  $("#menuSuc").textContent="📍 "+getSuc().n+" · lo tachado está agotado hoy"; }
+$("#btnMenu").addEventListener("click",()=>{ renderMenu(); show("mMenu"); });
 $("#btnShare").addEventListener("click",compartir);
 document.addEventListener("input",e=>{ const el=e.target.closest("[data-cfg]"); if(!el) return; config[el.dataset.cfg]=el.type==="checkbox"?el.checked:el.value; if(el.dataset.cfg==="sucursal") config.telIdx=0; clearTimeout(saveTimer); saveTimer=setTimeout(()=>saveConfig(true),400); });
 $("#mCfg").addEventListener("input",()=>{});
