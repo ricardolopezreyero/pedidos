@@ -123,6 +123,62 @@ tr.tot td{font-weight:900;background:var(--y3)}
 .form label{font-size:12px;font-weight:800;color:var(--mut);display:flex;flex-direction:column;gap:4px}
 .form input{border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;font-weight:800}
 @media(max-width:600px){.form{grid-template-columns:1fr}}
+/* buscador */
+.buscar{border:1.5px solid var(--line);border-radius:12px;padding:9px 12px;font-weight:800;min-width:260px;flex:1;max-width:420px}
+.buscar:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(46,158,62,.15)}
+/* productos: masas y picor */
+.items.wide{grid-template-columns:repeat(auto-fill,minmax(360px,1fr))}
+.item .nm{flex:1;min-width:0}
+.masas{display:inline-flex;gap:3px}
+.mb{width:28px;height:26px;border-radius:8px;border:1.5px solid var(--g);background:var(--g2);color:var(--g);font-weight:900;font-size:12px;padding:0}
+.mb.off{border-color:#f3b8b4;background:var(--r2);color:#b3261e;text-decoration:line-through}
+.pics{display:inline-flex;gap:2px;margin-left:4px}
+.pb{border:1.5px solid var(--line);background:#fff;border-radius:8px;padding:2px 5px;font-size:10px;line-height:1.4;letter-spacing:-2px;min-width:26px}
+.pb.on{border-color:var(--r);background:var(--r2)}
+.item.off .mb,.item.off .pb{opacity:.5}
+/* mostrador */
+.abiertos{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip-ped{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:6px 12px;text-align:left;display:flex;flex-direction:column;gap:1px}
+.chip-ped b{font-size:13.5px}.chip-ped span{font-size:11.5px;color:var(--mut);font-weight:700}
+.chip-ped.on{border-color:var(--ink);background:var(--y)}
+.chip-ped.nuevo{background:var(--g);color:#fff;border-color:var(--g);font-weight:900;justify-content:center}
+.chip-ped.nuevo small{opacity:.8}
+.pos{display:grid;grid-template-columns:1.4fr 1fr;gap:12px;align-items:start}
+@media(max-width:900px){.pos{grid-template-columns:1fr}}
+.pos input{border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-weight:800;width:100%}
+.pos input.big{font-size:17px;padding:11px 12px}
+.pos input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(46,158,62,.15)}
+.personas{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.per{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:6px 12px;text-align:left;display:flex;flex-direction:column}
+.per b{font-size:13.5px}.per span{font-size:11px;color:var(--mut);font-weight:700}
+.per.on{border-color:var(--ink);background:var(--y)}
+.per.add{background:var(--g2);border-color:var(--g);color:var(--g);font-weight:900;justify-content:center}
+.seg{display:inline-flex;background:#ECE4C8;border-radius:999px;padding:3px}
+.seg button{border:0;background:transparent;padding:6px 12px;border-radius:999px;font-weight:900;font-size:13px;color:#6b5a00}
+.seg button.on{background:var(--ink);color:var(--y)}
+.seg small{opacity:.6;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:7px 11px;font-weight:800;font-size:13px;display:inline-flex;align-items:center;gap:5px}
+.chip.has{border-color:var(--g);background:var(--g2)}
+.chip.first{border-color:var(--ink);box-shadow:0 0 0 2px var(--y)}
+.chip.off{border-color:#f3b8b4;background:#fff5f4;color:#b3261e;text-decoration:line-through;opacity:.8}
+.chip .cnt{background:var(--g);color:#fff;border-radius:999px;padding:1px 7px;font-size:11px}
+.chip .cnt.no{background:var(--r);text-decoration:none}
+.chip .pic{font-size:10px;letter-spacing:-2px}
+.lines .line{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px dashed var(--line);flex-wrap:wrap}
+.lines .line:first-child{border-top:0}
+.line.off{background:var(--r2);border-radius:10px;padding-left:6px}
+.qty{display:inline-flex;align-items:center;gap:3px}
+.qty button{width:30px;height:30px;border-radius:9px;border:1.5px solid var(--line);background:#fff;font-size:17px;font-weight:900;line-height:1;padding:0}
+.qty b{min-width:26px;text-align:center;background:var(--y);border-radius:8px;padding:4px 0}
+.ln{flex:1;font-weight:800;min-width:120px}
+.ln em{font-style:normal;color:var(--mut);font-size:11px;text-transform:uppercase;margin-left:4px}
+.det{width:140px!important;padding:5px 8px!important;font-size:12.5px!important;margin-left:6px}
+.chrow{width:100%;display:flex;gap:4px;flex-wrap:wrap;padding-left:4px}
+.mini{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:3px 9px;font-size:12px;font-weight:800}
+.mini.on{background:var(--ink);color:var(--y);border-color:var(--ink)}
+.pos-tot{margin-top:10px;font-weight:800;color:var(--mut);font-size:13px}
+.pos-tot .money{font-size:20px;color:var(--ink);font-weight:900;margin-top:4px}
 /* acceso */
 .gate{position:fixed;inset:0;background:var(--ink);display:grid;place-items:center;z-index:99;padding:20px}
 .gate form{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:360px;text-align:center}
@@ -155,7 +211,9 @@ const FIREBASE_CONFIG={apiKey:"AIzaSyDSAFxL2E_S1iHiRfSHGbbuHiR_-2j-HP4",authDoma
 const ROOT="ranitas", CLAVE_MAESTRA="123";   // usuario maestro (provisional)
 const SUCURSALES=[{id:"sanatorio",n:"Sanatorio Español"},{id:"vinedos",n:"Viñedos"},{id:"juarez",n:"Juárez"},{id:"ibero",n:"Villas de la Ibero"}];
 const ROLES={papa:"👨",mama:"👩",hijo:"👦",hija:"👧",otro:"🙂"};
-const VISTAS=[{id:"panorama",n:"Panorama",e:"📊"},{id:"pedidos",n:"Pedidos",e:"📋"},{id:"productos",n:"Productos",e:"🏪"},{id:"precios",n:"Precios",e:"💲"},{id:"usuarios",n:"Usuarios",e:"👥"}];
+const VISTAS=[{id:"panorama",n:"Panorama",e:"📊"},{id:"pedidos",n:"Pedidos",e:"📋"},{id:"mostrador",n:"Mostrador",e:"🧾"},{id:"productos",n:"Productos",e:"🏪"},{id:"precios",n:"Precios",e:"💲"},{id:"usuarios",n:"Usuarios",e:"👥"}];
+const GUISOS_PIC={"Chicharrón prensado":2,"Chicharrón pella":2,"Carne con chile":2,"Guiso verde":1,"Huevo verde":1,"Huevo rojo":1,"Asado":1};   // picor de fábrica (editable en Productos → ranitas/menu)
+const SALSAS=["Verde cremosa","Roja","Verde tomatillo","Chipotle con crema","La más picosa 🌶🌶🌶"], QUESOS=["Asadero","Chihuahua"], EXTRAS=["Huevo estrellado","Huevo revuelto","Guiso favorito"];
 const slugify=x=>(x||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
 const catKey=(c,name)=>c+"_"+slugify(name);
 const CATALOGO=[
@@ -207,7 +265,7 @@ if(sesion()) $("#gate").style.display="none"; else setTimeout(()=>$("#pw").focus
 
 /* ---------- datos en vivo ---------- */
 const QS=new URLSearchParams(location.search);
-let tableros={}, anfitriones={}, catalogo={}, online=false, prev={}, first=true, flash={};
+let tableros={}, anfitriones={}, catalogo={}, menu={}, online=false, prev={}, first=true, flash={}, q="";
 let vista=QS.get("v")||"panorama", fSuc=QS.get("suc")||"", fTab=QS.get("t")||"", pSuc=QS.get("suc")||"vinedos";
 if(!VISTAS.some(v=>v.id===vista)) vista="panorama";
 firebase.initializeApp(FIREBASE_CONFIG); const db=firebase.database();
@@ -215,6 +273,7 @@ db.ref(".info/connected").on("value",s=>{ online=!!s.val(); $("#dot").className=
 db.ref(ROOT+"/anfitriones").on("value",s=>{ anfitriones=s.val()||{}; render(); });
 db.ref(ROOT+"/tableros").on("value",s=>{ tableros=s.val()||{}; render(); });
 db.ref(ROOT+"/catalogo").on("value",s=>{ catalogo=s.val()||{}; render(); });
+db.ref(ROOT+"/menu").on("value",s=>{ menu=s.val()||{}; render(); });
 db.ref(ROOT+"/admin/usuarios").on("value",s=>{ usuarios=s.val()||{}; refrescarYo(); });
 setInterval(render,30000);
 function allCards(){ const out=[]; Object.keys(tableros).forEach(sl=>{ const t=tableros[sl]||{}; const cfg=t.config||{}; Object.keys(t.pedidos||{}).forEach(id=>{ const c=t.pedidos[id]; if(!c) return; out.push(Object.assign({},c,{id,slug:sl,personas:toArr(c.personas),sucursal:c.sucursal||cfg.sucursal||"",tablero:(anfitriones[sl]||{}).nombre||sl})); }); }); return out; }
@@ -228,10 +287,18 @@ function renderNav(){ const cards=allCards(); const vis=yo?yo.vistas:[];
   $("#nav").innerHTML=VISTAS.filter(v=>vis.includes(v.id)).map(v=>{ let n=""; if(v.id==="pedidos") n=cards.filter(c=>c.estado==="pedido").length||""; if(v.id==="productos"){ const a=SUCURSALES.reduce((s,x)=>s+apagados(x.id).length,0); n=a||""; } if(v.id==="usuarios") n=Object.keys(usuarios).length+1; return `<button class="${vista===v.id?"on":""}" data-v="${v.id}">${v.e} ${v.n}${n!==""?`<span class="n">${n}</span>`:""}</button>`; }).join("");
   $("#who").textContent=yo?yo.nombre:""; }
 $("#nav").addEventListener("click",e=>{ const b=e.target.closest("[data-v]"); if(!b) return; vista=b.dataset.v; syncUrl(); render(); });
-function render(){ if(!yo) return; if(!yo.vistas.includes(vista)) vista=yo.vistas[0]; if(!vista) return; renderNav(); ({panorama:renderPanorama,pedidos:renderPedidos,productos:renderProductos,precios:renderPrecios,usuarios:renderUsuarios})[vista](); }
+function render(){ if(!yo) return; if(!yo.vistas.includes(vista)) vista=yo.vistas[0]; if(!vista) return; renderNav(); if(pos.card&&vista==="mostrador"){ renderMostrador(); return; } ({panorama:renderPanorama,pedidos:renderPedidos,mostrador:renderMostrador,productos:renderProductos,precios:renderPrecios,usuarios:renderUsuarios})[vista](); }
+const picDe=name=>{ const v=menu["g_"+slugify(name)]; return v&&v.pic!=null?+v.pic:(GUISOS_PIC[name]||0); };
+// ---- precios: costo total de un pedido con el catálogo de su sucursal (harina y maíz por separado). Solo se muestra el total. — RLR
+function precioDe(suc,cat,name,masa){ const v=(catalogo[suc]||{})[catKey(cat,name)]||{}; if(cat==="g"&&masa==="maiz"&&v.precioM!=null&&v.precioM!=="") return +v.precioM; return v.precio!=null&&v.precio!==""?+v.precio:null; }
+function hayPrecios(suc){ return Object.values(catalogo[suc]||{}).some(v=>v&&(v.precio!=null&&v.precio!==""||v.precioM!=null&&v.precioM!=="")); }
+function costo(c){ const suc=c.sucursal||((tableros[c.slug]||{}).config||{}).sucursal; if(!suc||!hayPrecios(suc)) return null; let t=0;
+  toArr(c.personas).forEach(p=>{ toArr(p.gorditas).forEach(l=>{ t+=(precioDe(suc,"g",l.guiso,l.masa)||0)*(+l.cant||0); }); if(p.chilaquiles) t+=(precioDe(suc,"ch","Chilaquiles")||0)*(+p.chilaquiles.cant||1); toArr(p.bebidas).forEach(l=>{ t+=(precioDe(suc,"b",l.nombre)||0)*(+l.cant||0); }); toArr(p.postres).forEach(l=>{ t+=(precioDe(suc,"po",l.nombre)||0)*(+l.cant||0); }); }); return t; }
+const money=x=>"$"+Math.round(x).toLocaleString("es-MX");
 function filtrosHTML(){ const sl=Object.keys(anfitriones).sort((a,b)=>(anfitriones[a].nombre||a).localeCompare(anfitriones[b].nombre||b));
   return `<select id="fSuc"><option value="">📍 Todas las sucursales</option>${SUCURSALES.map(s=>`<option value="${s.id}"${fSuc===s.id?" selected":""}>📍 ${s.n}</option>`).join("")}</select>
   <select id="fTab"><option value="">🏠 Todos los tableros</option>${sl.map(k=>`<option value="${k}"${fTab===k?" selected":""}>🏠 ${esc(anfitriones[k].nombre||k)} · /${k}</option>`).join("")}</select>`; }
+document.addEventListener("input",e=>{ if(e.target.id==="q"){ q=e.target.value; const st=e.target.selectionStart; renderPedidos(); const i=$("#q"); if(i){ i.focus(); try{ i.setSelectionRange(st,st); }catch(x){} } } });
 document.addEventListener("change",e=>{ if(e.target.id==="fSuc"){ fSuc=e.target.value; syncUrl(); render(); } if(e.target.id==="fTab"){ fTab=e.target.value; syncUrl(); render(); } if(e.target.id==="pSuc"){ pSuc=e.target.value; syncUrl(); render(); } });
 
 /* ---------- 1. PANORAMA: capa 1 = ahora mismo · capa 2 = acumulado para decidir ---------- */
@@ -301,11 +368,12 @@ function renderPanorama(){
 }
 
 /* ---------- 2. PEDIDOS (kanban del negocio) ---------- */
+function coincide(c,q){ if(!q) return true; const t=(c.familia+" "+c.tablero+" "+c.id+" "+toArr(c.personas).map(p=>nombreDe(p)+" "+personLines(p).join(" ")).join(" ")+" "+(c.notas||"")).toLowerCase(); return q.toLowerCase().split(/\s+/).filter(Boolean).every(w=>t.includes(w)); }
 function renderPedidos(){
-  const cards=filtradas(); const snap={}; const now=Date.now(); Object.keys(flash).forEach(k=>{ if(now-flash[k]>1600) delete flash[k]; });
+  const cards=filtradas().filter(c=>coincide(c,q)); const snap={}; const now=Date.now(); Object.keys(flash).forEach(k=>{ if(now-flash[k]>1600) delete flash[k]; });
   cards.forEach(c=>{ snap[c.id]=JSON.stringify(c); if(!first&&c._w!==SID&&prev[c.id]!==snap[c.id]) flash[c.id]=now; }); prev=snap; first=false;
   const Tc=sumT(cards.filter(ETAPAS[2].f));
-  $("#main").innerHTML=`<div class="top"><h1>📋 Pedidos</h1><span class="sp"></span>${filtrosHTML()}<div class="sub">🍳 En cocina ahora: ${esc(totStr(Tc))} · toca los botones para avanzar cada pedido; las familias lo ven al instante.</div></div>
+  $("#main").innerHTML=`<div class="top"><h1>📋 Pedidos</h1><input class="buscar" id="q" value="${esc(q)}" placeholder="🔎 Buscar familia, persona, guiso, tablero…"><span class="sp"></span>${filtrosHTML()}<div class="sub">🍳 En cocina ahora: ${esc(totStr(Tc))} · toca los botones para avanzar cada pedido; las familias lo ven al instante.${q?` · <b>${cards.length}</b> resultado${cards.length===1?"":"s"} para "${esc(q)}"`:""}</div></div>
   <div class="board">${ETAPAS.map(e=>{ const cs=cards.filter(e.f).sort((a,b)=>(b.actualizado||0)-(a.actualizado||0)); return `<section class="col k${e.k}"><div class="col-head"><span>${e.n}</span><span class="n">${cs.length}</span></div><div class="cards">${cs.length?cs.map(cardHTML).join(""):`<div class="empty">Nada por aquí</div>`}</div></section>`; }).join("")}</div>`;
 }
 function cardHTML(c){
@@ -325,26 +393,109 @@ function cardHTML(c){
     <div class="badges"><span class="b tab">🏠 ${esc(c.tablero)}</span>${suc?`<span class="b suc">📍 ${esc(suc.n)}</span>`:""}${c.estado==="pedido"?`<span class="b">📲 ${fmtFecha(c.pedidoEn)}</span>`:""}${c.estado==="entregado"?`<span class="b ok">🛵 ${fmtFecha(c.entregadoEn)}</span>`:""}${cfg.entrega?`<span class="b">⏰ ${esc(cfg.entrega)}</span>`:""}</div>
     <div>${persons}</div>${c.notas?`<div class="notas">📝 ${esc(c.notas)}</div>`:""}
     ${c.estado!=="armando"&&cfg.direccion?`<div class="notas">🏠 ${esc(cfg.direccion)}${cfg.telAnfitrion?" · 📞 "+esc(cfg.telAnfitrion):""}</div>`:""}
-    <div class="tot">${esc(totStr(totales(c)))}</div><div class="acts">${A}</div></article>`;
+    <div class="tot">${esc(totStr(totales(c)))}${costo(c)!=null?` · <b>💰 ${money(costo(c))}</b>`:""}</div><div class="acts">${A}${c.estado!=="archivado"?`<button class="btn y" data-a="editar" data-id="${c.id}" data-s="${c.slug}">✏️ Editar</button>`:""}</div></article>`;
 }
 function upd(slug,id,patch){ patch.actualizado=Date.now(); patch._w=SID; db.ref(ROOT+"/tableros/"+slug+"/pedidos/"+id).update(patch).catch(()=>toast("No se pudo guardar")); }
+
+/* ---------- 2b. MOSTRADOR: pedidos en sucursal a toda velocidad; también edita cualquier pedido del kanban — RLR ---------- */
+const pos={card:null,slug:null,per:0,masa:"harina",qtxt:"",abiertos:{}};
+const mostSlug=suc=>"mostrador-"+suc;
+async function asegurarMostrador(suc){ const sl=mostSlug(suc); if(!anfitriones[sl]){ const nom="Mostrador "+(SUCURSALES.find(s=>s.id===suc)||{}).n; await db.ref(ROOT+"/anfitriones/"+sl).set({nombre:nom,tel:"",slug:sl,mostrador:true,creado:Date.now()}); await db.ref(ROOT+"/tableros/"+sl+"/config").set({sucursal:suc,telIdx:0,anfitrion:nom,telAnfitrion:"",direccion:"En sucursal",entrega:"",pago:"efectivo",pagoCon:"",sms:false}); } return sl; }
+const nuevaPersona=(i)=>({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),rol:"otro",nombre:"Persona "+i,masa:"harina",gorditas:[],bebidas:[],postres:[],chilaquiles:null});
+function nuevoPedidoPos(){ const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6); pos.card={id,familia:"",estado:"armando",listo:false,mostrador:true,creado:Date.now(),actualizado:Date.now(),sucursal:pSuc,personas:[nuevaPersona(1)],notas:""}; pos.slug=null; pos.per=0; pos.masa="harina"; pos.qtxt=""; renderMostrador(); setTimeout(()=>{ const i=$("#posNombre"); if(i) i.focus(); },50); }
+function abrirEnMostrador(slug,id){ const c=(tableros[slug]||{}).pedidos&&tableros[slug].pedidos[id]; if(!c) return; pos.card=JSON.parse(JSON.stringify(Object.assign({id},c,{personas:toArr(c.personas).map(p=>Object.assign(p,{gorditas:toArr(p.gorditas),bebidas:toArr(p.bebidas),postres:toArr(p.postres),chilaquiles:p.chilaquiles?Object.assign(p.chilaquiles,{extras:toArr(p.chilaquiles.extras)}):null}))}))); pos.slug=slug; pos.per=0; pos.masa=(pos.card.personas[0]||{}).masa||"harina"; pos.qtxt=""; const cfg=(tableros[slug]||{}).config||{}; if(cfg.sucursal) pSuc=cfg.sucursal; vista="mostrador"; syncUrl(); render(); }
+async function guardarPos(silencio){ const c=pos.card; if(!c) return null; const slug=pos.slug||await asegurarMostrador(pSuc); pos.slug=slug; c.actualizado=Date.now(); c._w=SID; if(!c.familia) c.familia=c.mostrador?"Mostrador "+new Date().toLocaleTimeString("es-MX",{hour:"numeric",minute:"2-digit"}):""; await db.ref(ROOT+"/tableros/"+slug+"/pedidos/"+c.id).set(JSON.parse(JSON.stringify(c))); if(!silencio) toast("Guardado"); return slug; }
+async function mandarCocina(){ const c=pos.card; if(!c) return; if(!toArr(c.personas).some(p=>personLines(p).length)) return toast("El pedido está vacío"); Object.assign(c,{estado:"pedido",listo:true,etapa:"proceso",pedidoEn:Date.now(),sucursal:c.sucursal||pSuc}); await guardarPos(true); toast("🍳 Mandado a cocina · "+c.familia); pos.card=null; pos.slug=null; render(); }
+function minimizarPos(){ if(!pos.card) return; guardarPos(true).then(()=>{ toast("Minimizado · "+pos.card.familia); pos.card=null; pos.slug=null; render(); }); }
+function renderMostrador(){
+  const sl=mostSlug(pSuc); const abiertos=Object.entries(((tableros[sl]||{}).pedidos)||{}).map(([id,c])=>Object.assign({id},c)).filter(c=>c.estado==="armando"||c.estado==="porpedir").sort((a,b)=>(b.actualizado||0)-(a.actualizado||0));
+  const chips=`<div class="abiertos">${abiertos.map(c=>`<button class="chip-ped${pos.card&&pos.card.id===c.id?" on":""}" data-abrir="${c.id}"><b>${esc(c.familia||"sin nombre")}</b><span>${esc(totStr(totales(c)))}</span></button>`).join("")}<button class="chip-ped nuevo" id="posNuevo">➕ Nuevo pedido <small>(N)</small></button></div>`;
+  if(!pos.card){ $("#main").innerHTML=`<div class="top"><h1>🧾 Mostrador</h1>${sucSelect()}<div class="sub">Toma pedidos en la sucursal tecleando. Cada pedido tiene nombre; lo minimizas para atender otro y lo retomas cuando quieras. Atajos: <b>N</b> nuevo · escribe y <b>Enter</b> agrega · <b>H</b>/<b>M</b> masa · <b>+</b> persona.</div></div>${chips}<div class="empty" style="margin-top:30px">Elige un pedido abierto o crea uno nuevo.</div>`; return; }
+  const c=pos.card; const p=c.personas[pos.per]||c.personas[0]; if(!c.personas[pos.per]) pos.per=0;
+  const suc=c.sucursal||pSuc; const cat=catalogo[suc]||{}; const dispo=(k,masa)=>{ const v=cat[k]||{}; if(v.on===false) return false; if(masa==="harina"&&v.offH) return false; if(masa==="maiz"&&v.offM) return false; return true; };
+  const items=[]; CATALOGO[0].items.forEach(i=>items.push({c:"g",n:i,k:catKey("g",i)})); items.push({c:"ch",n:"Chilaquiles",k:catKey("ch","Chilaquiles")}); CATALOGO[5].items.forEach(i=>items.push({c:"b",n:i,k:catKey("b",i)})); CATALOGO[6].items.forEach(i=>items.push({c:"po",n:i,k:catKey("po",i)}));
+  const norm=x=>x.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,""); const m=/^(\d+)\s*(.*)$/.exec(pos.qtxt.trim()); const qn=m?m[2]:pos.qtxt.trim(); const ws=norm(qn).split(/\s+/).filter(Boolean); const filt=ws.length?items.filter(it=>{ const t=norm(it.n); return ws.every(w=>t.split(/\s+/).some(x=>x.startsWith(w))||t.includes(w)); }).sort((a,b)=>{ const sa=norm(a.n).startsWith(ws[0])?0:1, sb=norm(b.n).startsWith(ws[0])?0:1; return sa-sb; }):items;
+  const cnt={}; p.gorditas.forEach(l=>{ cnt[l.guiso]=cnt[l.guiso]||{harina:0,maiz:0}; cnt[l.guiso][l.masa]+=+l.cant||0; });
+  const chipHTML=(it,idx)=>{ const off=it.c==="g"?!dispo(it.k,pos.masa):!dispo(it.k); const badge=it.c==="g"&&cnt[it.n]?[cnt[it.n].harina?cnt[it.n].harina+"H":"",cnt[it.n].maiz?cnt[it.n].maiz+"M":""].filter(Boolean).join("·"):it.c==="ch"&&p.chilaquiles?(p.chilaquiles.cant||1):it.c==="b"?(p.bebidas.find(x=>x.nombre===it.n)||{}).cant:it.c==="po"?(p.postres.find(x=>x.nombre===it.n)||{}).cant:""; return `<button class="chip${badge?" has":""}${off?" off":""}${idx===0&&qn?" first":""}" data-add="${idx}">${({g:"🫓",ch:"🍳",b:"☕",po:"🍰"})[it.c]} ${esc(it.n)}${it.c==="g"&&picDe(it.n)?`<span class="pic">${"🌶".repeat(picDe(it.n))}</span>`:""}${off?`<span class="cnt no">agotado</span>`:badge?`<span class="cnt">${badge}</span>`:""}</button>`; };
+  const lineas=[]; p.gorditas.forEach((l,i)=>lineas.push(`<div class="line${dispo(catKey("g",l.guiso),l.masa)?"":" off"}"><span class="qty"><button data-q="g:${i}:-1">−</button><b>${l.cant}</b><button data-q="g:${i}:1">+</button></span><span class="ln">${esc(l.guiso)} <em>${l.masa==="maiz"?"maíz":"harina"}</em>${l.guiso==="Combinada"?`<input class="det" data-det="g:${i}" value="${esc(l.detalle||"")}" placeholder="¿de qué?">`:""}</span></div>`));
+  if(p.chilaquiles){ const ch=p.chilaquiles; lineas.push(`<div class="line chil"><span class="qty"><button data-q="ch::-1">−</button><b>${ch.cant||1}</b><button data-q="ch::1">+</button></span><span class="ln">Chilaquiles</span><div class="chrow">${SALSAS.map(x=>`<button class="mini${ch.salsa===x?" on":""}" data-ch="salsa:${esc(x)}">${esc(x)}</button>`).join("")}</div><div class="chrow">${QUESOS.map(x=>`<button class="mini${ch.queso===x?" on":""}" data-ch="queso:${esc(x)}">${esc(x)}</button>`).join("")}${EXTRAS.map(x=>`<button class="mini${(ch.extras||[]).includes(x)?" on":""}" data-ch="extra:${esc(x)}">+ ${esc(x)}</button>`).join("")}${(ch.extras||[]).includes("Guiso favorito")?`<select data-ch="guiso" class="mini"><option value="">¿guiso?</option>${CATALOGO[0].items.filter(x=>x!=="Combinada").map(x=>`<option${ch.guiso===x?" selected":""}>${esc(x)}</option>`).join("")}</select>`:""}</div></div>`); }
+  p.bebidas.forEach((l,i)=>lineas.push(`<div class="line${dispo(catKey("b",l.nombre))?"":" off"}"><span class="qty"><button data-q="b:${i}:-1">−</button><b>${l.cant}</b><button data-q="b:${i}:1">+</button></span><span class="ln">☕ ${esc(l.nombre)}${l.nombre==="Refresco"?`<input class="det" data-det="b:${i}" value="${esc(l.detalle||"")}" placeholder="¿cuál?">`:""}</span></div>`));
+  p.postres.forEach((l,i)=>lineas.push(`<div class="line${dispo(catKey("po",l.nombre))?"":" off"}"><span class="qty"><button data-q="po:${i}:-1">−</button><b>${l.cant}</b><button data-q="po:${i}:1">+</button></span><span class="ln">🍰 ${esc(l.nombre)}</span></div>`));
+  const $c=costo(Object.assign({},c,{sucursal:suc})); const t=totales(c); const origen=pos.slug&&!pos.slug.startsWith("mostrador-")?`<span class="b tab">🏠 ${esc((anfitriones[pos.slug]||{}).nombre||pos.slug)}</span> <span class="b">${esc(c.estado)}</span>`:`<span class="b suc">📍 ${esc((SUCURSALES.find(s=>s.id===suc)||{}).n||suc)}</span>`;
+  $("#main").innerHTML=`<div class="top"><h1>🧾 Mostrador</h1>${sucSelect()}<span class="sp"></span><button class="btn ghost" id="posMin">🗕 Minimizar</button>${c.estado==="armando"||c.estado==="porpedir"?`<button class="btn p" id="posCocina">🍳 Mandar a cocina</button>`:`<button class="btn p" id="posGuardar">💾 Guardar cambios</button>`}<button class="btn r" id="posBorrar">🗑</button></div>${chips}
+  <div class="pos">
+    <div class="pos-left">
+      <div class="card" style="padding:10px 12px;margin-bottom:10px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="posNombre" class="big" value="${esc(c.familia)}" placeholder="Nombre del pedido (cliente o mesa)">${origen}</div></div>
+      <div class="personas">${c.personas.map((pp,i)=>{ const L=personLines(pp); return `<button class="per${i===pos.per?" on":""}" data-per="${i}"><b>${esc(nombreDe(pp))}</b><span>${L.length?esc(totStr(totales({personas:[pp]}))):"sin nada"}</span></button>`; }).join("")}<button class="per add" id="posAddPer">➕ Persona <small>(+)</small></button></div>
+      <div class="card" style="padding:12px">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><input id="posPerNombre" value="${esc(p.nombre)}" placeholder="Nombre de la persona" style="flex:1;min-width:140px"><span class="seg"><button class="${pos.masa!=="maiz"?"on":""}" data-masa="harina">Harina <small>(H)</small></button><button class="${pos.masa==="maiz"?"on":""}" data-masa="maiz">Maíz <small>(M)</small></button></span>${c.personas.length>1?`<button class="btn ghost" id="posDelPer" title="Quitar persona">✕</button>`:""}</div>
+        <input id="posQ" class="big" value="${esc(pos.qtxt)}" placeholder="Escribe: asado · 2 queso · chila · café…  y Enter" autocomplete="off">
+        <div class="chips" style="margin-top:8px">${filt.map((it,i)=>chipHTML(it,i)).join("")||`<span class="empty">Nada coincide</span>`}</div>
+      </div>
+    </div>
+    <div class="pos-right card">
+      <h3 style="margin-bottom:6px">${esc(nombreDe(p))}</h3>
+      <div class="lines">${lineas.join("")||`<div class="empty">Escribe y da Enter para agregar</div>`}</div>
+      <label style="display:block;margin-top:10px;font-size:12px;font-weight:800;color:var(--mut)">Notas del pedido<input id="posNotas" value="${esc(c.notas||"")}" placeholder="sin cebolla, salsa aparte…" style="margin-top:4px"></label>
+      <div class="pos-tot">${esc(totStr(t))}${$c!=null?`<div class="money">Total ${money($c)}</div>`:""}</div>
+    </div>
+  </div>`;
+  pos._items=filt;
+}
+document.addEventListener("click",e=>{ if(vista!=="mostrador") return; const t=e.target;
+  if(t.id==="posNuevo"||t.closest("#posNuevo")){ nuevoPedidoPos(); return; }
+  const ab=t.closest("[data-abrir]"); if(ab){ if(pos.card) guardarPos(true); abrirEnMostrador(mostSlug(pSuc),ab.dataset.abrir); return; }
+  if(!pos.card) return; const c=pos.card; const p=c.personas[pos.per];
+  if(t.id==="posMin"){ minimizarPos(); return; } if(t.id==="posCocina"){ mandarCocina(); return; } if(t.id==="posGuardar"){ guardarPos().then(()=>{ pos.card=null; pos.slug=null; vista="pedidos"; syncUrl(); render(); }); return; }
+  if(t.id==="posBorrar"){ if(confirm("¿Borrar este pedido?")){ if(pos.slug) db.ref(ROOT+"/tableros/"+pos.slug+"/pedidos/"+c.id).remove(); pos.card=null; pos.slug=null; render(); } return; }
+  if(t.id==="posAddPer"||t.closest("#posAddPer")){ c.personas.push(nuevaPersona(c.personas.length+1)); pos.per=c.personas.length-1; pos.qtxt=""; renderMostrador(); $("#posQ").focus(); return; }
+  if(t.id==="posDelPer"){ c.personas.splice(pos.per,1); pos.per=Math.max(0,pos.per-1); renderMostrador(); return; }
+  const per=t.closest("[data-per]"); if(per){ pos.per=+per.dataset.per; pos.masa=c.personas[pos.per].masa||"harina"; pos.qtxt=""; renderMostrador(); $("#posQ").focus(); return; }
+  const ms=t.closest("[data-masa]"); if(ms){ pos.masa=ms.dataset.masa; p.masa=pos.masa; renderMostrador(); $("#posQ").focus(); return; }
+  const add=t.closest("[data-add]"); if(add){ agregarPos(pos._items[+add.dataset.add]); return; }
+  const q_=t.closest("[data-q]"); if(q_){ const [cat,i,d]=q_.dataset.q.split(":"); const arr=cat==="g"?p.gorditas:cat==="b"?p.bebidas:cat==="po"?p.postres:null; if(cat==="ch"){ p.chilaquiles.cant=Math.max(0,(p.chilaquiles.cant||1)+(+d)); if(!p.chilaquiles.cant) p.chilaquiles=null; } else { arr[i].cant=(+arr[i].cant||0)+(+d); if(arr[i].cant<=0) arr.splice(i,1); } renderMostrador(); guardarPos(true); return; }
+  const ch=t.closest("[data-ch]"); if(ch&&ch.tagName!=="SELECT"){ const [k,v]=ch.dataset.ch.split(/:(.*)/); const C=p.chilaquiles; if(k==="extra"){ C.extras=C.extras||[]; const i=C.extras.indexOf(v); if(i>=0) C.extras.splice(i,1); else C.extras.push(v); } else C[k]=C[k]===v?"":v; renderMostrador(); guardarPos(true); return; }
+});
+function agregarPos(it){ if(!it||!pos.card) return; const p=pos.card.personas[pos.per]; const m=/^(\d+)\s*(.*)$/.exec(pos.qtxt.trim()); const n=m?Math.max(1,+m[1]):1; const suc=pos.card.sucursal||pSuc; const v=(catalogo[suc]||{})[it.k]||{};
+  if(v.on===false||(it.c==="g"&&(pos.masa==="harina"?v.offH:v.offM))){ toast("⛔ "+it.n+" no está disponible hoy"); return; }
+  if(it.c==="g"){ const l=p.gorditas.find(x=>x.guiso===it.n&&x.masa===pos.masa); if(l) l.cant=(+l.cant||0)+n; else p.gorditas.push({guiso:it.n,masa:pos.masa,cant:n,detalle:""}); }
+  else if(it.c==="ch"){ if(p.chilaquiles) p.chilaquiles.cant=(+p.chilaquiles.cant||1)+n; else p.chilaquiles={salsa:"",queso:"",extras:[],guiso:"",cant:n}; }
+  else if(it.c==="b"){ const l=p.bebidas.find(x=>x.nombre===it.n); if(l) l.cant=(+l.cant||0)+n; else p.bebidas.push({nombre:it.n,cant:n,detalle:""}); }
+  else { const l=p.postres.find(x=>x.nombre===it.n); if(l) l.cant=(+l.cant||0)+n; else p.postres.push({nombre:it.n,cant:n}); }
+  pos.qtxt=""; renderMostrador(); guardarPos(true); const i=$("#posQ"); if(i) i.focus(); }
+document.addEventListener("input",e=>{ if(vista!=="mostrador"||!pos.card) return; const t=e.target; const c=pos.card; const p=c.personas[pos.per];
+  if(t.id==="posQ"){ pos.qtxt=t.value; const st=t.selectionStart; renderMostrador(); const i=$("#posQ"); i.focus(); try{ i.setSelectionRange(st,st); }catch(x){} return; }
+  if(t.id==="posNombre"){ c.familia=t.value; clearTimeout(pos._t); pos._t=setTimeout(()=>guardarPos(true),500); return; }
+  if(t.id==="posPerNombre"){ p.nombre=t.value; const b=document.querySelector(`[data-per="${pos.per}"] b`); if(b) b.textContent=nombreDe(p); clearTimeout(pos._t); pos._t=setTimeout(()=>guardarPos(true),500); return; }
+  if(t.id==="posNotas"){ c.notas=t.value; clearTimeout(pos._t); pos._t=setTimeout(()=>guardarPos(true),500); return; }
+  const det=t.closest("[data-det]"); if(det){ const [cat,i]=det.dataset.det.split(":"); (cat==="g"?p.gorditas:p.bebidas)[i].detalle=t.value; clearTimeout(pos._t); pos._t=setTimeout(()=>guardarPos(true),500); }
+});
+document.addEventListener("change",e=>{ if(vista!=="mostrador"||!pos.card) return; const sel=e.target.closest("select[data-ch]"); if(sel){ pos.card.personas[pos.per].chilaquiles.guiso=sel.value; guardarPos(true); } });
+document.addEventListener("keydown",e=>{ if(vista!=="mostrador") return; const t=e.target; const enInput=t&&(t.tagName==="INPUT"||t.tagName==="SELECT"||t.tagName==="TEXTAREA");
+  if(t&&t.id==="posQ"){ if(e.key==="Enter"){ e.preventDefault(); agregarPos(pos._items&&pos._items[0]); return; } if(e.key==="Escape"){ pos.qtxt=""; renderMostrador(); $("#posQ").focus(); return; } }
+  if(enInput&&t.id!=="posQ") return; if(!pos.card){ if(e.key==="n"||e.key==="N") nuevoPedidoPos(); return; }
+  if(e.key==="+"){ e.preventDefault(); $("#posAddPer").click(); } else if((e.key==="h"||e.key==="H")&&!(t&&t.id==="posQ"&&t.value)){ pos.masa="harina"; pos.card.personas[pos.per].masa="harina"; renderMostrador(); $("#posQ").focus(); } else if((e.key==="m"||e.key==="M")&&!(t&&t.id==="posQ"&&t.value)){ pos.masa="maiz"; pos.card.personas[pos.per].masa="maiz"; renderMostrador(); $("#posQ").focus(); } else if((e.key==="n"||e.key==="N")&&!(t&&t.id==="posQ"&&t.value)){ minimizarPos(); setTimeout(nuevoPedidoPos,100); }
+});
 
 /* ---------- 3. PRODUCTOS (prender / apagar por sucursal) ---------- */
 function sucSelect(){ return `<select id="pSuc">${SUCURSALES.map(x=>{ const a=apagados(x.id).length; return `<option value="${x.id}"${x.id===pSuc?" selected":""}>📍 ${x.n}${a?" · "+a+" apagado"+(a>1?"s":""):""}</option>`; }).join("")}</select>`; }
 function renderProductos(){ const c=catalogo[pSuc]||{}; const ap=apagados(pSuc).length;
   $("#main").innerHTML=`<div class="top"><h1>🏪 Productos</h1>${sucSelect()}<div class="sub">Toca un producto para apagarlo o prenderlo. Se refleja al instante en todos los tableros que piden a esta sucursal: sale en rojo como agotado y no se puede mandar hasta ajustar. ${ap?`<b style="color:var(--r)">${ap} apagado${ap>1?"s":""}</b>`:"Todo prendido ✅"}</div></div>`+
-  CATALOGO.map(g=>{ const offs=g.items.filter(i=>(c[catKey(g.c,i)]||{}).on===false).length; return `<div class="grp"><h3>${g.t}<span>${offs?offs+" apagado"+(offs>1?"s":""):"todo prendido"}</span></h3><div class="items">${g.items.map(i=>{ const k=catKey(g.c,i); const v=c[k]||{}; const off=v.on===false; return `<div class="item${off?" off":""}" data-k="${k}" data-n="${esc(i)}"><span class="sw"></span><span>${esc(i)}</span></div>`; }).join("")}</div></div>`; }).join(""); }
-document.addEventListener("click",e=>{ const it=e.target.closest(".item"); if(!it||vista!=="productos") return; const k=it.dataset.k; const cur=((catalogo[pSuc]||{})[k]||{}); const on=cur.on===false;
-  db.ref(ROOT+"/catalogo/"+pSuc+"/"+k).update({on,precio:cur.precio||null,ts:Date.now()}).then(()=>toast((on?"✅ Prendido: ":"⛔ Apagado: ")+it.dataset.n)).catch(()=>toast("No se pudo guardar")); });
+  CATALOGO.map(g=>{ const offs=g.items.filter(i=>(c[catKey(g.c,i)]||{}).on===false).length; return `<div class="grp"><h3>${g.t}<span>${g.c==="g"?"interruptor general · H = harina · M = maíz · 🌶 picor":offs?offs+" apagado"+(offs>1?"s":""):"todo prendido"}</span></h3><div class="items${g.c==="g"?" wide":""}">${g.items.map(i=>{ const k=catKey(g.c,i); const v=c[k]||{}; const off=v.on===false; const masas=g.c==="g"?`<span class="masas"><button class="mb${v.offH?" off":""}" data-masa="H" data-k="${k}" data-n="${esc(i)}" title="Harina">H</button><button class="mb${v.offM?" off":""}" data-masa="M" data-k="${k}" data-n="${esc(i)}" title="Maíz">M</button></span><span class="pics" data-k="${k}" data-n="${esc(i)}" title="Picor">${[0,1,2,3].map(x=>`<button class="pb${picDe(i)===x?" on":""}" data-pic="${x}">${x?"🌶".repeat(x):"–"}</button>`).join("")}</span>`:""; return `<div class="item${off?" off":""}" data-k="${k}" data-n="${esc(i)}"><span class="sw"></span><span class="nm">${esc(i)}</span>${masas}</div>`; }).join("")}</div></div>`; }).join(""); }
+document.addEventListener("click",e=>{ if(vista!=="productos") return;
+  const mb=e.target.closest(".mb"); if(mb){ e.stopPropagation(); const k=mb.dataset.k, cur=((catalogo[pSuc]||{})[k]||{}); const f=mb.dataset.masa==="H"?"offH":"offM"; const val=!cur[f]; db.ref(ROOT+"/catalogo/"+pSuc+"/"+k).update({[f]:val,ts:Date.now()}).then(()=>toast((val?"⛔ Apagado ":"✅ Prendido ")+mb.dataset.n+" de "+(mb.dataset.masa==="H"?"harina":"maíz"))); return; }
+  const pb=e.target.closest(".pb"); if(pb){ e.stopPropagation(); const box=pb.closest(".pics"); db.ref(ROOT+"/menu/"+box.dataset.k).update({pic:+pb.dataset.pic}).then(()=>toast(box.dataset.n+": picor "+("🌶".repeat(+pb.dataset.pic)||"sin picante"))); return; }
+  const it=e.target.closest(".item"); if(!it) return; const k=it.dataset.k; const cur=((catalogo[pSuc]||{})[k]||{}); const on=cur.on===false;
+  db.ref(ROOT+"/catalogo/"+pSuc+"/"+k).update({on,ts:Date.now()}).then(()=>toast((on?"✅ Prendido: ":"⛔ Apagado: ")+it.dataset.n)).catch(()=>toast("No se pudo guardar")); });
 
 /* ---------- 4. PRECIOS (por sucursal; aún no se muestran a las familias) ---------- */
 function renderPrecios(){ const c=catalogo[pSuc]||{}; const conPrecio=Object.values(c).filter(v=>v&&v.precio).length;
   $("#main").innerHTML=`<div class="top"><h1>💲 Precios</h1>${sucSelect()}<button class="btn ghost" id="copiarPrecios" title="Copiar los precios de otra sucursal">📋 Copiar de…</button><div class="sub">Cada sucursal puede tener su precio. Se guardan solos al salir del campo. Por ahora <b>no se muestran a las familias</b>; cuando quieras, se activan en tableros y mensaje. ${conPrecio?conPrecio+" con precio":"Sin precios capturados"}.</div></div>`+
-  CATALOGO.filter(g=>["g","ch","b","po"].includes(g.c)).map(g=>`<div class="grp"><h3>${g.t}</h3><div class="items">${g.items.map(i=>{ const k=catKey(g.c,i); const v=c[k]||{}; return `<div class="price${v.on===false?" off":""}"><span>${esc(i)}</span><input type="number" inputmode="decimal" min="0" step="1" placeholder="$" value="${v.precio!=null?esc(v.precio):""}" data-k="${k}" data-n="${esc(i)}"></div>`; }).join("")}</div></div>`).join(""); }
-document.addEventListener("change",e=>{ const inp=e.target.closest(".price input"); if(!inp||vista!=="precios") return; const k=inp.dataset.k; const val=inp.value===""?null:+inp.value; const cur=((catalogo[pSuc]||{})[k]||{});
-  db.ref(ROOT+"/catalogo/"+pSuc+"/"+k).update({on:cur.on!==false,precio:val,ts:Date.now()}).then(()=>toast(val==null?"Precio borrado: "+inp.dataset.n:inp.dataset.n+" · $"+val)).catch(()=>toast("No se pudo guardar")); });
+  CATALOGO.filter(g=>["g","ch","b","po"].includes(g.c)).map(g=>`<div class="grp"><h3>${g.t}${g.c==="g"?"<span>harina · maíz (si maíz va vacío, usa el de harina)</span>":""}</h3><div class="items">${g.items.map(i=>{ const k=catKey(g.c,i); const v=c[k]||{}; return `<div class="price${v.on===false?" off":""}"><span>${esc(i)}</span><input type="number" inputmode="decimal" min="0" step="1" placeholder="${g.c==="g"?"$ H":"$"}" value="${v.precio!=null?esc(v.precio):""}" data-k="${k}" data-f="precio" data-n="${esc(i)}">${g.c==="g"?`<input type="number" inputmode="decimal" min="0" step="1" placeholder="$ M" value="${v.precioM!=null?esc(v.precioM):""}" data-k="${k}" data-f="precioM" data-n="${esc(i)} maíz" style="margin-left:4px">`:""}</div>`; }).join("")}</div></div>`).join(""); }
+document.addEventListener("change",e=>{ const inp=e.target.closest(".price input"); if(!inp||vista!=="precios") return; const k=inp.dataset.k; const val=inp.value===""?null:+inp.value;
+  db.ref(ROOT+"/catalogo/"+pSuc+"/"+k).update({[inp.dataset.f]:val,ts:Date.now()}).then(()=>toast(val==null?"Precio borrado: "+inp.dataset.n:inp.dataset.n+" · $"+val)).catch(()=>toast("No se pudo guardar")); });
 document.addEventListener("click",e=>{ if(e.target.id!=="copiarPrecios") return; const otras=SUCURSALES.filter(s=>s.id!==pSuc); const pick=prompt("¿De qué sucursal copio los precios a "+SUCURSALES.find(s=>s.id===pSuc).n+"?\n"+otras.map((s,i)=>(i+1)+") "+s.n).join("\n")); const src=otras[+pick-1]; if(!src) return;
-  const from=catalogo[src.id]||{}; const patch={}; Object.keys(from).forEach(k=>{ if(from[k]&&from[k].precio!=null){ const cur=((catalogo[pSuc]||{})[k]||{}); patch[k]=Object.assign({},cur,{on:cur.on!==false,precio:from[k].precio,ts:Date.now()}); } });
+  const from=catalogo[src.id]||{}; const patch={}; Object.keys(from).forEach(k=>{ if(from[k]&&(from[k].precio!=null||from[k].precioM!=null)){ const cur=((catalogo[pSuc]||{})[k]||{}); patch[k]=Object.assign({},cur,{precio:from[k].precio==null?null:from[k].precio,precioM:from[k].precioM==null?null:from[k].precioM,ts:Date.now()}); } });
   if(!Object.keys(patch).length) return toast(src.n+" no tiene precios"); db.ref(ROOT+"/catalogo/"+pSuc).update(patch).then(()=>toast("Precios copiados de "+src.n)); });
 
 /* ---------- 5. USUARIOS (vistas, no permisos) ---------- */
@@ -367,6 +518,7 @@ document.addEventListener("click",e=>{ const el=e.target.closest("[data-a]"); if
   if(a==="etapa"){ const patch={etapa:v}; if(el.dataset.back){ patch.estado="pedido"; patch.entregadoEn=null; } upd(s,id,patch); toast({proceso:"De vuelta a cocina 🍳",espera:"Esperando repartidor ⏳",repartiendo:"En camino 🛵"}[v]); }
   if(a==="entregar"){ upd(s,id,{estado:"entregado",etapa:"entregado",entregadoEn:Date.now()}); toast("Entregado ✅"); }
   if(a==="archivar"){ upd(s,id,{estado:"archivado",archivadoEn:Date.now()}); toast("Archivado 📚"); }
+  if(a==="editar"){ abrirEnMostrador(s,id); }
 });
 </script>
 <!-- RLR · eye/181218 -->

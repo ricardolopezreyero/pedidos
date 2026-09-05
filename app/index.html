@@ -226,6 +226,7 @@ label.f input,label.f textarea,label.f select{margin-top:4px;font-weight:700}
 .chip .pic{font-size:11px;letter-spacing:-2px}
 .chip.off,.pill.off{border-color:#f3b8b4;background:#fff5f4;color:#b3261e;text-decoration:line-through;opacity:.85}
 .chip .cnt.no{background:var(--r);text-decoration:none}
+.chip .cnt.ok2{background:#c98a00}
 .line.off{background:var(--r2);border-radius:10px;padding-left:6px;padding-right:6px}
 .ln em.no{color:var(--r);text-transform:none;letter-spacing:0;margin-left:8px}
 .lines{margin-top:8px}
@@ -395,14 +396,18 @@ const ESTADOS=[
 ];
 
 /* ---------- catálogo por sucursal: ranitas/catalogo/<sucursal>/<clave> {on:false, precio} — RLR ---------- */
-let cat={}, catRef=null, catSuc="";
+let cat={}, catRef=null, catSuc="", menu={};
 const catKey=(c,name)=>c+"_"+slugify(name);
-const disponible=(c,name)=>{ const v=cat[catKey(c,name)]; return !(v&&v.on===false); };
+const disponible=(c,name,masa)=>{ const v=cat[catKey(c,name)]; if(!v) return true; if(v.on===false) return false; if(c==="g"&&masa){ if(masa==="maiz"&&v.offM) return false; if(masa!=="maiz"&&v.offH) return false; } if(c==="g"&&!masa&&v.offH&&v.offM) return false; return true; };
+const picDe=name=>{ const v=menu["g_"+slugify(name)]; if(v&&v.pic!=null) return +v.pic; const g=GUISOS.find(x=>x.n===name); return g?g.pic:0; };
+// Precios desde el catálogo de la sucursal (harina y maíz por separado). Solo se muestra el TOTAL y solo si el admin lo activa (config.mostrarPrecios) — RLR
+function precioDe(c,name,masa){ const v=cat[catKey(c,name)]||{}; if(c==="g"&&masa==="maiz"&&v.precioM!=null&&v.precioM!=="") return +v.precioM; return v.precio!=null&&v.precio!==""?+v.precio:null; }
 function suscribirCatalogo(){ if(!db||!SLUG||config.sucursal===catSuc) return; if(catRef) catRef.off(); catSuc=config.sucursal; catRef=db.ref(ROOT+"/catalogo/"+catSuc);
-  catRef.on("value",s=>{ cat=s.val()||{}; renderBoard(); if(ui.draft) renderEditor(); }); }
+  catRef.on("value",s=>{ cat=s.val()||{}; renderBoard(); if(ui.draft) renderEditor(); });
+  if(!menu._on){ menu._on=1; db.ref(ROOT+"/menu").on("value",s=>{ menu=Object.assign({_on:1},s.val()||{}); if(ui.draft) renderEditor(); }); } }
 // Qué trae un pedido que la sucursal actual ya no tiene
 function faltantes(c){ const F=[]; toArr(c.personas).forEach(p=>{ const n=nombreDe(p);
-  toArr(p.gorditas).forEach(l=>{ if(!disponible("g",l.guiso)) F.push(n+": "+l.guiso); });
+  toArr(p.gorditas).forEach(l=>{ if(!disponible("g",l.guiso,l.masa)) F.push(n+": "+l.guiso+" de "+(l.masa==="maiz"?"maíz":"harina")); });
   if(p.chilaquiles){ const ch=p.chilaquiles; if(!disponible("ch","chilaquiles")) F.push(n+": chilaquiles"); else { if(ch.salsa&&!disponible("sal",ch.salsa)) F.push(n+": salsa "+ch.salsa.toLowerCase()); if(ch.queso&&!disponible("q",ch.queso)) F.push(n+": queso "+ch.queso.toLowerCase()); toArr(ch.extras).forEach(x=>{ if(!disponible("ex",x)) F.push(n+": "+x.toLowerCase()); }); if(ch.guiso&&!disponible("g",ch.guiso)) F.push(n+": guiso "+ch.guiso.toLowerCase()); } }
   toArr(p.bebidas).forEach(l=>{ if(!disponible("b",l.nombre)) F.push(n+": "+l.nombre); });
   toArr(p.postres).forEach(l=>{ if(!disponible("po",l.nombre)) F.push(n+": "+l.nombre); }); }); return F; }
@@ -579,8 +584,8 @@ function totStr(t){ const s=[]; if(t.g) s.push("🫓 "+t.g+" gordita"+(t.g>1?"s"
 function totCorto(t){ const s=[]; if(t.g) s.push(t.g+" gordita"+(t.g>1?"s":"")); if(t.ch) s.push(t.ch+" chilaquiles"); if(t.b) s.push(t.b+" bebida"+(t.b>1?"s":"")); if(t.po) s.push(t.po+" postre"+(t.po>1?"s":"")); return s.join(" · "); }
 // Precios opcionales (⚙️): si Ricardo los captura, se estima cuánto es por familia y en total — RLR
 const num=v=>{ const x=parseFloat(String(v||"").replace(/[^0-9.]/g,"")); return isNaN(x)?0:x; };
-function hayPrecios(){ return num(config.precioG)>0||num(config.precioCh)>0||num(config.precioB)>0||num(config.precioPo)>0; }
-function costo(c){ if(!hayPrecios()) return null; const t=totales(c); return t.g*num(config.precioG)+t.ch*num(config.precioCh)+t.b*num(config.precioB)+t.po*num(config.precioPo); }
+function hayPrecios(){ return !!config.mostrarPrecios&&Object.values(cat).some(v=>v&&(v.precio!=null&&v.precio!==""||v.precioM!=null&&v.precioM!="")); }
+function costo(c){ if(!hayPrecios()) return null; let t=0; toArr(c.personas).forEach(p=>{ toArr(p.gorditas).forEach(l=>{ t+=(precioDe("g",l.guiso,l.masa)||0)*(+l.cant||0); }); if(p.chilaquiles) t+=(precioDe("ch","Chilaquiles")||0)*(+p.chilaquiles.cant||1); toArr(p.bebidas).forEach(l=>{ t+=(precioDe("b",l.nombre)||0)*(+l.cant||0); }); toArr(p.postres).forEach(l=>{ t+=(precioDe("po",l.nombre)||0)*(+l.cant||0); }); }); return t; }
 const money=x=>"$"+Math.round(x).toLocaleString("es-MX");
 function cierreInfo(){ const c=(config.cierre||"").trim(); const m=/^(\d{1,2}):(\d{2})$/.exec(c); if(!m) return null;
   const d=new Date(); d.setHours(+m[1],+m[2],0,0); const diff=Math.round((d-Date.now())/60000);
@@ -787,8 +792,8 @@ function checkDup(){ const d=ui.draft; const w=$("#dupWarn"); if(!d||!w) return;
 function personaHTML(p,pi){
   const r=rolDe(p); const cnt={}; p.gorditas.forEach(l=>{ cnt[l.guiso]=cnt[l.guiso]||{harina:0,maiz:0}; cnt[l.guiso][l.masa]+=l.cant; });
   const chips=GUISOS.map(g=>{ const c=cnt[g.n]; const b=c?[c.harina?c.harina+"H":"",c.maiz?c.maiz+"M":""].filter(Boolean).join("·"):"";
-    const off=!disponible("g",g.n); return `<button class="chip${c?" has":""}${off?" off":""}" data-a="${off?"agotado":"addG"}" data-p="${pi}" data-v="${esc(g.n)}">${esc(g.n)}${g.pic&&!off?`<span class="pic">${"🌶".repeat(g.pic)}</span>`:""}${off?`<span class="cnt no">agotado</span>`:b?`<span class="cnt">${b}</span>`:""}</button>`; }).join("");
-  const lines=p.gorditas.map((l,i)=>`<div class="line${disponible("g",l.guiso)?"":" off"}"><span class="qty"><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="-1">−</button><span class="lq">${l.cant}</span><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="1">+</button></span><span class="ln">${esc(l.guiso)}<em>${l.masa==="maiz"?"maíz":"harina"}</em>${disponible("g",l.guiso)?"":`<em class="no">⛔ agotado hoy</em>`}</span>
+    const off=!disponible("g",g.n,p.masa||"harina"), soloOtra=!off&&!disponible("g",g.n,p.masa==="maiz"?"harina":"maiz"); const pic=picDe(g.n); return `<button class="chip${c?" has":""}${off?" off":""}" data-a="${off?"agotado":"addG"}" data-p="${pi}" data-v="${esc(g.n)}">${esc(g.n)}${pic&&!off?`<span class="pic">${"🌶".repeat(pic)}</span>`:""}${off?`<span class="cnt no">sin ${p.masa==="maiz"?"maíz":"harina"}</span>`:b?`<span class="cnt">${b}</span>`:soloOtra?`<span class="cnt ok2">solo ${p.masa==="maiz"?"maíz":"harina"}</span>`:""}</button>`; }).join("");
+  const lines=p.gorditas.map((l,i)=>`<div class="line${disponible("g",l.guiso,l.masa)?"":" off"}"><span class="qty"><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="-1">−</button><span class="lq">${l.cant}</span><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="1">+</button></span><span class="ln">${esc(l.guiso)}<em>${l.masa==="maiz"?"maíz":"harina"}</em>${disponible("g",l.guiso,l.masa)?"":`<em class="no">⛔ agotado hoy</em>`}</span>
     ${l.guiso==="Combinada"?`<input class="det" data-in="gdet" data-p="${pi}" data-i="${i}" value="${esc(l.detalle)}" placeholder="¿de qué?">`:""}</div>`).join("");
   const openB=ui.open[p.id+"b"]||p.bebidas.length, openP=ui.open[p.id+"p"]||p.postres.length;
   const col=!!ui.open[p.id+"c"]; const L=personLines(p);
@@ -872,8 +877,7 @@ function renderCfg(){ $("#cfgBody").innerHTML=`
     <label class="f">Forma de pago<select data-cfg="pago"><option value="efectivo"${config.pago==="efectivo"?" selected":""}>Efectivo</option><option value="transferencia"${config.pago==="transferencia"?" selected":""}>Transferencia</option><option value="tarjeta"${config.pago==="tarjeta"?" selected":""}>Tarjeta (terminal)</option></select></label>
     <label class="f">Pago con (para que traigan cambio)<input data-cfg="pagoCon" value="${esc(config.pagoCon)}" placeholder="$500" inputmode="numeric"></label>
   </div>
-  <label class="f">Precios opcionales — si los pones, se estima cuánto es por familia</label>
-  <div class="cfg4"><input data-cfg="precioG" value="${esc(config.precioG)}" placeholder="🫓 gordita" inputmode="decimal"><input data-cfg="precioCh" value="${esc(config.precioCh)}" placeholder="🍳 chilaquiles" inputmode="decimal"><input data-cfg="precioB" value="${esc(config.precioB)}" placeholder="☕ bebida" inputmode="decimal"><input data-cfg="precioPo" value="${esc(config.precioPo)}" placeholder="🍰 postre" inputmode="decimal"></div>
+
   <label class="f hostrow" style="background:var(--g2)"><input type="checkbox" data-cfg="sms" ${config.sms===false?"":"checked"}> <span><b>Avisos por SMS al anfitrión</b> cuando una familia entra al tablero y cuando da Listo (al celular ${esc(config.telAnfitrion||"del anfitrión")}).</span></label>
   <label class="f hostrow"><input type="checkbox" data-a="hostToggle" ${host?"checked":""}> <span><b>Soy el anfitrión</b> (solo en esta pantalla): ver los botones de mandar por WhatsApp y mover pedidos. Se confirma con el celular del anfitrión${ui.anf?" ("+esc(ui.anf.nombre)+")":""}.</span></label>
   <p style="font-size:12.5px;color:var(--mut);font-weight:700">Servicio a domicilio en las 4 sucursales (también Uber Eats, DiDi Food y Rappi). Los cambios se guardan solos.</p>`; }
@@ -928,7 +932,7 @@ document.addEventListener("click",e=>{
     case "delPersona": if(!personLines(p).length||confirm("¿Quitar a "+nombreDe(p)+" y su pedido?")){ d.personas.splice(pi,1); R(); } break;
     case "dupPersona": { const c=clone(p); c.id=uid(); c.nombre=""; d.personas.splice(pi+1,0,c); R(); toast("Copiado. Ponle nombre 👇"); break; }
     case "masa": p.masa=v; R(); break;
-    case "agotado": toast("⛔ "+v+" no está disponible hoy en Suc. "+getSuc().n); break;
+    case "agotado": toast("⛔ "+v+(p&&!disponible("g",v,p.masa)&&disponible("g",v)?" de "+(p.masa==="maiz"?"maíz":"harina"):"")+" no está disponible hoy en Suc. "+getSuc().n); break;
     case "colPersona": ui.open[p.id+"c"]=!ui.open[p.id+"c"]; renderEditor(); break;
     case "confirmar": closeEditor(true,true); break;
     case "addG": { const masa=p.masa||"harina"; const l=p.gorditas.find(x=>x.guiso===v&&x.masa===masa); if(l) l.cant++; else p.gorditas.push({guiso:v,masa,cant:1,detalle:""}); R(); break; }
