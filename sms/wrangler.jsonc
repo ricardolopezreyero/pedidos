@@ -1,0 +1,12 @@
+{
+  // Ranitas · SMS al anfitrión (Telnyx) — Ricardo López Reyero (RLR) · eye/181218
+  "name": "ranitas-sms",
+  "main": "worker.js",
+  "compatibility_date": "2026-09-01",
+  "observability": { "enabled": true },
+  "vars": {
+    "FIREBASE_URL": "https://notion-casa-default-rtdb.firebaseio.com",
+    "APP_URL": "https://ranita.capitaltorreon.com/"
+  }
+  // Secretos (wrangler secret put): TELNYX_API_KEY, TELNYX_FROM (número Telnyx en E.164, ej. +18325551234)
+}

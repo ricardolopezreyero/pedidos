@@ -350,6 +350,8 @@ const FIREBASE_CONFIG={
 };
 const ROOT="ranitas";
 const APP_URL="https://ranita.capitaltorreon.com/";
+const SMS_URL="https://ranitas-sms.noisy-shape-4fc9.workers.dev/notify";   // Worker que avisa por SMS al anfitrión (Telnyx) — RLR
+function notificar(evento,card){ if(!SLUG||!card||config.sms===false) return; try{ fetch(SMS_URL,{method:"POST",keepalive:true,headers:{"Content-Type":"application/json"},body:JSON.stringify({slug:SLUG,cardId:card.id,evento})}).catch(()=>{}); }catch(e){} }
 /* ---------- ruta: cada anfitrión tiene su tablero en /su-liga (o ?t=su-liga en local) — RLR ---------- */
 const slugify=x=>(x||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40);
 const QS=new URLSearchParams(location.search);
@@ -715,7 +717,7 @@ function crearPedido(from){
   c.id=uid(); c.estado="armando"; c.listo=false; c.creado=Date.now(); c.actualizado=c.creado;
   delete c.pedidoEn; delete c.entregadoEn; delete c.archivadoEn; delete c.mensaje; delete c.sucursal; delete c.tel;
   c.personas.forEach(p=>p.id=uid());
-  mine.add(c.id); saveMine(); saveCard(c); ui.tab="armando"; openEditor(c.id);
+  mine.add(c.id); saveMine(); saveCard(c); ui.tab="armando"; openEditor(c.id); if(!host) notificar("nueva",c);
   if(from) toast("Pedido copiado de Familia "+(from.familia||"sin nombre")+". Ajusta lo que cambie.");
 }
 function familiasHistorial(){ const m={};
@@ -758,7 +760,8 @@ function closeEditor(listo,confirmado){ if(!ui.draft) return; clearTimeout(saveT
     if(!confirmado){ openConfirm(d); return; }
     hide("mConf");
   }
-  d.listo=!!listo; if(d.estado==="armando"||d.estado==="porpedir"){ d.estado=listo?"porpedir":"armando"; if(listo) d.listoEn=Date.now(); }
+  d.listo=!!listo; const eraArmando=d.estado==="armando"; if(d.estado==="armando"||d.estado==="porpedir"){ d.estado=listo?"porpedir":"armando"; if(listo) d.listoEn=Date.now(); }
+  if(listo&&eraArmando&&!host) notificar("lista",d);
   ui.editing=null; ui.draft=null; saveCard(d); hide("mEditor"); clearPresence(id); if(listo) ui.tab="porpedir";
   if(listo) toast("¡Listo! Familia "+(d.familia||"sin nombre")+" pasa a Por pedir ✅"); }
 function renderEditor(){
@@ -871,11 +874,12 @@ function renderCfg(){ $("#cfgBody").innerHTML=`
   </div>
   <label class="f">Precios opcionales — si los pones, se estima cuánto es por familia</label>
   <div class="cfg4"><input data-cfg="precioG" value="${esc(config.precioG)}" placeholder="🫓 gordita" inputmode="decimal"><input data-cfg="precioCh" value="${esc(config.precioCh)}" placeholder="🍳 chilaquiles" inputmode="decimal"><input data-cfg="precioB" value="${esc(config.precioB)}" placeholder="☕ bebida" inputmode="decimal"><input data-cfg="precioPo" value="${esc(config.precioPo)}" placeholder="🍰 postre" inputmode="decimal"></div>
+  <label class="f hostrow" style="background:var(--g2)"><input type="checkbox" data-cfg="sms" ${config.sms===false?"":"checked"}> <span><b>Avisos por SMS al anfitrión</b> cuando una familia entra al tablero y cuando da Listo (al celular ${esc(config.telAnfitrion||"del anfitrión")}).</span></label>
   <label class="f hostrow"><input type="checkbox" data-a="hostToggle" ${host?"checked":""}> <span><b>Soy el anfitrión</b> (solo en esta pantalla): ver los botones de mandar por WhatsApp y mover pedidos. Se confirma con el celular del anfitrión${ui.anf?" ("+esc(ui.anf.nombre)+")":""}.</span></label>
   <p style="font-size:12.5px;color:var(--mut);font-weight:700">Servicio a domicilio en las 4 sucursales (también Uber Eats, DiDi Food y Rappi). Los cambios se guardan solos.</p>`; }
 $("#btnCfg").addEventListener("click",()=>{ renderCfg(); show("mCfg"); });
 $("#btnShare").addEventListener("click",compartir);
-document.addEventListener("input",e=>{ const el=e.target.closest("[data-cfg]"); if(!el) return; config[el.dataset.cfg]=el.value.trim?el.value:el.value; if(el.dataset.cfg==="sucursal") config.telIdx=0; clearTimeout(saveTimer); saveTimer=setTimeout(saveConfig,400); });
+document.addEventListener("input",e=>{ const el=e.target.closest("[data-cfg]"); if(!el) return; config[el.dataset.cfg]=el.type==="checkbox"?el.checked:el.value; if(el.dataset.cfg==="sucursal") config.telIdx=0; clearTimeout(saveTimer); saveTimer=setTimeout(saveConfig,400); });
 $("#mCfg").addEventListener("input",()=>{});
 
 /* ---------- eventos del editor ---------- */
