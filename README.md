@@ -14,6 +14,7 @@ Sistema completo de pedidos para **Gorditas Ranitas** (Torreón, Coahuila): las 
 | Tablero de un anfitrión | `https://ranita.capitaltorreon.com/<liga>` · ejemplo real: https://ranita.capitaltorreon.com/familia-lopez-acosta |
 | Admin del restaurante | https://ranita.capitaltorreon.com/admin |
 | Manuales por perfil | https://ranita.capitaltorreon.com/manual |
+| Postulación de proveedores (pública) | https://ranita.capitaltorreon.com/proveedores |
 | Hoja QR de una mesa (imprimible carta) | `https://ranita.capitaltorreon.com/mesa?s=mesa-<sucursal>-<n>` |
 | Repositorio | https://github.com/ricardolopezreyero/pedidos |
 | Cloudflare Pages (proyecto `ranita`) | https://ranita.pages.dev |
@@ -76,6 +77,7 @@ Es **la misma tarjeta** en todos lados: lo que la familia teclea lo ve la caja a
 | 👥 **Usuarios** | Claves y vistas permitidas por persona. | Dueño |
 | 🏬 **Sucursales** | Alta de sucursal con todo automático (mesas, mostrador, catálogo, cocina). Solo Maestro. | Dueño |
 | 📖 **Recetas** | Recetario de casa v2: 33 recetas con gramajes exactos, preparación de ingredientes, paso a paso con tiempos y temperaturas, puntos de control, secretos, conservación y alérgenos. Calculadora que escala con costo estimado, "lo pedido hoy", modo lectura para estudiar (pasos palomeados, subrayado, notas, se retoma donde se quedó) y certificación por cocinero. | Cocina, dueño |
+| 🏬 **Proveedores por ciudad** (dentro de Compras) | Página pública `/proveedores` donde cualquier negocio se postula con su lista de precios puesto en sucursal y pago a 30 días (con hoja imprimible para llenar a mano). En Compras: ciudades, guía de 15 rubros que hay que conseguir en cada ciudad, bandeja de postulaciones (aceptar crea el proveedor y sus cotizaciones), comparador de cotizaciones por insumo con el más barato en verde y elección de proveedor por insumo. Las recetas no cambian de ciudad a ciudad; los proveedores sí. | Dueño, compras |
 | 🛒 **Compras** | Lista de compras sumada por insumo y agrupada por proveedor, orden por WhatsApp, marcar como pedida, historial, catálogo de insumos con precio y proveedores con WhatsApp y días de entrega. | Dueño, caja |
 | 📜 **Bitácora** | Registro permanente de absolutamente todo, en vivo, con filtros y búsqueda. | Dueño |
 | 📖 **Manuales** | Manual por perfil con capturas y lenguaje simple. | Todos |
@@ -162,7 +164,10 @@ Cualquier servidor estático sobre `app/` sirve (por ejemplo `python3 -m http.se
 | `recetas/<id>` | `{nombre, emoji, cat, rinde, unidad, porcion, tiempo, dificultad, ingredientes[{insumo,cant,unidad,prep}], pasos[{t,min,temp}], puntos[], tips[], equipo[], alergenos[], conservacion, ref, validada, version}` |
 | `estudio/<estudiante>/<receta>` | `{pasos{i:true}, marcas{}, nota, ultimo, certificada, nombre, ts}` progreso de lectura y certificación por cocinero |
 | `insumos/<id>` | `{nombre, unidad, precio, proveedor, presentacion}` |
-| `proveedores/<id>` | `{nombre, rubro, wa, dias, notas}` |
+| `proveedores/<id>` | `{nombre, contacto, rubro, rubros[], wa, dias, minimo, direccion, ciudad, condiciones, notas, origen}` |
+| `ciudades/<id>` | `{n, estado, activa}` · cada sucursal lleva `ciudad` |
+| `cotizaciones/<ciudad>/<insumo>/<proveedor>` | `{precio, unidad, presentacion, ts, fuente}` · `insumos/<id>/proveedorPor/<ciudad>` = proveedor elegido |
+| `postulaciones/<push>` | lo que llena un proveedor en `/proveedores`: negocio, contacto, wa, ciudad, rubros, precios{}, estado pendiente/aceptada/rechazada |
 | `compras/lista/<insumo\|unidad>` · `compras/historial/<push>` | lista viva de compras y órdenes ya pedidas |
 | `bitacora/<push>` | registro permanente, solo se agrega |
 

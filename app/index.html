@@ -739,7 +739,7 @@ function renderHome(){
     <button class="btn p big" data-a="crearTablero">🐸 Crear mi tablero</button>
     <p class="hnote">La liga se queda para siempre con el historial de lo que pidió cada familia. Con tu celular activas el modo anfitrión en cualquier otro dispositivo. Si alguien ya te pasó una liga, solo ábrela.</p></section>
   <div class="instcard"><img src="/icon-192.png" alt=""><div><b>Instala Ranitas en tu celular</b><span>Queda en tu pantalla de inicio con el ícono de la ranita. Abre al instante, con o sin señal, y es gratis.</span></div><button class="btn p" data-instalar>📲 Instalar</button></div>
-  <p class="hfoot">Gorditas Ranitas · Torreón · ${SUCURSALES.map(x=>x.n).join(" · ")}<br><a href="/admin" style="color:var(--mut)">¿Trabajas en Ranitas? Entra a la app del equipo →</a></p>`;
+  <p class="hfoot">Gorditas Ranitas · Torreón · ${SUCURSALES.map(x=>x.n).join(" · ")}<br><a href="/admin" style="color:var(--mut)">¿Trabajas en Ranitas? Entra a la app del equipo →</a> · <a href="/proveedores" style="color:var(--mut)">¿Eres proveedor? Manda tu lista de precios →</a></p>`;
   $("#home").hidden=false;
 }
 function renderNotFound(){
@@ -755,7 +755,7 @@ async function crearTablero(){
   if(nombre.length<2) return m.textContent="Pon el nombre del anfitrión.";
   if(tel.length<10) return m.textContent="Pon un celular de 10 dígitos.";
   if(sl.length<3) return m.textContent="La liga necesita al menos 3 letras.";
-  if(["admin","manual","mesa","og","favicon","icon-512","apple-touch-icon","manifest","index","api","sms"].includes(sl)||sl.startsWith("mesa-")||sl.startsWith("mostrador-")) return m.textContent="Esa liga está reservada. Prueba con tu apellido.";
+  if(["admin","manual","mesa","og","favicon","icon-512","apple-touch-icon","manifest","index","api","sms","proveedores","sw"].includes(sl)||sl.startsWith("mesa-")||sl.startsWith("mostrador-")) return m.textContent="Esa liga está reservada. Prueba con tu apellido.";
   if(!db) return m.textContent="Sin conexión. Intenta de nuevo.";
   m.textContent="Revisando la liga…";
   const ref=db.ref(ROOT+"/anfitriones/"+sl); const ex=(await ref.once("value")).val();
