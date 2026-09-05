@@ -179,6 +179,54 @@ tr.tot td{font-weight:900;background:var(--y3)}
 .mini.on{background:var(--ink);color:var(--y);border-color:var(--ink)}
 .pos-tot{margin-top:10px;font-weight:800;color:var(--mut);font-size:13px}
 .pos-tot .money{font-size:20px;color:var(--ink);font-weight:900;margin-top:4px}
+/* cocina */
+.cocs{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-weight:800;color:var(--mut)}
+.coc{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-weight:900;font-size:14px;display:inline-flex;gap:6px;align-items:center}
+.coc span{font-size:11px;color:var(--mut);font-weight:700}
+.coc.on{background:var(--ink);color:var(--y);border-color:var(--ink)}.coc.on span{color:#ddd}
+.coc.add{background:var(--g2);border-color:var(--g);color:var(--g)}
+.kgrid{display:grid;grid-template-columns:minmax(300px,1fr) 1.6fr;gap:12px;align-items:start}
+@media(max-width:900px){.kgrid{grid-template-columns:1fr}}
+.kcol h2,.kmain h2{font-size:16px;margin-bottom:8px}
+.kcol .n{background:#fff;border-radius:999px;padding:1px 9px;font-size:12px;color:var(--mut)}
+.kdem{background:var(--y2);border-radius:12px;padding:8px 10px;font-size:13px;font-weight:700;margin-bottom:8px;display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.kcards{display:flex;flex-direction:column;gap:8px}
+.kc{background:#fff;border-radius:16px;box-shadow:var(--sh);padding:12px 14px;border-left:6px solid var(--r)}
+.kc-top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:17px}
+.kc-sub{font-size:12px;color:var(--mut);font-weight:700;margin:2px 0 6px}
+.kc-lines{display:flex;flex-wrap:wrap;gap:4px}
+.kl{background:#f2ecd6;border-radius:8px;padding:3px 8px;font-size:13px;font-weight:800}
+.kl.g{background:var(--y2)}.kl.ch{background:#ffe7c2}.kl.b{background:#e3eeff}.kl.po{background:#f3e3ff}
+.kl em{font-style:normal;font-size:11px;color:var(--mut);font-weight:900}
+.kc-nota{margin-top:6px;background:var(--r2);color:#b3261e;border-radius:8px;padding:4px 8px;font-weight:800;font-size:13px}
+.kc-nota.big{font-size:15px;padding:8px 12px;margin:8px 0}
+.wait{font-size:12px;font-weight:900;border-radius:999px;padding:2px 8px;background:var(--g2);color:var(--g)}
+.wait.warn{background:#fff1c2;color:#8a5a00}.wait.late{background:var(--r);color:#fff;animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.55}}
+.kbtn{border:0;border-radius:14px;padding:14px 16px;font-weight:900;font-size:16px;width:100%;margin-top:10px}
+.kbtn.take{background:var(--r);color:#fff}.kbtn.take:disabled{background:#e9d9d7;color:#a77;cursor:not-allowed}
+.kbtn.ghost{background:transparent;border:1.5px solid var(--line);width:auto;padding:8px 12px;font-size:13px;margin:0}
+.kbtn.next{background:var(--b);color:#fff}.kbtn.go{background:var(--g);color:#fff;font-size:20px;padding:18px}
+.karm{background:#fff;border-radius:18px;box-shadow:var(--sh);padding:14px 16px}
+.karm-top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:18px;flex-wrap:wrap}
+.ksteps{display:flex;gap:6px;margin:12px 0}
+.kstep{flex:1;border:2px solid var(--line);background:#fff;border-radius:12px;padding:10px;font-weight:900;font-size:15px}
+.kstep span{background:#f2ecd6;border-radius:999px;padding:1px 8px;font-size:12px;margin-left:6px}
+.kstep.on{border-color:var(--ink);background:var(--y)}.kstep.ready:not(.on){border-color:var(--g);background:var(--g2)}
+.klist{display:flex;flex-direction:column;gap:6px}
+.kitem{display:flex;align-items:center;gap:12px;border:2px solid var(--line);background:#fff;border-radius:14px;padding:12px 14px;text-align:left;font-size:19px;font-weight:900;min-height:64px}
+.kitem.done{background:var(--g2);border-color:var(--g);color:#2a6b34}
+.kitem.done .kn{text-decoration:line-through;opacity:.7}
+.kq{min-width:48px;height:48px;border-radius:12px;background:var(--y);display:grid;place-items:center;font-size:22px;flex:none}
+.kitem.done .kq{background:var(--g);color:#fff}
+.kn{flex:1;display:flex;flex-direction:column}
+.kn em{font-style:normal;font-size:12px;letter-spacing:.08em;font-weight:900;color:#8a5a00}.kn em.maiz{color:#2b4a9e}
+.kn small{font-size:12.5px;color:var(--mut);font-weight:700}
+.kchk{width:36px;height:36px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:20px;flex:none}
+.kitem.done .kchk{background:var(--g);color:#fff;border-color:var(--g)}
+.kitem.ch{border-left:6px solid #e0a040}.kitem.b{border-left:6px solid #6b8fd6}.kitem.po{border-left:6px solid #a76bd6}
+.kmine,.kotros{margin-top:10px;font-size:13px;font-weight:700;color:var(--mut);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.empty.big{font-size:17px;padding:60px 20px;background:#fff;border-radius:18px}
 /* acceso */
 .gate{position:fixed;inset:0;background:var(--ink);display:grid;place-items:center;z-index:99;padding:20px}
 .gate form{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:360px;text-align:center}
@@ -211,7 +259,7 @@ const FIREBASE_CONFIG={apiKey:"AIzaSyDSAFxL2E_S1iHiRfSHGbbuHiR_-2j-HP4",authDoma
 const ROOT="ranitas", CLAVE_MAESTRA="123";   // usuario maestro (provisional)
 const SUCURSALES=[{id:"sanatorio",n:"Sanatorio Español"},{id:"vinedos",n:"Viñedos"},{id:"juarez",n:"Juárez"},{id:"ibero",n:"Villas de la Ibero"}];
 const ROLES={papa:"👨",mama:"👩",hijo:"👦",hija:"👧",otro:"🙂"};
-const VISTAS=[{id:"panorama",n:"Panorama",e:"📊"},{id:"pedidos",n:"Pedidos",e:"📋"},{id:"mostrador",n:"Mostrador",e:"🧾"},{id:"productos",n:"Productos",e:"🏪"},{id:"precios",n:"Precios",e:"💲"},{id:"usuarios",n:"Usuarios",e:"👥"}];
+const VISTAS=[{id:"panorama",n:"Panorama",e:"📊"},{id:"pedidos",n:"Pedidos",e:"📋"},{id:"mostrador",n:"Mostrador",e:"🧾"},{id:"cocina",n:"Cocina",e:"🔥"},{id:"productos",n:"Productos",e:"🏪"},{id:"precios",n:"Precios",e:"💲"},{id:"usuarios",n:"Usuarios",e:"👥"}];
 const GUISOS_PIC={"Chicharrón prensado":2,"Chicharrón pella":2,"Carne con chile":2,"Guiso verde":1,"Huevo verde":1,"Huevo rojo":1,"Asado":1};   // picor de fábrica (editable en Productos → ranitas/menu)
 const SALSAS=["Verde cremosa","Roja","Verde tomatillo","Chipotle con crema","La más picosa 🌶🌶🌶"], QUESOS=["Asadero","Chihuahua"], EXTRAS=["Huevo estrellado","Huevo revuelto","Guiso favorito"];
 const slugify=x=>(x||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
@@ -230,6 +278,7 @@ const ETAPAS=[
   {id:"armando",   n:"✏️ Armando",              k:1, f:c=>c.estado==="armando"},
   {id:"porpedir",  n:"📋 Por pedir",            k:1, f:c=>c.estado==="porpedir"},
   {id:"proceso",   n:"🍳 En proceso",            k:2, f:c=>c.estado==="pedido"&&(!c.etapa||c.etapa==="proceso")},
+  {id:"armado",    n:"🔥 Armando en cocina",     k:2, f:c=>c.estado==="pedido"&&c.etapa==="armado"},
   {id:"espera",    n:"⏳ Espera de repartidor",  k:3, f:c=>c.estado==="pedido"&&c.etapa==="espera"},
   {id:"repartiendo",n:"🛵 Repartiendo",          k:4, f:c=>c.estado==="pedido"&&c.etapa==="repartiendo"},
   {id:"entregado", n:"✅ Entregado",             k:5, f:c=>c.estado==="entregado"},
@@ -274,6 +323,7 @@ db.ref(ROOT+"/anfitriones").on("value",s=>{ anfitriones=s.val()||{}; render(); }
 db.ref(ROOT+"/tableros").on("value",s=>{ tableros=s.val()||{}; render(); });
 db.ref(ROOT+"/catalogo").on("value",s=>{ catalogo=s.val()||{}; render(); });
 db.ref(ROOT+"/menu").on("value",s=>{ menu=s.val()||{}; render(); });
+let cocineros={}; db.ref(ROOT+"/cocina").on("value",s=>{ cocineros=s.val()||{}; render(); });
 db.ref(ROOT+"/admin/usuarios").on("value",s=>{ usuarios=s.val()||{}; refrescarYo(); });
 setInterval(render,30000);
 function allCards(){ const out=[]; Object.keys(tableros).forEach(sl=>{ const t=tableros[sl]||{}; const cfg=t.config||{}; Object.keys(t.pedidos||{}).forEach(id=>{ const c=t.pedidos[id]; if(!c) return; out.push(Object.assign({},c,{id,slug:sl,personas:toArr(c.personas),sucursal:c.sucursal||cfg.sucursal||"",tablero:(anfitriones[sl]||{}).nombre||sl})); }); }); return out; }
@@ -287,7 +337,7 @@ function renderNav(){ const cards=allCards(); const vis=yo?yo.vistas:[];
   $("#nav").innerHTML=VISTAS.filter(v=>vis.includes(v.id)).map(v=>{ let n=""; if(v.id==="pedidos") n=cards.filter(c=>c.estado==="pedido").length||""; if(v.id==="productos"){ const a=SUCURSALES.reduce((s,x)=>s+apagados(x.id).length,0); n=a||""; } if(v.id==="usuarios") n=Object.keys(usuarios).length+1; return `<button class="${vista===v.id?"on":""}" data-v="${v.id}">${v.e} ${v.n}${n!==""?`<span class="n">${n}</span>`:""}</button>`; }).join("");
   $("#who").textContent=yo?yo.nombre:""; }
 $("#nav").addEventListener("click",e=>{ const b=e.target.closest("[data-v]"); if(!b) return; vista=b.dataset.v; syncUrl(); render(); });
-function render(){ if(!yo) return; if(!yo.vistas.includes(vista)) vista=yo.vistas[0]; if(!vista) return; renderNav(); if(pos.card&&vista==="mostrador"){ renderMostrador(); return; } ({panorama:renderPanorama,pedidos:renderPedidos,mostrador:renderMostrador,productos:renderProductos,precios:renderPrecios,usuarios:renderUsuarios})[vista](); }
+function render(){ if(!yo) return; if(!yo.vistas.includes(vista)) vista=yo.vistas[0]; if(!vista) return; renderNav(); if(pos.card&&vista==="mostrador"){ renderMostrador(); return; } ({panorama:renderPanorama,pedidos:renderPedidos,mostrador:renderMostrador,cocina:renderCocina,productos:renderProductos,precios:renderPrecios,usuarios:renderUsuarios})[vista](); }
 const picDe=name=>{ const v=menu["g_"+slugify(name)]; return v&&v.pic!=null?+v.pic:(GUISOS_PIC[name]||0); };
 // ---- precios: costo total de un pedido con el catálogo de su sucursal (harina y maíz por separado). Solo se muestra el total. — RLR
 function precioDe(suc,cat,name,masa){ const v=(catalogo[suc]||{})[catKey(cat,name)]||{}; if(cat==="g"&&masa==="maiz"&&v.precioM!=null&&v.precioM!=="") return +v.precioM; return v.precio!=null&&v.precio!==""?+v.precio:null; }
@@ -305,7 +355,7 @@ document.addEventListener("change",e=>{ if(e.target.id==="fSuc"){ fSuc=e.target.
 function renderPanorama(){
   const cards=filtradas(); const hoy=new Date(); hoy.setHours(0,0,0,0); const t0=hoy.getTime();
   const por={}; ETAPAS.forEach(e=>por[e.id]=cards.filter(e.f));
-  const cocina=por.proceso, viene=por.armando.concat(por.porpedir), calle=por.espera.concat(por.repartiendo);
+  const cocina=por.proceso.concat(por.armado), viene=por.armando.concat(por.porpedir), calle=por.espera.concat(por.repartiendo);
   const entHoy=cards.filter(c=>(c.estado==="entregado"||c.estado==="archivado")&&(c.entregadoEn||0)>=t0);
   const pedHoy=cards.filter(c=>(c.pedidoEn||0)>=t0);
   const hist=cards.filter(c=>c.estado==="entregado"||c.estado==="archivado"||c.estado==="pedido");
@@ -382,7 +432,7 @@ function cardHTML(c){
   const A={
     armando:`<span class="b wip">✏️ armando…</span>`,
     porpedir:`<span class="b ok">✅ Lista · el anfitrión aún no manda el WhatsApp</span>`,
-    pedido:(!c.etapa||c.etapa==="proceso")?`<button class="btn bl" data-a="etapa" data-v="espera" data-id="${c.id}" data-s="${c.slug}">⏳ Listo, espera repartidor</button>`:
+    pedido:(!c.etapa||c.etapa==="proceso"||c.etapa==="armado")?`${c.etapa==="armado"&&c.cocinero?`<span class="b wip">🔥 ${esc(c.cocinero.nombre)}</span>`:""}<button class="btn bl" data-a="etapa" data-v="espera" data-id="${c.id}" data-s="${c.slug}">⏳ Listo, espera repartidor</button>`:
            c.etapa==="espera"?`<button class="btn v" data-a="etapa" data-v="repartiendo" data-id="${c.id}" data-s="${c.slug}">🛵 Salió a repartir</button><button class="btn ghost" data-a="etapa" data-v="proceso" data-id="${c.id}" data-s="${c.slug}">↩︎</button>`:
            `<button class="btn p" data-a="entregar" data-id="${c.id}" data-s="${c.slug}">✅ Entregado</button><button class="btn ghost" data-a="etapa" data-v="espera" data-id="${c.id}" data-s="${c.slug}">↩︎</button>`,
     entregado:`<button class="btn" data-a="archivar" data-id="${c.id}" data-s="${c.slug}">📦 Archivar</button><button class="btn ghost" data-a="etapa" data-v="repartiendo" data-id="${c.id}" data-s="${c.slug}" data-back="1">↩︎</button>`,
@@ -477,6 +527,56 @@ document.addEventListener("keydown",e=>{ if(vista!=="mostrador") return; const t
   if(e.key==="+"){ e.preventDefault(); $("#posAddPer").click(); } else if((e.key==="h"||e.key==="H")&&!(t&&t.id==="posQ"&&t.value)){ pos.masa="harina"; pos.card.personas[pos.per].masa="harina"; renderMostrador(); $("#posQ").focus(); } else if((e.key==="m"||e.key==="M")&&!(t&&t.id==="posQ"&&t.value)){ pos.masa="maiz"; pos.card.personas[pos.per].masa="maiz"; renderMostrador(); $("#posQ").focus(); } else if((e.key==="n"||e.key==="N")&&!(t&&t.id==="posQ"&&t.value)){ minimizarPos(); setTimeout(nuevoPedidoPos,100); }
 });
 
+/* ---------- 2c. COCINA: cola → lo tomo → comal por guiso → empaque por persona → listo — RLR ---------- */
+const kit={miId:localStorage.getItem("ranitas-cocinero-id")||"",vista:"comal",abierto:null};
+const mins=ts=>ts?Math.max(0,Math.round((Date.now()-ts)/60000)):0;
+const lineKey=(p,cat,i)=>p.id+":"+cat+":"+i;
+// Líneas del pedido con clave estable, para marcar avance
+function lineasDe(c){ const L=[]; toArr(c.personas).forEach((p,pi)=>{ const pid=p.id||("p"+pi); toArr(p.gorditas).forEach((l,i)=>L.push({k:pid+":g:"+i,pid,per:nombreDe(p),cat:"g",n:l.guiso+(l.detalle?" ("+l.detalle+")":""),masa:l.masa==="maiz"?"maiz":"harina",cant:+l.cant||0}));
+  if(p.chilaquiles){ const ch=p.chilaquiles; const ex=toArr(ch.extras).map(x=>x==="Guiso favorito"?(ch.guiso?"guiso "+ch.guiso.toLowerCase():"guiso favorito"):x.toLowerCase()); L.push({k:pid+":ch:0",pid,per:nombreDe(p),cat:"ch",n:"Chilaquiles "+(ch.salsa?ch.salsa.toLowerCase():"")+(ch.queso?" · "+ch.queso.toLowerCase():"")+(ex.length?" + "+ex.join(" + "):""),masa:"",cant:+ch.cant||1}); }
+  toArr(p.bebidas).forEach((l,i)=>L.push({k:pid+":b:"+i,pid,per:nombreDe(p),cat:"b",n:l.nombre+(l.detalle?" ("+l.detalle+")":""),masa:"",cant:+l.cant||0}));
+  toArr(p.postres).forEach((l,i)=>L.push({k:pid+":po:"+i,pid,per:nombreDe(p),cat:"po",n:l.nombre,masa:"",cant:+l.cant||0})); }); return L; }
+function comalDe(c){ const m={}; lineasDe(c).forEach(l=>{ const g=l.cat+"|"+l.n+"|"+l.masa; m[g]=m[g]||{cat:l.cat,n:l.n,masa:l.masa,cant:0,keys:[]}; m[g].cant+=l.cant; m[g].keys.push(l.k); }); return Object.values(m).sort((a,b)=>({g:0,ch:1,b:2,po:3})[a.cat]-({g:0,ch:1,b:2,po:3})[b.cat]||b.cant-a.cant); }
+function renderCocina(){
+  const suc=pSuc; const cards=allCards().filter(c=>c.sucursal===suc&&c.estado==="pedido"&&(!c.etapa||c.etapa==="proceso"||c.etapa==="armado"));
+  const cola=cards.filter(c=>c.etapa!=="armado").sort((a,b)=>(a.pedidoEn||0)-(b.pedidoEn||0)), armando=cards.filter(c=>c.etapa==="armado");
+  const cocs=Object.entries((cocineros[suc]||{}).cocineros||{}).map(([id,v])=>Object.assign({id},v)); const yo=cocs.find(x=>x.id===kit.miId);
+  const mios=armando.filter(c=>c.cocinero&&c.cocinero.id===kit.miId), otros=armando.filter(c=>!c.cocinero||c.cocinero.id!==kit.miId);
+  const abierto=mios.find(c=>c.id===kit.abierto)||mios[0]; if(abierto) kit.abierto=abierto.id;
+  // demanda total en cola (para cocinar en tandas)
+  const dem={}; cola.forEach(c=>comalDe(c).forEach(x=>{ if(x.cat!=="g") return; const k=x.n+"|"+x.masa; dem[k]=dem[k]||{n:x.n,masa:x.masa,cant:0}; dem[k].cant+=x.cant; })); const demArr=Object.values(dem).sort((a,b)=>b.cant-a.cant);
+  const hoy=new Date(); hoy.setHours(0,0,0,0); const hechosHoy=allCards().filter(c=>c.sucursal===suc&&c.listoCocinaEn>=hoy.getTime()); const porCoc={}; hechosHoy.forEach(c=>{ const id=(c.cocinero||{}).id||"?"; porCoc[id]=porCoc[id]||{n:0,t:0}; porCoc[id].n++; porCoc[id].t+=Math.max(0,(c.listoCocinaEn-(c.armadoEn||c.pedidoEn||c.listoCocinaEn))/60000); });
+  const espera=t=>{ const m=mins(t); return `<span class="wait${m>=20?" late":m>=10?" warn":""}">⏱ ${m} min</span>`; };
+  const tarjetaCola=c=>`<article class="kc"><div class="kc-top"><b>${esc(c.familia||"sin nombre")}</b>${espera(c.pedidoEn)}</div><div class="kc-sub">${esc(c.tablero)} · ${toArr(c.personas).filter(p=>personLines(p).length).length} personas · ${esc(totStr(totales(c)))}</div><div class="kc-lines">${comalDe(c).map(x=>`<span class="kl ${x.cat}">${x.cant} ${esc(x.n)}${x.masa?" <em>"+(x.masa==="maiz"?"M":"H")+"</em>":""}</span>`).join("")}</div>${c.notas?`<div class="kc-nota">📝 ${esc(c.notas)}</div>`:""}<button class="kbtn take" data-tomar="${c.id}" data-s="${c.slug}" ${yo?"":"disabled"}>🔥 Lo tomo${yo?"":" · elige tu nombre"}</button></article>`;
+  const armadoHTML=c=>{ const av=c.avance||{}; const comal=comalDe(c); const listas=comal.filter(x=>x.keys.every(k=>av[k])).length; const pers=toArr(c.personas).filter(p=>personLines(p).length); const emp=c.empaque||{}; const empacados=pers.filter(p=>emp[p.id]).length; const todoComal=listas===comal.length, todoEmp=empacados===pers.length;
+    return `<div class="karm"><div class="karm-top"><div><b>${esc(c.familia||"sin nombre")}</b> <span class="b tab">${esc(c.tablero)}</span> ${espera(c.pedidoEn)} <span class="b">🔥 ${mins(c.armadoEn)} min armando</span></div><div><button class="kbtn ghost" data-soltar="${c.id}" data-s="${c.slug}">↩︎ Soltar</button></div></div>
+    ${c.notas?`<div class="kc-nota big">📝 ${esc(c.notas)}</div>`:""}
+    <div class="ksteps"><button class="kstep${kit.vista==="comal"?" on":""}" data-kv="comal">1 · Comal <span>${listas}/${comal.length}</span></button><button class="kstep${kit.vista==="empaque"?" on":""}${todoComal?" ready":""}" data-kv="empaque">2 · Empaque <span>${empacados}/${pers.length}</span></button></div>
+    ${kit.vista==="comal"?`<div class="klist">${comal.map(x=>{ const done=x.keys.every(k=>av[k]); return `<button class="kitem ${x.cat}${done?" done":""}" data-check="${esc(x.keys.join(","))}" data-id="${c.id}" data-s="${c.slug}" data-done="${done?1:0}"><span class="kq">${x.cant}</span><span class="kn">${esc(x.n)}${x.masa?`<em class="${x.masa}">${x.masa==="maiz"?"MAÍZ":"HARINA"}</em>`:""}</span><span class="kchk">${done?"✓":""}</span></button>`; }).join("")}</div>${todoComal?`<button class="kbtn next" data-kv="empaque">Todo en el comal listo → Empacar</button>`:""}`:
+    `<div class="klist">${pers.map(p=>{ const done=!!emp[p.id]; return `<button class="kitem per${done?" done":""}" data-emp="${p.id}" data-id="${c.id}" data-s="${c.slug}" data-done="${done?1:0}"><span class="kq">${ROLES[p.rol]||"🙂"}</span><span class="kn">${esc(nombreDe(p))}<small>${esc(personLines(p).join(" · "))}</small></span><span class="kchk">${done?"✓":""}</span></button>`; }).join("")}</div>${todoEmp?`<button class="kbtn go" data-listo="${c.id}" data-s="${c.slug}">✅ Listo para repartir</button>`:`<button class="kbtn ghost" data-listo="${c.id}" data-s="${c.slug}">Marcar listo de todos modos</button>`}`}</div>`; };
+  $("#main").innerHTML=`<div class="top"><h1>🔥 Cocina</h1>${sucSelect()}<span class="sp"></span><div class="cocs">Soy: ${cocs.map(x=>`<button class="coc${x.id===kit.miId?" on":""}" data-coc="${x.id}">${esc(x.nombre)}${porCoc[x.id]?`<span>${porCoc[x.id].n} hoy</span>`:""}</button>`).join("")}<button class="coc add" id="cocAdd">＋</button></div></div>
+  <div class="kgrid">
+    <section class="kcol"><h2>🍳 En cola <span class="n">${cola.length}</span></h2>${demArr.length?`<div class="kdem"><b>Demanda en cola</b> — cocina en tandas: ${demArr.slice(0,8).map(d=>`<span class="kl g">${d.cant} ${esc(d.n)} <em>${d.masa==="maiz"?"M":"H"}</em></span>`).join("")}</div>`:""}<div class="kcards">${cola.map(tarjetaCola).join("")||`<div class="empty">Sin pedidos en cola 🎉</div>`}</div></section>
+    <section class="kmain">${abierto?armadoHTML(abierto):`<div class="empty big">${yo?"Toma un pedido de la cola para empezar":"Elige tu nombre arriba (o agrégalo con ＋) para tomar pedidos"}</div>`}
+      ${mios.length>1?`<div class="kmine">Mis pedidos: ${mios.map(c=>`<button class="coc${c.id===kit.abierto?" on":""}" data-abrirk="${c.id}">${esc(c.familia||"sin nombre")} <span>${mins(c.armadoEn)} min</span></button>`).join("")}</div>`:""}
+      ${otros.length?`<div class="kotros"><b>Otros cocineros:</b> ${otros.map(c=>`<span class="kl">${esc((c.cocinero||{}).nombre||"?")} → ${esc(c.familia||"sin nombre")} (${mins(c.armadoEn)} min)</span>`).join(" ")}</div>`:""}
+      ${hechosHoy.length?`<div class="kotros">Hoy: ${hechosHoy.length} pedidos salidos de cocina · ${Object.entries(porCoc).map(([id,v])=>{ const nm=(cocs.find(x=>x.id===id)||{}).nombre||"?"; return esc(nm)+" "+v.n+" ("+Math.round(v.t/v.n)+" min prom.)"; }).join(" · ")}</div>`:""}
+    </section>
+  </div>`;
+}
+document.addEventListener("click",e=>{ if(vista!=="cocina") return; const t=e.target; const suc=pSuc;
+  const coc=t.closest("[data-coc]"); if(coc){ kit.miId=coc.dataset.coc; localStorage.setItem("ranitas-cocinero-id",kit.miId); kit.abierto=null; renderCocina(); return; }
+  if(t.id==="cocAdd"){ const nom=(prompt("Nombre del cocinero:")||"").trim(); if(!nom) return; const id=slugify(nom)+"-"+Date.now().toString(36).slice(-3); kit.miId=id; localStorage.setItem("ranitas-cocinero-id",id); db.ref(ROOT+"/cocina/"+suc+"/cocineros/"+id).set({nombre:nom,creado:Date.now()}); return; }
+  const kv=t.closest("[data-kv]"); if(kv){ kit.vista=kv.dataset.kv; renderCocina(); return; }
+  const ab=t.closest("[data-abrirk]"); if(ab){ kit.abierto=ab.dataset.abrirk; kit.vista="comal"; renderCocina(); return; }
+  const tomar=t.closest("[data-tomar]"); if(tomar){ const yo=((cocineros[suc]||{}).cocineros||{})[kit.miId]; if(!yo) return toast("Elige tu nombre primero"); const ref=db.ref(ROOT+"/tableros/"+tomar.dataset.s+"/pedidos/"+tomar.dataset.tomar);
+    ref.transaction(c=>{ if(!c) return c; if(c.etapa==="armado"&&c.cocinero&&c.cocinero.id!==kit.miId) return; c.etapa="armado"; c.cocinero={id:kit.miId,nombre:yo.nombre}; c.armadoEn=Date.now(); c.actualizado=Date.now(); c._w=SID; return c; },(err,ok)=>{ if(!ok) toast("Ese pedido ya lo tomó alguien más"); else { kit.abierto=tomar.dataset.tomar; kit.vista="comal"; toast("🔥 Es tuyo"); } }); return; }
+  const soltar=t.closest("[data-soltar]"); if(soltar){ upd(soltar.dataset.s,soltar.dataset.soltar,{etapa:"proceso",cocinero:null,armadoEn:null}); kit.abierto=null; toast("De vuelta a la cola"); return; }
+  const chk=t.closest("[data-check]"); if(chk){ const done=chk.dataset.done==="1"; const patch={}; chk.dataset.check.split(",").forEach(k=>patch["avance/"+k]=done?null:true); patch.actualizado=Date.now(); patch._w=SID; db.ref(ROOT+"/tableros/"+chk.dataset.s+"/pedidos/"+chk.dataset.id).update(patch); return; }
+  const emp=t.closest("[data-emp]"); if(emp){ const done=emp.dataset.done==="1"; db.ref(ROOT+"/tableros/"+emp.dataset.s+"/pedidos/"+emp.dataset.id).update({["empaque/"+emp.dataset.emp]:done?null:true,actualizado:Date.now(),_w:SID}); return; }
+  const listo=t.closest("[data-listo]"); if(listo){ upd(listo.dataset.s,listo.dataset.listo,{etapa:"espera",listoCocinaEn:Date.now()}); kit.abierto=null; kit.vista="comal"; toast("✅ Listo · esperando repartidor"); return; }
+});
+
 /* ---------- 3. PRODUCTOS (prender / apagar por sucursal) ---------- */
 function sucSelect(){ return `<select id="pSuc">${SUCURSALES.map(x=>{ const a=apagados(x.id).length; return `<option value="${x.id}"${x.id===pSuc?" selected":""}>📍 ${x.n}${a?" · "+a+" apagado"+(a>1?"s":""):""}</option>`; }).join("")}</select>`; }
 function renderProductos(){ const c=catalogo[pSuc]||{}; const ap=apagados(pSuc).length;
@@ -515,7 +615,7 @@ document.addEventListener("change",e=>{ const cb=e.target; if(!cb.dataset||!cb.d
 
 /* ---------- acciones del kanban ---------- */
 document.addEventListener("click",e=>{ const el=e.target.closest("[data-a]"); if(!el) return; const {a,v,id,s}=el.dataset;
-  if(a==="etapa"){ const patch={etapa:v}; if(el.dataset.back){ patch.estado="pedido"; patch.entregadoEn=null; } upd(s,id,patch); toast({proceso:"De vuelta a cocina 🍳",espera:"Esperando repartidor ⏳",repartiendo:"En camino 🛵"}[v]); }
+  if(a==="etapa"){ const patch={etapa:v}; if(el.dataset.back){ patch.estado="pedido"; patch.entregadoEn=null; } if(v==="espera") patch.listoCocinaEn=Date.now(); upd(s,id,patch); toast({proceso:"De vuelta a cocina 🍳",espera:"Esperando repartidor ⏳",repartiendo:"En camino 🛵"}[v]); }
   if(a==="entregar"){ upd(s,id,{estado:"entregado",etapa:"entregado",entregadoEn:Date.now()}); toast("Entregado ✅"); }
   if(a==="archivar"){ upd(s,id,{estado:"archivado",archivadoEn:Date.now()}); toast("Archivado 📚"); }
   if(a==="editar"){ abrirEnMostrador(s,id); }

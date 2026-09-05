@@ -690,7 +690,7 @@ function cardHTML(c){
   if(typing.length) badges.push(`<span class="b live">✏️ ${esc((typing[0].fam||c.familia)?"Familia "+(typing[0].fam||c.familia):"Alguien")} está escribiendo…</span>`);
   else if(c.estado==="armando") badges.push(`<span class="b wip">✏️ Armando…</span>`);
   else if(c.estado==="porpedir") badges.push(`<span class="b ok">✅ Listo para pedir</span>`);
-  if(c.estado==="pedido"){ badges.push(`<span class="b ok">📲 Pedido ${fmtFecha(c.pedidoEn)}</span>`); const et={proceso:"🍳 En cocina",espera:"⏳ Esperando repartidor",repartiendo:"🛵 En camino"}[c.etapa||"proceso"]; if(et) badges.push(`<span class="b${c.etapa==="repartiendo"?" live":""}">${et}</span>`); }
+  if(c.estado==="pedido"){ badges.push(`<span class="b ok">📲 Pedido ${fmtFecha(c.pedidoEn)}</span>`); const et={proceso:"🍳 En cocina",armado:"🔥 Preparando tu pedido",espera:"⏳ Esperando repartidor",repartiendo:"🛵 En camino"}[c.etapa||"proceso"]; if(et) badges.push(`<span class="b${c.etapa==="repartiendo"?" live":""}">${et}</span>`); }
   if(c.estado==="entregado") badges.push(`<span class="b ok">🛵 Entregado ${fmtFecha(c.entregadoEn)}</span>`);
   if(c.estado==="archivado") badges.push(`<span class="b">📚 ${fmtFecha(c.pedidoEn||c.archivadoEn||c.creado,false)}</span>`);
   if(suc&&c.estado!=="armando") badges.push(`<span class="b suc">📍 ${esc(suc.n)}</span>`);
