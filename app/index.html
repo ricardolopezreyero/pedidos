@@ -770,9 +770,9 @@ function renderBoardNow(){
     const prev=prevSnap[c.id]; if(firstRender||c._w===SID) return;
     // Aviso al anfitrión: una familia acaba de dar "Listo" (o llegó una familia nueva)
     if((mine.has(c.id)||host)&&prev&&(prev.nh||0)<noHubo(c).length){ toast("⛔ Cocina no tuvo "+noHubo(c).slice(-1)[0]+(c.etapa==="proceso"||!c.etapa?". Toca Cambiar para pedir otra cosa.":". Pregunta en caja o al mesero.")); beep(); }
-    if(host){ if(prev&&prev.estado==="armando"&&c.estado==="porpedir"){ toast("✅ Familia "+(c.familia||"sin nombre")+" ya quedó · lista para pedir"); beep(); } else if(!prev&&c.estado==="armando"){ toast("🐸 Familia "+(c.familia||"nueva")+" está armando su pedido"); } }
+    if(host){ if(prev&&prev.estado==="armando"&&c.estado==="porpedir"){ toast("✅ "+(c.familia||"sin nombre")+" ya quedó · lista para pedir"); beep(); } else if(!prev&&c.estado==="armando"){ toast("🐸 Familia "+(c.familia||"nueva")+" está armando su pedido"); } }
     if(!prev){ ui.flash[c.id]={card:true,per:{},ts:now}; return; }
-    if(prev.estado!==undefined&&(prev.estado!==c.estado||prev.col!==colDe(c))) { ui.flash[c.id]=Object.assign(ui.flash[c.id]||{card:true,per:{}},{moved:true,ts:now}); if(host) toast(({cocina:"🔥 Cocina tomó el pedido de Familia ",camino:"🛵 Salió el pedido de Familia ",entregado:"✅ Entregado a Familia "})[colDe(c)]?({cocina:"🔥 Cocina tomó el pedido de Familia ",camino:"🛵 Salió el pedido de Familia ",entregado:"✅ Entregado a Familia "})[colDe(c)]+(c.familia||""):"Familia "+(c.familia||"")+" → "+(ESTADOS.find(e=>e.id===colDe(c))||{}).n); }
+    if(prev.estado!==undefined&&(prev.estado!==c.estado||prev.col!==colDe(c))) { ui.flash[c.id]=Object.assign(ui.flash[c.id]||{card:true,per:{}},{moved:true,ts:now}); if(host) toast(({cocina:"🔥 Cocina tomó el pedido de ",camino:"🛵 Salió el pedido de ",entregado:"✅ Entregado a "})[colDe(c)]?({cocina:"🔥 Cocina tomó el pedido de ",camino:"🛵 Salió el pedido de ",entregado:"✅ Entregado a "})[colDe(c)]+(c.familia||""):(c.familia||"")+" → "+(ESTADOS.find(e=>e.id===colDe(c))||{}).n); }
     if(prev.j!==snap[c.id].j){ const f=ui.flash[c.id]||{card:true,per:{}}; f.card=true; f.ts=now; Object.keys(per).forEach(k=>{ if(prev.per[k]!==per[k]) f.per[k]=true; }); ui.flash[c.id]=f; } });
   prevSnap=snap; firstRender=false;
   const counts={}; ESTADOS.forEach(e=>counts[e.id]=cardsIn(e.id).length);
@@ -810,7 +810,7 @@ function emptyHTML(est){ const t={armando:["🫓",MESA()?"Toca <b>+ Pedido</b> p
 function cardHTML(c){
   const t=totales(c); const suc=SUCURSALES.find(s=>s.id===c.sucursal);
   const badges=[]; const typing=typingOn(c.id); const fl=(ui.flash||{})[c.id]||{per:{}};
-  if(typing.length) badges.push(`<span class="b live">✏️ ${esc((typing[0].fam||c.familia)?"Familia "+(typing[0].fam||c.familia):"Alguien")} está escribiendo…</span>`);
+  if(typing.length) badges.push(`<span class="b live">✏️ ${esc((typing[0].fam||c.familia)?(typing[0].fam||c.familia):"Alguien")} está escribiendo…</span>`);
   else if(c.estado==="armando") badges.push(`<span class="b wip">✏️ Armando…</span>`);
   else if(c.estado==="porpedir") badges.push(`<span class="b ok">✅ Listo para pedir</span>`);
   if(c.estado==="pedido"){ badges.push(`<span class="b ok">📲 Pedido ${fmtFecha(c.pedidoEn)}</span>`); const et={proceso:"🍳 Recibido, en cola de cocina",armado:"🔥 "+(c.cocinero?esc(c.cocinero.nombre)+" lo está preparando":"Preparando tu pedido"),espera:"⏳ Listo, esperando repartidor",repartiendo:"🛵 "+(c.repartidor?esc(c.repartidor.nombre)+" va en camino con tu pedido":"Va en camino")}[c.etapa||"proceso"]; if(et) badges.push(`<span class="b${c.etapa==="repartiendo"?" live":""}">${et}</span>`); }
@@ -831,7 +831,7 @@ function cardHTML(c){
   }[colDe(c)==="cocina"||colDe(c)==="camino"?"pedido":c.estado];
   const $c=costo(c);
   return `<article class="card${mine.has(c.id)?" mine":""}${fl.card?" flash":""}${fl.moved?" moved":""}${typing.length?" typing":""}" data-id="${esc(c.id)}">
-    <div class="card-top"><h3>Familia ${esc(c.familia||"sin nombre")}${fl.card&&typing.length&&!Object.keys(fl.per).length?`<span class="caret">▍</span>`:""}</h3><span class="when">${typing.length?"en vivo":fmtRel(c.actualizado)}</span></div>
+    <div class="card-top"><h3>${esc(c.familia||"sin nombre")}${fl.card&&typing.length&&!Object.keys(fl.per).length?`<span class="caret">▍</span>`:""}</h3><span class="when">${typing.length?"en vivo":fmtRel(c.actualizado)}</span></div>
     <div class="badges">${badges.join("")}</div>
     ${tagsHTML(c,host&&!MESA())}
     <div class="persons">${persons}</div>
@@ -849,8 +849,8 @@ function crearPedido(from){
   ["pedidoEn","entregadoEn","archivadoEn","mensaje","sucursal","tel","pago","faltas","avance","empaque","cocinero","etapa","listoEn","listoCocinaEn","armadoEn","_w","mesa"].forEach(k=>delete c[k]);
   c.personas.forEach(p=>p.id=uid());
   mine.add(c.id); saveMine(); saveCard(c); ui.tab="armando"; openEditor(c.id); if(!host) notificar("nueva",c);
-  bit("pedido",from?"repitio":"creo",from?"Repitió el pedido de Familia "+(from.familia||"")+" ("+totStr(totales(c))+")":"Creó un pedido nuevo",{pedido:c.id,familia:c.familia});
-  if(from) toast("Pedido copiado de Familia "+(from.familia||"sin nombre")+". Ajusta lo que cambie.");
+  bit("pedido",from?"repitio":"creo",from?"Repitió el pedido de "+(from.familia||"")+" ("+totStr(totales(c))+")":"Creó un pedido nuevo",{pedido:c.id,familia:c.familia});
+  if(from) toast("Pedido copiado de "+(from.familia||"sin nombre")+". Ajusta lo que cambie.");
 }
 function familiasHistorial(){ const m={};
   Object.values(pedidos).filter(c=>c.estado!=="armando"&&c.estado!=="porpedir").forEach(c=>{ const k=(c.familia||"").trim().toLowerCase(); if(!k) return; const ts=c.pedidoEn||c.actualizado; if(!m[k]||ts>m[k].ts) m[k]={c,ts}; });
@@ -860,7 +860,7 @@ function openNuevo(){
   if(MESA()){ crearPedido(null); return; }
   const fams=familiasHistorial();
   $("#nuevoBody").innerHTML=`<button class="btn y big" data-a="crear">✨ Familia nueva (empezar de cero)</button>
-    ${fams.length?`<label class="f">O repite un pedido anterior — solo ajustas lo que cambie:</label><div class="famlist">${fams.map(c=>{ const t=totales(c); return `<button data-a="repetir" data-id="${c.id}"><b>🔁 Familia ${esc(c.familia)}</b><span>${esc(c.personas.map(nombreDe).join(", "))}</span><span>${esc(totStr(t))} · ${fmtRel(c.pedidoEn||c.actualizado)}</span></button>`; }).join("")}</div>`:`<p style="color:var(--mut);font-weight:700;margin-top:14px">Cuando un pedido se marque como entregado o archivado, aparecerá aquí para repetirlo con un toque.</p>`}`;
+    ${fams.length?`<label class="f">O repite un pedido anterior — solo ajustas lo que cambie:</label><div class="famlist">${fams.map(c=>{ const t=totales(c); return `<button data-a="repetir" data-id="${c.id}"><b>🔁 ${esc(c.familia)}</b><span>${esc(c.personas.map(nombreDe).join(", "))}</span><span>${esc(totStr(t))} · ${fmtRel(c.pedidoEn||c.actualizado)}</span></button>`; }).join("")}</div>`:`<p style="color:var(--mut);font-weight:700;margin-top:14px">Cuando un pedido se marque como entregado o archivado, aparecerá aquí para repetirlo con un toque.</p>`}`;
   show("mNuevo");
 }
 
@@ -879,7 +879,7 @@ function validarDraft(d){ const err=[]; const vacios=[];
   return {err,vacios}; }
 // Doble confirmación: antes de dar Listo se muestra el pedido acomodado por persona — RLR
 function openConfirm(d){ const v=validarDraft(d); const $c=costo(d);
-  $("#confBody").innerHTML=`<div class="conf-fam">👨‍👩‍👧‍👦 Familia ${esc(d.familia||"sin nombre")}</div>
+  $("#confBody").innerHTML=`<div class="conf-fam">👨‍👩‍👧‍👦 ${esc(d.familia||"sin nombre")}</div>
     ${v.err.length?`<div class="warn">⚠️ Falta resolver:<br>${v.err.map(esc).join("<br>")}</div>`:""}
     ${d.personas.map(p=>{ const L=personLines(p); return `<div class="conf-per${L.length?"":" none"}"><div class="conf-nom">${rolDe(p).e} ${esc(nombreDe(p))}</div>${L.length?`<ul>${L.map(l=>`<li>${lineaHTML(l)}</li>`).join("")}</ul>`:`<div class="conf-none">Sin pedido esta vez</div>`}</div>`; }).join("")}
     ${d.notas?`<div class="notas">📝 ${esc(d.notas)}</div>`:""}
@@ -904,7 +904,7 @@ function closeEditor(listo,confirmado){ if(!ui.draft) return; clearTimeout(saveT
   if(listo&&eraArmando&&!host) notificar("lista",d);
   { const df=diffPedido(ui.orig,d); if(df) bit("edicion","edito","Cambió: "+df,{pedido:d.id,familia:d.familia}); if(d.estado!=="pedido"||ui.orig.estado!=="pedido") bit("pedido",listo?"listo":"guardo",listo?"Dio Listo → Por pedir ("+totStr(totales(d))+")":"Guardó sin dar Listo"+(d.estado==="armando"&&ui.orig.estado==="porpedir"?" (regresó a Armando)":""),{pedido:d.id,familia:d.familia}); }
   ui.editing=null; ui.draft=null; saveDraft(d,extra); hide("mEditor"); clearPresence(id); if(listo) ui.tab=d.estado==="pedido"?"pedido":"porpedir";
-  if(listo) toast(MESA()?"🍳 Tu orden llegó a cocina. Aquí ves cómo avanza.":d.estado==="pedido"?"Cambio guardado ✅":"¡Listo! Familia "+(d.familia||"sin nombre")+" pasa a Por pedir ✅"); }
+  if(listo) toast(MESA()?"🍳 Tu orden llegó a cocina. Aquí ves cómo avanza.":d.estado==="pedido"?"Cambio guardado ✅":"¡Listo! "+(d.familia||"sin nombre")+" pasa a Por pedir ✅"); }
 function renderEditor(){
   const d=ui.draft; const body=$("#edBody"); const st=body.scrollTop; const bl=$("#btnListo"); if(bl) bl.textContent=MESA()?"🍳 Ordenar":d.estado==="pedido"?"💾 Guardar cambio":"✅ Listo, ya quedó";
   // Recordar dónde estaba el cursor para no perder el foco si el render viene de otra pantalla — RLR
@@ -924,7 +924,7 @@ function tieneNota(d,x){ return (d.notas||"").toLowerCase().includes(x.toLowerCa
 // Dos personas de la misma familia abrieron "+ Pedido": avisar para no mandar la familia dos veces — RLR
 function checkDup(){ const d=ui.draft; const w=$("#dupWarn"); if(!d||!w) return; const k=(d.familia||"").trim().toLowerCase();
   const otro=k?Object.values(pedidos).find(c=>c.id!==d.id&&(c.estado==="armando"||c.estado==="porpedir")&&(c.familia||"").trim().toLowerCase()===k):null;
-  w.innerHTML=otro?`<div class="warn" style="margin-top:8px">⚠️ Ya hay un pedido de <b>Familia ${esc(otro.familia)}</b> armándose (${esc(totStr(totales(otro)))}). <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><button class="btn y" data-a="irDuplicado" data-id="${otro.id}">Abrir ese y no duplicar</button><button class="btn ghost" data-a="ignorarDup">Es otra familia</button></div></div>`:""; }
+  w.innerHTML=otro?`<div class="warn" style="margin-top:8px">⚠️ Ya hay un pedido de <b>${esc(otro.familia)}</b> armándose (${esc(totStr(totales(otro)))}). <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><button class="btn y" data-a="irDuplicado" data-id="${otro.id}">Abrir ese y no duplicar</button><button class="btn ghost" data-a="ignorarDup">Es otra familia</button></div></div>`:""; }
 function personaHTML(p,pi){
   const r=rolDe(p); const cnt={}; p.gorditas.forEach(l=>{ cnt[l.guiso]=cnt[l.guiso]||{harina:0,maiz:0}; cnt[l.guiso][l.masa]+=l.cant; });
   const chips=GUISOS.map(g=>{ const c=cnt[g.n]; const b=c?(c.harina?`<span class="cnt mh">🌾${c.harina}</span>`:"")+(c.maiz?`<span class="cnt mm">🌽${c.maiz}</span>`:""):"";
@@ -966,7 +966,7 @@ function openMessage(cards,markIds){
   const msg=buildMessage(cards); ui.msgIds=markIds; ui.msgText=msg; $("#mMsg h2").textContent="📲 Mensaje para WhatsApp";
   const pend=cardsIn("armando",true).filter(c=>!cards.includes(c));
   const conFalta=cards.filter(c=>faltantes(c).length);
-  $("#msgBody").innerHTML=`${conFalta.length?`<div class="warn">⛔ Productos agotados en Suc. ${esc(getSuc().n)}: ${esc(conFalta.map(c=>"Familia "+(c.familia||"sin nombre")+" ("+faltantes(c).join("; ")+")").join(" · "))}. Hay que ajustar esos pedidos antes de mandar.</div>`:""}${pend.length?`<div class="warn">⚠️ Todavía armando (no van en este mensaje): ${esc(pend.map(c=>"Familia "+(c.familia||"sin nombre")).join(", "))}.</div>`:""}
+  $("#msgBody").innerHTML=`${conFalta.length?`<div class="warn">⛔ Productos agotados en Suc. ${esc(getSuc().n)}: ${esc(conFalta.map(c=>(c.familia||"sin nombre")+" ("+faltantes(c).join("; ")+")").join(" · "))}. Hay que ajustar esos pedidos antes de mandar.</div>`:""}${pend.length?`<div class="warn">⚠️ Todavía armando (no van en este mensaje): ${esc(pend.map(c=>(c.familia||"sin nombre")).join(", "))}.</div>`:""}
     <div style="font-weight:800;color:var(--mut);font-size:13px;margin-bottom:6px">Va a: 📍 ${esc(getSuc().n)} · 📲 ${fmtTel(getTel())}</div><textarea class="msg" readonly>${esc(msg)}</textarea>`;
   $("#msgFoot").innerHTML=`<button class="btn" data-a="copiar">📋 Copiar</button><a class="btn wa" href="${waLink(getTel(),msg)}" target="_blank" rel="noopener" data-a="abrirWa">📲 Abrir WhatsApp</a>
     ${markIds?`<button class="btn p" data-a="marcarVarios" ${conFalta.length?"disabled":""}>✅ Ya se pidió (${markIds.length})</button>`:""}`;
@@ -976,7 +976,7 @@ function openMessage(cards,markIds){
 function openReparto(cards){ cards=cards.filter(Boolean); ui.msgIds=null; $("#mMsg h2").textContent="📋 Lista de reparto";
   const T={g:0,h:0,m:0,ch:0,b:0,po:0}; cards.forEach(c=>{ const t=totales(c); Object.keys(T).forEach(k=>T[k]+=t[k]); });
   ui.msgText=cards.map(c=>"FAMILIA "+(c.familia||"sin nombre").toUpperCase()+"\n"+c.personas.map(p=>{ const L=personLines(p); return L.length?"• "+nombreDe(p)+": "+L.join(", "):""; }).filter(Boolean).join("\n")).join("\n\n");
-  $("#msgBody").innerHTML=`<div style="font-weight:800;color:var(--mut);font-size:13px;margin-bottom:8px">Toca cada renglón cuando ya lo entregaste. 📦 ${esc(totCorto(T)||"sin productos")}</div>`+cards.map(c=>`<div class="rep-fam"><h3>👨‍👩‍👧‍👦 Familia ${esc(c.familia||"sin nombre")}</h3>${c.personas.map(p=>{ const L=personLines(p); return L.length?`<div class="rep-per"><div class="rep-nom">${rolDe(p).e} ${esc(nombreDe(p))}</div>${L.map(l=>`<button class="rep-line" data-a="chk">${lineaHTML(l)}</button>`).join("")}</div>`:""; }).join("")}${c.notas?`<div class="notas">📝 ${esc(c.notas)}</div>`:""}</div>`).join("")||`<div class="empty">Nada que repartir.</div>`;
+  $("#msgBody").innerHTML=`<div style="font-weight:800;color:var(--mut);font-size:13px;margin-bottom:8px">Toca cada renglón cuando ya lo entregaste. 📦 ${esc(totCorto(T)||"sin productos")}</div>`+cards.map(c=>`<div class="rep-fam"><h3>👨‍👩‍👧‍👦 ${esc(c.familia||"sin nombre")}</h3>${c.personas.map(p=>{ const L=personLines(p); return L.length?`<div class="rep-per"><div class="rep-nom">${rolDe(p).e} ${esc(nombreDe(p))}</div>${L.map(l=>`<button class="rep-line" data-a="chk">${lineaHTML(l)}</button>`).join("")}</div>`:""; }).join("")}${c.notas?`<div class="notas">📝 ${esc(c.notas)}</div>`:""}</div>`).join("")||`<div class="empty">Nada que repartir.</div>`;
   $("#msgFoot").innerHTML=`<div class="sum">Solo se marca en esta pantalla.</div><button class="btn" data-a="copiar">📋 Copiar lista</button><button class="btn p" data-a="close" data-v="mMsg">Cerrar</button>`;
   show("mMsg"); }
 function marcar(id,estado){ const c=pedidos[id]; if(!c) return; const antes=c.estado; const P={estado,listo:true};
@@ -994,8 +994,8 @@ async function compartir(){ const ci=cierreInfo(); const text="🐸 Pide tus gor
   try{ await navigator.clipboard.writeText(text); toast("Liga copiada 🔗"); }catch(e){ window.open("https://api.whatsapp.com/send?text="+encodeURIComponent(text),"_blank"); } }
 
 // Liga de una familia (grupo) dentro del tablero: el papá se la manda a los suyos y cada quien pone lo suyo — RLR
-async function compartirFamilia(id,fam){ const url=famUrl(id); const text="🐸 Pedido de Familia "+(fam||"")+" en Gorditas Ranitas: "+url+"\nEntra y pon lo que quieres. Cada quien sus gorditas (harina o maíz).";
-  try{ if(navigator.share){ await navigator.share({title:"Pedido de Familia "+(fam||""),text}); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
+async function compartirFamilia(id,fam){ const url=famUrl(id); const text="🐸 Pedido de "+(fam||"")+" en Gorditas Ranitas: "+url+"\nEntra y pon lo que quieres. Cada quien sus gorditas (harina o maíz).";
+  try{ if(navigator.share){ await navigator.share({title:"Pedido de "+(fam||""),text}); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
   try{ await navigator.clipboard.writeText(url); toast("Liga de la familia copiada 🔗"); }catch(e){ prompt("Liga de la familia:",url); } }
 /* ---------- config ---------- */
 function renderCfg(){ $("#cfgBody").innerHTML=`
@@ -1038,7 +1038,7 @@ document.addEventListener("click",e=>{
     case "crear": hide("mNuevo"); crearPedido(null); break;
     case "repetir": hide("mNuevo"); crearPedido(pedidos[id]); break;
     case "edit": openEditor(id); break;
-    case "del": { const c=pedidos[id]; if(c&&confirm("¿Eliminar el pedido de Familia "+(c.familia||"sin nombre")+"?")){ bit("pedido","borro","Borró el pedido ("+totStr(totales(c))+")",{pedido:id,familia:c.familia}); deleteCard(id); toast("Pedido eliminado"); } break; }
+    case "del": { const c=pedidos[id]; if(c&&confirm("¿Eliminar el pedido de "+(c.familia||"sin nombre")+"?")){ bit("pedido","borro","Borró el pedido ("+totStr(totales(c))+")",{pedido:id,familia:c.familia}); deleteCard(id); toast("Pedido eliminado"); } break; }
     case "marcar": if(v==="pedido"&&pedidos[id]&&faltantes(pedidos[id]).length){ toast("⛔ Ese pedido trae productos agotados: "+faltantes(pedidos[id]).join(", ")); break; } marcar(id,v); if(v==="pedido"){ ui.tab="pedido"; toast("Marcado como pedido 📲"); } if(v==="entregado"){ ui.tab="entregado"; toast("¡Buen provecho! 🛵"); } if(v==="archivado"){ ui.tab="archivado"; toast("Archivado. Lo puedes repetir cuando quieras 🔁"); } renderBoard(); break;
     case "enviarTodo": { const cards=cardsIn("porpedir",true); if(!cards.length) return; openMessage(cards,cards.map(c=>c.id)); break; }
     case "enviarUno": openMessage([pedidos[id]],[id]); break;

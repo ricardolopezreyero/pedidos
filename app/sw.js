@@ -5,7 +5,7 @@
    - Externos (fuentes, Firebase SDK, cdnjs): caché primero, refresco silencioso.
    - Firebase Realtime (websocket / long-poll) nunca pasa por aquí.
    - Nueva versión: se instala, avisa a la página y ella decide cuándo recargar. */
-const VERSION="20260904-2350";
+const VERSION="20260904-2352";
 const SHELL="ranitas-shell-"+VERSION, EXT="ranitas-ext-v1";
 const PRECACHE=["/","/index.html","/admin","/admin.html","/manual","/manual.html","/mesa","/mesa.html","/manifest.json","/admin.json","/favicon.png","/icon-192.png","/icon-512.png","/icon-192-maskable.png","/icon-512-maskable.png","/admin-icon-192.png","/admin-icon-512.png","/admin-icon-192-maskable.png","/admin-icon-512-maskable.png","/apple-touch-icon.png","/admin-apple-touch-icon.png"];
 const EXT_OK=["fonts.googleapis.com","fonts.gstatic.com","www.gstatic.com","cdnjs.cloudflare.com"];
