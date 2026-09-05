@@ -122,10 +122,24 @@ tr.tot td{font-weight:900;background:var(--y3)}
 .sw{width:40px;height:22px;border-radius:999px;background:#ccc;position:relative;flex:none;transition:.15s}
 .sw::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.15s}
 .item:not(.off) .sw{background:var(--g)}.item:not(.off) .sw::after{left:21px}
-.price{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:12px;padding:6px 8px 6px 12px;font-weight:800}
-.price input{width:86px;margin-left:auto;border:1.5px solid var(--line);border-radius:9px;padding:6px 8px;text-align:right;font-weight:900}
-.price input:focus{outline:none;border-color:var(--g)}
-.price.off{opacity:.5}
+.ptable-wrap{overflow-x:auto}
+.ptable{width:100%;max-width:640px;border-collapse:separate;border-spacing:0}
+.ptable th{text-align:left;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);padding:6px 10px;border-bottom:1.5px solid var(--line)}
+.ptable th.mh,.ptable th.mm,.ptable td.mh,.ptable td.mm{width:150px;text-align:center}
+.ptable th.mh{color:#7a4f00}.ptable th.mm{color:#1d4ed8}
+.ptable td{padding:5px 10px;border-bottom:1px solid #f3ecd6;vertical-align:middle}
+.ptable td.pn{font-weight:800;white-space:nowrap}
+.ptable td.pn small{display:block;color:var(--r);font-weight:800;font-size:11px}
+.ptable tr.off td{opacity:.5}
+.ptable td.mh .pin{background:#FFF6DC}.ptable td.mm .pin{background:#EEF4FF}
+.pin{display:inline-flex;align-items:center;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.pin span{padding:0 4px 0 10px;color:var(--mut);font-weight:800}
+.pin input{width:88px;border:0;padding:8px 10px 8px 2px;font-weight:900;font-size:15px;text-align:right;background:transparent}
+.pin input:focus{outline:none}
+.pin:focus-within{border-color:var(--g);box-shadow:0 0 0 3px rgba(46,158,62,.15)}
+.pin input::-webkit-outer-spin-button,.pin input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.pin input[type=number]{-moz-appearance:textfield}
+@media(max-width:600px){.ptable th.mh,.ptable th.mm,.ptable td.mh,.ptable td.mm{width:auto}.pin input{width:58px;font-size:14px;padding:7px 6px 7px 2px}.ptable td{padding:4px 5px}.ptable td.pn{white-space:normal;font-size:13px}.grp h3 span{display:block}}
 /* usuarios */
 .users{display:grid;gap:10px}
 .user{background:#fff;border-radius:14px;box-shadow:var(--sh);padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center}
@@ -961,8 +975,9 @@ document.addEventListener("click",e=>{ if(vista!=="productos") return;
 /* ---------- 4. PRECIOS (por sucursal; aún no se muestran a las familias) ---------- */
 function renderPrecios(){ const c=catalogo[pSuc]||{}; const conPrecio=Object.values(c).filter(v=>v&&v.precio).length;
   $("#main").innerHTML=`<div class="top"><h1>💲 Precios</h1>${sucSelect()}<button class="btn ghost" id="copiarPrecios" title="Copiar los precios de otra sucursal">📋 Copiar de…</button><div class="sub">Cada sucursal puede tener su precio. Se guardan solos al salir del campo. Por ahora <b>no se muestran a las familias</b>; cuando quieras, se activan en tableros y mensaje. ${conPrecio?conPrecio+" con precio":"Sin precios capturados"}.</div></div>`+
-  CATALOGO.filter(g=>["g","ch","b","po"].includes(g.c)).map(g=>`<div class="grp"><h3>${g.t}${g.c==="g"?"<span>harina · maíz (si maíz va vacío, usa el de harina)</span>":""}</h3><div class="items">${g.items.map(i=>{ const k=catKey(g.c,i); const v=c[k]||{}; return `<div class="price${v.on===false?" off":""}"><span>${esc(i)}</span><input type="number" inputmode="decimal" min="0" step="1" placeholder="${g.c==="g"?"$ 🌾":"$"}" value="${v.precio!=null?esc(v.precio):""}" data-k="${k}" data-f="precio" data-n="${esc(i)}">${g.c==="g"?`<input type="number" inputmode="decimal" min="0" step="1" placeholder="$ 🌽" value="${v.precioM!=null?esc(v.precioM):""}" data-k="${k}" data-f="precioM" data-n="${esc(i)} maíz" style="margin-left:4px">`:""}</div>`; }).join("")}</div></div>`).join(""); }
-document.addEventListener("change",e=>{ const inp=e.target.closest(".price input"); if(!inp||vista!=="precios") return; const k=inp.dataset.k; const val=inp.value===""?null:+inp.value;
+  CATALOGO.filter(g=>["g","ch","po","b"].includes(g.c)).map(g=>`<div class="grp"><h3>${g.t}${g.c==="g"?"<span>si 🌽 maíz va vacío, usa el de 🌾 harina</span>":""}</h3>
+    <div class="ptable-wrap"><table class="ptable"><thead><tr><th>Producto</th>${g.c==="g"?`<th class="mh">🌾 Harina</th><th class="mm">🌽 Maíz</th>`:`<th>Precio</th>`}</tr></thead><tbody>${g.items.map(i=>{ const k=catKey(g.c,i); const v=c[k]||{}; const inp=(f,val,cls)=>`<td class="${cls}"><div class="pin"><span>$</span><input type="number" inputmode="decimal" min="0" step="1" placeholder="—" value="${val!=null&&val!==""?esc(val):""}" data-k="${k}" data-f="${f}" data-n="${esc(i)}${f==="precioM"?" maíz":""}"></div></td>`; return `<tr class="${v.on===false?"off":""}"><td class="pn">${esc(i)}${v.on===false?`<small>apagado</small>`:""}</td>${inp("precio",v.precio,"mh")}${g.c==="g"?inp("precioM",v.precioM,"mm"):""}</tr>`; }).join("")}</tbody></table></div></div>`).join(""); }
+document.addEventListener("change",e=>{ const inp=e.target.closest(".ptable input"); if(!inp||vista!=="precios") return; const k=inp.dataset.k; const val=inp.value===""?null:+inp.value;
   const prev=((catalogo[pSuc]||{})[k]||{})[inp.dataset.f]; db.ref(ROOT+"/catalogo/"+pSuc+"/"+k).update({[inp.dataset.f]:val,ts:Date.now()}).then(()=>toast(val==null?"Precio borrado: "+inp.dataset.n:inp.dataset.n+" · $"+val)).catch(()=>toast("No se pudo guardar")); bit("precio","precio","Precio de "+inp.dataset.n+" en "+(SUCURSALES.find(x=>x.id===pSuc)||{}).n+": "+(prev!=null&&prev!==""?"$"+prev:"—")+" → "+(val==null?"—":"$"+val)); });
 document.addEventListener("click",e=>{ if(e.target.id!=="copiarPrecios") return; const otras=SUCURSALES.filter(s=>s.id!==pSuc); const pick=prompt("¿De qué sucursal copio los precios a "+SUCURSALES.find(s=>s.id===pSuc).n+"?\n"+otras.map((s,i)=>(i+1)+") "+s.n).join("\n")); const src=otras[+pick-1]; if(!src) return;
   const from=catalogo[src.id]||{}; const patch={}; Object.keys(from).forEach(k=>{ if(from[k]&&(from[k].precio!=null||from[k].precioM!=null)){ const cur=((catalogo[pSuc]||{})[k]||{}); patch[k]=Object.assign({},cur,{precio:from[k].precio==null?null:from[k].precio,precioM:from[k].precioM==null?null:from[k].precioM,ts:Date.now()}); } });
