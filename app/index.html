@@ -35,12 +35,24 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Ranitas">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://www.gstatic.com">
+<link rel="preconnect" href="https://notion-casa-default-rtdb.firebaseio.com">
+<link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js">
+<link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js">
+<link rel="manifest" href="/manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
 /* RLR */
 :root{--y:#FFD60A;--y2:#FFF1B8;--y3:#FFFBEA;--r:#E4322B;--r2:#FDE7E5;--g:#2E9E3E;--g2:#E3F5E6;--wa:#25D366;--ink:#231F1A;--mut:#7A736B;--line:#EEE3BF;--card:#fff;--sh:0 6px 18px rgba(90,70,0,.10);--rad:16px}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--y3);color:var(--ink);font-family:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.35;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--y3);color:var(--ink);font-family:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.35;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-text-size-adjust:100%}
+button{user-select:none;-webkit-user-select:none}
+@media(pointer:coarse){.chip,.pill,.btn,.tab,.seg button{min-height:42px}.qty button,.stp button{width:38px;height:38px}.ib{width:42px;height:42px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 input,select,textarea{border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;width:100%;outline:none}
@@ -89,10 +101,13 @@ header{position:sticky;top:0;z-index:20;background:var(--y);padding:10px 12px;di
 .cards{display:flex;flex-direction:column;gap:10px}
 .empty{background:#fff;border:1.5px dashed var(--line);border-radius:var(--rad);padding:22px 16px;text-align:center;color:var(--mut);font-weight:700}
 .empty span{font-size:28px;display:block;margin-bottom:6px}
-@media(min-width:960px){
+@media(min-width:760px){
   .tabs{display:none}
-  .board{display:grid;grid-template-columns:repeat(7,minmax(215px,1fr));gap:10px;padding:14px;align-items:start;overflow-x:auto}
-  .col{display:block;background:rgba(255,255,255,.45);border-radius:18px;padding:8px;min-height:60vh}
+  .board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(270px,300px);gap:10px;padding:12px 14px 18px;align-items:start;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+  .col{display:block;background:rgba(255,255,255,.45);border-radius:18px;padding:8px;min-height:60vh;scroll-snap-align:start}
+}
+@media(min-width:1500px){
+  .board{grid-auto-flow:row;grid-template-columns:repeat(7,minmax(0,1fr));overflow:visible}
 }
 
 /* ---------- card ---------- */
@@ -656,7 +671,8 @@ $("#sucTel").addEventListener("change",e=>{ if(e.target.id==="telSel"){ config.t
 /* ---------- tablero ---------- */
 const sorters={armando:(a,b)=>a.creado-b.creado,porpedir:(a,b)=>(a.listoEn||a.actualizado)-(b.listoEn||b.actualizado),pedido:(a,b)=>(b.pedidoEn||0)-(a.pedidoEn||0),cocina:(a,b)=>(b.armadoEn||0)-(a.armadoEn||0),camino:(a,b)=>(b.listoCocinaEn||0)-(a.listoCocinaEn||0),entregado:(a,b)=>(b.entregadoEn||0)-(a.entregadoEn||0),archivado:(a,b)=>(b.archivadoEn||0)-(a.archivadoEn||0)};
 function cardsIn(est){ return Object.values(pedidos).filter(c=>colDe(c)===est).sort(sorters[est]); }
-function renderBoard(){
+let _rbPend=false; function renderBoard(){ if(_rbPend) return; _rbPend=true; setTimeout(()=>{ _rbPend=false; renderBoardNow(); },0); }   // agrupa ráfagas de eventos en un solo pintado (también en segundo plano) — RLR
+function renderBoardNow(){
   // ¿Qué cambió desde el último render? (solo brillan los cambios que vienen de OTRA pantalla)
   const snap={}; const now=Date.now(); ui.flash=ui.flash||{};
   Object.keys(ui.flash).forEach(k=>{ if(now-ui.flash[k].ts>1800) delete ui.flash[k]; });   // el destello dura 1.8 s aunque haya otros renders
