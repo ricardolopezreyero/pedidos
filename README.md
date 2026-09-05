@@ -75,6 +75,8 @@ Es **la misma tarjeta** en todos lados: lo que la familia teclea lo ve la caja a
 | 💲 **Precios** | Tabla por sucursal, harina y maíz, copiar de otra sucursal. | Dueño |
 | 👥 **Usuarios** | Claves y vistas permitidas por persona. | Dueño |
 | 🏬 **Sucursales** | Alta de sucursal con todo automático (mesas, mostrador, catálogo, cocina). Solo Maestro. | Dueño |
+| 📖 **Recetas** | Recetario con gramajes (29 recetas base marcadas como supuestas), calculadora que escala a la cantidad que necesites con costo estimado, "lo pedido hoy", editar, duplicar, imprimir. | Dueño, cocina |
+| 🛒 **Compras** | Lista de compras sumada por insumo y agrupada por proveedor, orden por WhatsApp, marcar como pedida, historial, catálogo de insumos con precio y proveedores con WhatsApp y días de entrega. | Dueño, caja |
 | 📜 **Bitácora** | Registro permanente de absolutamente todo, en vivo, con filtros y búsqueda. | Dueño |
 | 📖 **Manuales** | Manual por perfil con capturas y lenguaje simple. | Todos |
 
@@ -157,6 +159,10 @@ Cualquier servidor estático sobre `app/` sirve (por ejemplo `python3 -m http.se
 | `reparto/<sucursal>/repartidores/<id>` | `{nombre, creado}` |
 | `admin/usuarios/<id>` | `{nombre, clave, vistas[]}` |
 | `sucursales/<id>` | `{n, tels[], direccion, activa, orden, creado}` |
+| `recetas/<id>` | `{nombre, cat, rinde, unidad, ingredientes[{insumo,cant,unidad}], pasos, tiempo, supuesta}` |
+| `insumos/<id>` | `{nombre, unidad, precio, proveedor, presentacion}` |
+| `proveedores/<id>` | `{nombre, rubro, wa, dias, notas}` |
+| `compras/lista/<insumo\|unidad>` · `compras/historial/<push>` | lista viva de compras y órdenes ya pedidas |
 | `bitacora/<push>` | registro permanente, solo se agrega |
 
 **La tarjeta** (`pedidos/<id>`):
@@ -225,6 +231,7 @@ El Worker lee el tablero en Firebase, saca el celular del anfitrión y le manda 
 - Activar el SMS (sección 7).
 - Chilaquiles con más opciones de presentación ("ya lo moveremos").
 - Corte diario para Panorama.
+- Recetas: gramajes reales (los base son supuestos), consumo real contra teórico, inventario.
 - Reglas de seguridad en Firebase si el sistema crece.
 
 ---
