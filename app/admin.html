@@ -457,7 +457,7 @@ const _RLR="Ricardo López Reyero", _k="EYE", _rev=181218;
 const FIREBASE_CONFIG={apiKey:"AIzaSyDSAFxL2E_S1iHiRfSHGbbuHiR_-2j-HP4",authDomain:"notion-casa.firebaseapp.com",databaseURL:"https://notion-casa-default-rtdb.firebaseio.com",projectId:"notion-casa",storageBucket:"notion-casa.firebasestorage.app",messagingSenderId:"450309398626",appId:"1:450309398626:web:a2d12ad763123c16d6b13b"};
 const ROOT="ranitas", CLAVE_MAESTRA="123";   // usuario maestro (provisional)
 // Sucursales: viven en ranitas/sucursales (el Maestro las crea desde la vista Sucursales); estas 4 son el respaldo si el nodo no existe — RLR
-const SUC_BASE=[{id:"sanatorio",n:"Sanatorio Español",tels:["8717189478","8715093598"]},{id:"vinedos",n:"Viñedos",tels:["8712036783","8714189903"]},{id:"juarez",n:"Juárez",tels:["8719432960"]},{id:"ibero",n:"Villas de la Ibero",tels:["8714334785"]}];
+const SUC_BASE=[{id:"sanatorio",n:"Sanatorio Español",tels:["8717189478","8715093598"]},{id:"vinedos",n:"Viñedos",tels:["8712036783","8714189903"]},{id:"juarez",n:"Juárez",tels:["8719432960"]},{id:"ibero",n:"Villas de la Ibero",tels:["8719757123"]}];
 let SUCURSALES=SUC_BASE.slice(), SUC_TODAS={};
 function aplicarSucursales(v){ SUC_TODAS=v||{}; const arr=Object.entries(SUC_TODAS).filter(([k,x])=>x&&x.activa!==false).map(([k,x])=>({id:k,n:x.n||k,tels:Array.isArray(x.tels)?x.tels:Object.values(x.tels||{}),direccion:x.direccion||"",orden:x.orden||0,creado:x.creado||0})).sort((a,b)=>(a.orden-b.orden)||(a.creado-b.creado)); if(arr.length) SUCURSALES=arr; }
 const ROLES={papa:"👨",mama:"👩",hijo:"👦",hija:"👧",otro:"🙂"};
@@ -820,7 +820,7 @@ const telFmt=t=>String(t||"").replace(/\D/g,"").slice(-10).replace(/(\d{3})(\d{3
 const waMsg=(c,slug)=>{ const sn=(SUCURSALES.find(x=>x.id===c.sucursal)||{}).n||""; return "Hola 👋 Le escribimos de Gorditas Ranitas"+(sn?" (Suc. "+sn+")":"")+" sobre el pedido de "+(c.familia||"")+". "; };
 function contactoHTML(c,slug,compacto){ const a=anfitriones[slug]||{}; const cfg=(tableros[slug]||{}).config||{}; const tel=String(cfg.telAnfitrion||a.tel||"").replace(/\D/g,"").slice(-10); if(!tel&&compacto) return "";
   const btns=tel?`<a class="btn tel" href="tel:+52${tel}" title="Llamar">📞 ${compacto?"":telFmt(tel)}</a><a class="btn wa" href="https://api.whatsapp.com/send?phone=52${tel}&text=${encodeURIComponent(waMsg(c,slug))}" target="_blank" rel="noopener" title="WhatsApp">💬${compacto?"":" WhatsApp"}</a>`:""; if(compacto) return btns;
-  const url=APP_URL+slug+(c.id?"?f="+c.id:""); const et={proceso:"🍳 En cola de cocina",armado:"🔥 Armando en cocina"+(c.cocinero?" · "+c.cocinero.nombre:""),espera:"⏳ Espera repartidor",repartiendo:"🛵 Repartiendo",entregado:"✅ Entregado"}[c.etapa||(c.estado==="pedido"?"proceso":"")]||({armando:"✏️ Armando",porpedir:"📋 Por pedir",entregado:"✅ Entregado",archivado:"📚 Historial"}[c.estado]||c.estado);
+  const url=APP_URL+slug+(c.liga?"/"+c.liga:c.id?"?f="+c.id:""); const et={proceso:"🍳 En cola de cocina",armado:"🔥 Armando en cocina"+(c.cocinero?" · "+c.cocinero.nombre:""),espera:"⏳ Espera repartidor",repartiendo:"🛵 Repartiendo",entregado:"✅ Entregado"}[c.etapa||(c.estado==="pedido"?"proceso":"")]||({armando:"✏️ Armando",porpedir:"📋 Por pedir",entregado:"✅ Entregado",archivado:"📚 Historial"}[c.estado]||c.estado);
   return `<div class="origen"><div class="o-h"><b>${a.mesa?"🪑":a.mostrador?"🧾":"🏠"} ${esc(a.nombre||slug)}</b><span class="b">${esc(et)}</span></div>
     <div class="o-row"><a class="o-link" href="${esc(url)}" target="_blank" rel="noopener">🔗 ${esc(url.replace("https://",""))}</a><button class="btn ghost" data-copy="${esc(url)}" title="Copiar liga">📋</button></div>
     ${tel?`<div class="o-row"><span>📱 ${esc((cfg.anfitrion||a.nombre||"Anfitrión"))} · <b>${telFmt(tel)}</b></span><span class="o-acts">${btns}</span></div>`:`<div class="o-row"><span class="mut">Sin celular registrado</span></div>`}
@@ -1221,9 +1221,9 @@ function imprimirComanda(c){ const cfg=(tableros[c.slug]||{}).config||{}; const 
 </script>
 <!-- RLR · eye/181218 -->
 <style>/* PWA · RLR */#swUp{position:fixed;left:50%;top:12px;transform:translateX(-50%) translateY(-80px);background:#231F1A;color:#fff;padding:10px 14px 10px 16px;border-radius:999px;font-weight:900;font-size:14px;z-index:9999;display:flex;gap:10px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.3);transition:transform .35s cubic-bezier(.2,.8,.2,1);font-family:'Nunito',system-ui,sans-serif}#swUp.on{transform:translateX(-50%) translateY(0)}#swUp button{border:0;border-radius:999px;padding:7px 12px;font-weight:900;font-size:13px;background:#FFD60A;color:#231F1A;cursor:pointer;font-family:inherit}
-#instPill{position:fixed;right:14px;bottom:14px;z-index:9998;background:#231F1A;color:#FFD60A;border-radius:999px;padding:10px 12px 10px 16px;font-weight:900;font-size:14px;display:none;gap:10px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.28);font-family:'Nunito',system-ui,sans-serif;max-width:min(92vw,420px)}#instPill.on{display:flex}#instPill b{cursor:pointer}#instPill small{display:block;font-weight:700;color:#eee;font-size:12px;line-height:1.25}#instPill .x{background:none;border:0;color:#aaa;font-size:18px;cursor:pointer;padding:0 2px;line-height:1}
+#instPill{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:9998;background:#231F1A;color:#FFD60A;border-radius:999px;padding:10px 12px 10px 16px;font-weight:900;font-size:14px;display:none;gap:10px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.28);font-family:'Nunito',system-ui,sans-serif;max-width:min(92vw,420px)}#instPill.on{display:flex}#instPill b{cursor:pointer}#instPill small{display:block;font-weight:700;color:#eee;font-size:12px;line-height:1.25}#instPill .x{background:none;border:0;color:#aaa;font-size:18px;cursor:pointer;padding:0 2px;line-height:1}
 @media(display-mode:standalone),(display-mode:minimal-ui){#instPill{display:none!important}}</style>
-<div id="swUp" role="status">✨ Hay una versión nueva <button id="swUpBtn">Actualizar</button></div>
+<div id="swUp" role="status" hidden></div>
 <div id="instPill"><b id="instGo">📲 Instalar la app</b><button class="x" id="instNo" title="Ahora no">×</button></div>
 <script>
 /* PWA: instala, abre al instante y se actualiza sola — RLR */
@@ -1236,8 +1236,8 @@ function imprimirComanda(c){ const cfg=(tableros[c.slug]||{}).config||{}; const 
   no.addEventListener("click",()=>{ pill.classList.remove("on"); try{ localStorage.setItem("ranitas-inst-no",String(Date.now()+7*864e5)); }catch(e){} });
   window.addEventListener("appinstalled",()=>{ pill.classList.remove("on"); });
   if(!("serviceWorker" in navigator)) return; let recargando=false;
-  const avisar=reg=>{ const w=reg.waiting; if(!w) return; const bar=document.getElementById("swUp"); bar.classList.add("on"); document.getElementById("swUpBtn").onclick=()=>{ bar.classList.remove("on"); w.postMessage({tipo:"saltar"}); }; };
-  navigator.serviceWorker.addEventListener("controllerchange",()=>{ if(recargando) return; recargando=true; location.reload(); });
+  const avisar=reg=>{ const w=reg.waiting; if(w) w.postMessage({tipo:"saltar"}); };
+  // Sin recargas automáticas: la versión nueva se activa sola y se usa en la siguiente apertura. Nada de "hay una versión nueva" — RLR
   window.addEventListener("load",()=>{ navigator.serviceWorker.register("/sw").then(reg=>{ if(reg.waiting&&navigator.serviceWorker.controller) avisar(reg); reg.addEventListener("updatefound",()=>{ const nw=reg.installing; if(!nw) return; nw.addEventListener("statechange",()=>{ if(nw.state==="installed"&&navigator.serviceWorker.controller) avisar(reg); }); }); setInterval(()=>reg.update().catch(()=>{}),30*60*1000); document.addEventListener("visibilitychange",()=>{ if(!document.hidden) reg.update().catch(()=>{}); }); }).catch(()=>{}); });
 })();
 </script>

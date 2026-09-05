@@ -5,11 +5,11 @@
    - Externos (fuentes, Firebase SDK, cdnjs): caché primero, refresco silencioso.
    - Firebase Realtime (websocket / long-poll) nunca pasa por aquí.
    - Nueva versión: se instala, avisa a la página y ella decide cuándo recargar. */
-const VERSION="20260905-0748";
+const VERSION="20260905-1010";
 const SHELL="ranitas-shell-"+VERSION, EXT="ranitas-ext-v1";
 const PRECACHE=["/","/index.html","/admin","/admin.html","/manual","/manual.html","/mesa","/mesa.html","/manifest.json","/admin.json","/favicon.png","/icon-192.png","/icon-512.png","/icon-192-maskable.png","/icon-512-maskable.png","/admin-icon-192.png","/admin-icon-512.png","/admin-icon-192-maskable.png","/admin-icon-512-maskable.png","/apple-touch-icon.png","/admin-apple-touch-icon.png"];
 const EXT_OK=["fonts.googleapis.com","fonts.gstatic.com","www.gstatic.com","cdnjs.cloudflare.com"];
-self.addEventListener("install",e=>{ e.waitUntil(caches.open(SHELL).then(c=>Promise.allSettled(PRECACHE.map(u=>c.add(new Request(u,{cache:"reload"})))))); });
+self.addEventListener("install",e=>{ self.skipWaiting(); e.waitUntil(caches.open(SHELL).then(c=>Promise.allSettled(PRECACHE.map(u=>c.add(new Request(u,{cache:"reload"})))))); });
 self.addEventListener("activate",e=>{ e.waitUntil((async()=>{ const ks=await caches.keys(); await Promise.all(ks.filter(k=>k.startsWith("ranitas-shell-")&&k!==SHELL).map(k=>caches.delete(k))); await self.clients.claim(); const cs=await self.clients.matchAll({type:"window"}); cs.forEach(c=>c.postMessage({tipo:"activo",version:VERSION})); })()); });
 self.addEventListener("message",e=>{ if(e.data&&e.data.tipo==="saltar") self.skipWaiting(); });
 const conTope=(req,ms)=>new Promise((res,rej)=>{ const t=setTimeout(()=>rej(new Error("tope")),ms); fetch(req).then(r=>{ clearTimeout(t); res(r); },err=>{ clearTimeout(t); rej(err); }); });

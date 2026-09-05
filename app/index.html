@@ -60,6 +60,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--g);box-shadow:0 0 0 3
 h1,h2,h3{margin:0}
 
 /* ---------- header ---------- */
+header::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:120px;background:var(--y)}
 header{position:sticky;top:0;z-index:20;background:var(--y);padding:10px 12px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px 10px;box-shadow:0 2px 0 rgba(0,0,0,.06)}
 .suc{grid-column:1/-1;grid-row:2}
 .brand{grid-row:1;grid-column:1}
@@ -412,11 +413,15 @@ function notificar(evento,card){ if(!SLUG||!card||config.sms===false||MESA()) re
 const slugify=x=>(x||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40);
 const QS=new URLSearchParams(location.search);
 const LOCAL=location.hostname==="localhost"||location.hostname==="127.0.0.1";
-let SLUG=slugify(QS.get("t")||(LOCAL?"":location.pathname.split("/").filter(Boolean).pop()||""));
+const SEGS=location.pathname.split("/").filter(Boolean);
+let SLUG=slugify(QS.get("t")||(LOCAL?"":SEGS[0]||""));
+const FAMLIGA=LOCAL?(QS.get("fl")||""):(SEGS[1]||"");   // liga bonita de una familia: /familia-lopez-acosta/murra-garza — RLR
 if(SLUG==="index-html") SLUG="";
 const PATH=ROOT+"/tableros/"+SLUG;
 const boardUrl=sl=>APP_URL+sl;
-const famUrl=id=>LOCAL?location.origin+location.pathname+"?t="+SLUG+"&f="+id:boardUrl(SLUG)+"?f="+id;
+const famUrl=id=>{ const c=pedidos[id]; const liga=c&&c.liga; return LOCAL?location.origin+location.pathname+"?t="+SLUG+(liga?"&fl="+liga:"&f="+id):boardUrl(SLUG)+(liga?"/"+liga:"?f="+id); };
+// Liga estática por familia: se saca del nombre la primera vez y ya no cambia aunque cambie el nombre — RLR
+function asegurarLiga(id){ const c=pedidos[id]; if(!c||c.liga||!(c.familia||"").trim()) return c&&c.liga; let base=slugify(c.familia).replace(/^(familia|fam)-/,"")||("familia-"+String(id).slice(-4)); let liga=base, n=2; const usadas=new Set(Object.values(pedidos).filter(x=>x.id!==id&&x.liga).map(x=>x.liga)); while(usadas.has(liga)) liga=base+"-"+(n++); c.liga=liga; patchCard(id,{liga}); return liga; }
 const FAM=QS.get("f")||"";   // liga de una familia: abre directo su pedido
 const goTo=sl=>{ location.href=LOCAL?location.pathname+"?t="+sl:"/"+sl; };
 
@@ -426,7 +431,7 @@ let SUCURSALES=[
   {id:"sanatorio",n:"Sanatorio Español",tels:["8717189478","8715093598"]},
   {id:"vinedos",  n:"Viñedos",          tels:["8712036783","8714189903"]},
   {id:"juarez",   n:"Juárez",           tels:["8719432960"]},
-  {id:"ibero",    n:"Villas de la Ibero",tels:["8714334785"]}
+  {id:"ibero",    n:"Villas de la Ibero",tels:["8719757123"]}
 ];
 function aplicarSucursales(v){ const arr=Object.entries(v||{}).filter(([k,x])=>x&&x.activa!==false).map(([k,x])=>({id:k,n:x.n||k,tels:(Array.isArray(x.tels)?x.tels:Object.values(x.tels||{})).filter(Boolean),orden:x.orden||0,creado:x.creado||0})).sort((a,b)=>(a.orden-b.orden)||(a.creado-b.creado)); if(arr.length) SUCURSALES=arr; }
 const ROLES=[
@@ -612,7 +617,8 @@ function attachBoard(){
       }
       pedidos=next; cacheLocal(); renderBoard();
       if(ui.editing&&pedidos[ui.editing]&&pedidos[ui.editing].estado==="pedido"&&pedidos[ui.editing].etapa&&pedidos[ui.editing].etapa!=="proceso"){ const idc=ui.editing; ui.editing=null; ui.draft=null; hide("mEditor"); hide("mConf"); clearPresence(idc); toast("🔥 La cocina ya tomó este pedido; ya no se puede cambiar aquí."); }
-      if(FAM&&!ui.fOpened&&pedidos[FAM]){ ui.fOpened=true; const c=pedidos[FAM]; mine.add(FAM); saveMine(); if(c.estado==="armando"||c.estado==="porpedir"){ openEditor(FAM); toast("Pedido de "+(c.familia||"")+" · pon lo tuyo 👇"); } else { ui.tab=c.estado; renderBoard(); } }
+      const FAMID=FAM||(FAMLIGA?(Object.keys(pedidos).find(k=>pedidos[k].liga===FAMLIGA)||""):"");
+      if(FAMID&&!ui.fOpened&&pedidos[FAMID]){ ui.fOpened=true; const FAM=FAMID; const c=pedidos[FAM]; mine.add(FAM); saveMine(); if(c.estado==="armando"||c.estado==="porpedir"){ openEditor(FAM); toast("Pedido de "+(c.familia||"")+" · pon lo tuyo 👇"); } else { ui.tab=c.estado; renderBoard(); } }
       // Limpieza automática (solo anfitrión): lo entregado hace más de 12 h se va al historial solo
       if(host&&!MESA()&&(!ui._sweep||Date.now()-ui._sweep>60000)){ ui._sweep=Date.now(); const lim=Date.now()-12*3600e3; Object.values(pedidos).filter(c=>c.estado==="entregado"&&(c.entregadoEn||0)<lim).forEach(c=>marcar(c.id,"archivado")); }
     });
@@ -827,8 +833,8 @@ function cardHTML(c){
   const H=host&&!MESA(), M=mine.has(c.id);
   const A={
     armando:`<button class="btn y" data-a="edit" data-id="${c.id}">✏️ Editar</button><button class="btn" data-a="ligaFam" data-id="${c.id}" title="Liga de esta familia">🔗</button>${H||M?`<button class="btn r" data-a="del" data-id="${c.id}">🗑</button>`:""}`,
-    porpedir:`<button class="btn y" data-a="edit" data-id="${c.id}">✏️ Editar</button><button class="btn" data-a="ligaFam" data-id="${c.id}" title="Liga de esta familia">🔗</button>${H?`<button class="btn wa" data-a="enviarUno" data-id="${c.id}">📲</button><button class="btn p" data-a="marcar" data-id="${c.id}" data-v="pedido">✅ Ya se pidió</button>`:""}${H||M?`<button class="btn r" data-a="del" data-id="${c.id}">🗑</button>`:""}`,
-    pedido:`${(!c.etapa||c.etapa==="proceso")&&(H||M)?`<button class="btn y" data-a="edit" data-id="${c.id}" title="La cocina aún no lo toma: puedes cambiarlo">✏️ Cambiar</button>`:""}${MESA()?"":`<button class="btn" data-a="reparto" data-id="${c.id}">📋 Reparto</button>`}${H&&!MESA()?`<button class="btn" data-a="verMsg" data-id="${c.id}">📄</button><button class="btn p" data-a="marcar" data-id="${c.id}" data-v="entregado">🛵 Entregado</button><button class="btn ghost" data-a="marcar" data-id="${c.id}" data-v="porpedir" title="Regresar a Por pedir">↩︎</button>`:""}`,
+    porpedir:`<button class="btn y" data-a="edit" data-id="${c.id}">✏️ Editar</button><button class="btn" data-a="ligaFam" data-id="${c.id}" title="Liga de esta familia">🔗</button><button class="btn wa" data-a="enviarUno" data-id="${c.id}" title="Manda este pedido por WhatsApp a la sucursal">💬 WhatsApp</button><button class="btn p" data-a="marcar" data-id="${c.id}" data-v="pedido">📲 Ya lo pedí</button>${H||M?`<button class="btn r" data-a="del" data-id="${c.id}">🗑</button>`:""}`,
+    pedido:`${(!c.etapa||c.etapa==="proceso")&&(H||M)?`<button class="btn y" data-a="edit" data-id="${c.id}" title="La cocina aún no lo toma: puedes cambiarlo">✏️ Cambiar</button>`:""}${MESA()?"":`<button class="btn" data-a="reparto" data-id="${c.id}">📋 Reparto</button>`}${H&&!MESA()?`<button class="btn" data-a="verMsg" data-id="${c.id}">📄</button><button class="btn p" data-a="marcar" data-id="${c.id}" data-v="entregado">🛵 Entregado</button><button class="btn ghost" data-a="marcar" data-id="${c.id}" data-v="porpedir" title="Regresar a Por pedir">↩︎</button>`:(M&&(!c.etapa||c.etapa==="proceso")?`<button class="btn ghost" data-a="marcar" data-id="${c.id}" data-v="porpedir" title="Regresar a Por pedir">↩︎</button>`:"")}`,
     entregado:`<button class="btn" data-a="reparto" data-id="${c.id}">📋 Reparto</button><button class="btn y" data-a="repetir" data-id="${c.id}">🔁 Repetir</button>${H?`<button class="btn p" data-a="marcar" data-id="${c.id}" data-v="archivado">📦 Archivar</button><button class="btn ghost" data-a="marcar" data-id="${c.id}" data-v="pedido">↩︎</button>`:""}`,
     archivado:`<button class="btn y" data-a="repetir" data-id="${c.id}">🔁 Repetir este pedido</button>${H?`<button class="btn r" data-a="del" data-id="${c.id}">🗑</button>`:""}`
   }[colDe(c)==="cocina"||colDe(c)==="camino"?"pedido":c.estado];
@@ -890,7 +896,7 @@ function openConfirm(d){ const v=validarDraft(d); const $c=costo(d);
   $("#confFoot").innerHTML=`<button class="btn ghost" data-a="close" data-v="mConf">✏️ Seguir editando</button><button class="btn p" data-a="confirmar" ${v.err.length?"disabled":""}>${MESA()?"🍳 Ordenar":d.estado==="pedido"?"💾 Guardar cambio":"✅ Confirmar pedido"}</button>`;
   show("mConf"); }
 function closeEditor(listo,confirmado){ if(!ui.draft) return; clearTimeout(saveTimer);
-  const d=ui.draft; d.familia=(d.familia||"").trim(); const id=ui.editing;
+  const d=ui.draft; d.familia=(d.familia||"").trim(); const id=ui.editing; if(d.familia&&pedidos[id]&&!pedidos[id].liga){ pedidos[id].familia=d.familia; asegurarLiga(id); d.liga=pedidos[id].liga; }
   if(listo){ const v=validarDraft(d);
     if(!d.familia){ toast("⚠️ Ponle nombre a la familia"); const i=$("#edBody input[data-in=familia]"); if(i) i.focus(); return; }
     if(v.vacios.length===d.personas.length){ toast("⚠️ Nadie tiene nada todavía"); return; }
@@ -1060,7 +1066,7 @@ document.addEventListener("click",e=>{
     case "chk": el.classList.toggle("done"); break;
     case "llegoTodo": { const cs=activos(); if(!cs.length) break; if(confirm("¿Marcar "+cs.length+" pedido"+(cs.length===1?"":"s")+" como entregado"+(cs.length===1?"":"s")+"?")){ cs.forEach(c=>marcar(c.id,"entregado")); ui.tab="entregado"; renderBoard(); toast("¡Buen provecho! 🛵"); } break; }
     case "hostToggle": { if(el.checked){ const t=digits(prompt("Celular del anfitrión (para confirmar que eres tú):")||""); if(ui.anf&&t&&t===digits(ui.anf.tel)){ activarHost(); toast("Modo anfitrión activado"); } else { el.checked=false; toast("Ese celular no coincide"); } } else { host=false; localStorage.setItem(HOST_KEY,"0"); toast("Modo anfitrión desactivado"); } renderHeader(); renderBoard(); break; }
-    case "ligaFam": { const fid=id||ui.editing; const c=pedidos[fid]||ui.draft; if(!c) break; compartirFamilia(fid,c.familia); break; }
+    case "ligaFam": { const fid=id||ui.editing; const c=pedidos[fid]||ui.draft; if(!c) break; if(pedidos[fid]&&!pedidos[fid].familia&&ui.draft&&ui.editing===fid) pedidos[fid].familia=ui.draft.familia; asegurarLiga(fid); compartirFamilia(fid,c.familia); break; }
     case "copiarLiga": navigator.clipboard.writeText(boardUrl(SLUG)).then(()=>toast("Liga copiada 🔗"),()=>toast(boardUrl(SLUG))); break;
     case "ir": if(v) goTo(v); else location.href=LOCAL?location.pathname:"/"; break;
     case "irHost": localStorage.setItem("ranitas-host-"+v,"1"); goTo(v); break;
@@ -1102,9 +1108,9 @@ window.addEventListener("beforeunload",()=>{ if(ui.editing) clearPresence(ui.edi
 </script>
 <!-- RLR · Ricardo López Reyero · eye/181218 -->
 <style>/* PWA · RLR */#swUp{position:fixed;left:50%;top:12px;transform:translateX(-50%) translateY(-80px);background:#231F1A;color:#fff;padding:10px 14px 10px 16px;border-radius:999px;font-weight:900;font-size:14px;z-index:9999;display:flex;gap:10px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.3);transition:transform .35s cubic-bezier(.2,.8,.2,1);font-family:'Nunito',system-ui,sans-serif}#swUp.on{transform:translateX(-50%) translateY(0)}#swUp button{border:0;border-radius:999px;padding:7px 12px;font-weight:900;font-size:13px;background:#FFD60A;color:#231F1A;cursor:pointer;font-family:inherit}
-#instPill{position:fixed;right:14px;bottom:14px;z-index:9998;background:#231F1A;color:#FFD60A;border-radius:999px;padding:10px 12px 10px 16px;font-weight:900;font-size:14px;display:none;gap:10px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.28);font-family:'Nunito',system-ui,sans-serif;max-width:min(92vw,420px)}#instPill.on{display:flex}#instPill b{cursor:pointer}#instPill small{display:block;font-weight:700;color:#eee;font-size:12px;line-height:1.25}#instPill .x{background:none;border:0;color:#aaa;font-size:18px;cursor:pointer;padding:0 2px;line-height:1}
+#instPill{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:9998;background:#231F1A;color:#FFD60A;border-radius:999px;padding:10px 12px 10px 16px;font-weight:900;font-size:14px;display:none;gap:10px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.28);font-family:'Nunito',system-ui,sans-serif;max-width:min(92vw,420px)}#instPill.on{display:flex}#instPill b{cursor:pointer}#instPill small{display:block;font-weight:700;color:#eee;font-size:12px;line-height:1.25}#instPill .x{background:none;border:0;color:#aaa;font-size:18px;cursor:pointer;padding:0 2px;line-height:1}
 @media(display-mode:standalone),(display-mode:minimal-ui){#instPill{display:none!important}}</style>
-<div id="swUp" role="status">✨ Hay una versión nueva <button id="swUpBtn">Actualizar</button></div>
+<div id="swUp" role="status" hidden></div>
 <div id="instPill"><b id="instGo">📲 Instalar la app</b><button class="x" id="instNo" title="Ahora no">×</button></div>
 <script>
 /* PWA: instala, abre al instante y se actualiza sola — RLR */
@@ -1117,8 +1123,8 @@ window.addEventListener("beforeunload",()=>{ if(ui.editing) clearPresence(ui.edi
   no.addEventListener("click",()=>{ pill.classList.remove("on"); try{ localStorage.setItem("ranitas-inst-no",String(Date.now()+7*864e5)); }catch(e){} });
   window.addEventListener("appinstalled",()=>{ pill.classList.remove("on"); });
   if(!("serviceWorker" in navigator)) return; let recargando=false;
-  const avisar=reg=>{ const w=reg.waiting; if(!w) return; const bar=document.getElementById("swUp"); bar.classList.add("on"); document.getElementById("swUpBtn").onclick=()=>{ bar.classList.remove("on"); w.postMessage({tipo:"saltar"}); }; };
-  navigator.serviceWorker.addEventListener("controllerchange",()=>{ if(recargando) return; recargando=true; location.reload(); });
+  const avisar=reg=>{ const w=reg.waiting; if(w) w.postMessage({tipo:"saltar"}); };
+  // Sin recargas automáticas: la versión nueva se activa sola y se usa en la siguiente apertura. Nada de "hay una versión nueva" — RLR
   window.addEventListener("load",()=>{ navigator.serviceWorker.register("/sw").then(reg=>{ if(reg.waiting&&navigator.serviceWorker.controller) avisar(reg); reg.addEventListener("updatefound",()=>{ const nw=reg.installing; if(!nw) return; nw.addEventListener("statechange",()=>{ if(nw.state==="installed"&&navigator.serviceWorker.controller) avisar(reg); }); }); setInterval(()=>reg.update().catch(()=>{}),30*60*1000); document.addEventListener("visibilitychange",()=>{ if(!document.hidden) reg.update().catch(()=>{}); }); }).catch(()=>{}); });
 })();
 </script>
