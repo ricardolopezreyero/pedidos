@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Ranitas · Admin (vista del restaurante) — Ricardo López Reyero (RLR) · build eye · rev 181218 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="author" content="Ricardo López Reyero">
+<meta name="build" content="eye"><meta name="rev" content="181218">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#231F1A">
+<title>Ranitas · Admin</title>
+<link rel="icon" type="image/png" sizes="64x64" href="/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+/* RLR */
+:root{--y:#FFD60A;--y2:#FFF1B8;--y3:#FFFBEA;--r:#E4322B;--r2:#FDE7E5;--g:#2E9E3E;--g2:#E3F5E6;--b:#2b4a9e;--b2:#eef3ff;--ink:#231F1A;--mut:#7A736B;--line:#EEE3BF;--sh:0 6px 18px rgba(90,70,0,.10)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#F3EFE2;color:var(--ink);font-family:'Nunito',system-ui,sans-serif;font-size:14px;line-height:1.35}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+header{position:sticky;top:0;z-index:20;background:var(--ink);color:var(--y);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.brand{font-weight:900;font-size:19px;white-space:nowrap}
+.brand small{color:#fff;opacity:.7;font-size:12px;margin-left:6px;letter-spacing:.12em;text-transform:uppercase}
+.dot{width:9px;height:9px;border-radius:50%;background:#777;display:inline-block;margin-left:6px}
+.dot.on{background:#4ade80;box-shadow:0 0 0 3px rgba(74,222,128,.25)}
+header select{background:#fff;color:var(--ink);border:0;border-radius:10px;padding:8px 10px;font-weight:800;max-width:100%}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-left:auto}
+.stats{display:flex;gap:8px;padding:10px 14px 0;flex-wrap:wrap}
+.stat{background:#fff;border-radius:12px;padding:8px 12px;font-weight:800;font-size:13px;box-shadow:var(--sh)}
+.stat b{font-size:16px;margin-right:4px}
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(270px,1fr);gap:12px;padding:12px 14px 30px;overflow-x:auto;align-items:start}
+.col{background:rgba(255,255,255,.55);border-radius:16px;padding:8px;min-height:40vh}
+.col-head{font-weight:900;font-size:14.5px;padding:6px 6px 10px;display:flex;justify-content:space-between;align-items:center}
+.col-head .n{background:#fff;border-radius:999px;padding:1px 8px;font-size:12px;color:var(--mut)}
+.col.k1 .col-head{color:#8a5a00}.col.k2 .col-head{color:var(--r)}.col.k3 .col-head{color:var(--b)}.col.k4 .col-head{color:#7c3aed}.col.k5 .col-head{color:var(--g)}.col.k6 .col-head{color:var(--mut)}
+.cards{display:flex;flex-direction:column;gap:8px}
+.card{background:#fff;border-radius:14px;box-shadow:var(--sh);padding:10px 12px;border-left:5px solid var(--y)}
+.card.flash{animation:fl 1.6s ease-out}
+@keyframes fl{0%{background:#FFF3B0}100%{background:#fff}}
+.card-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.card-top h3{margin:0;font-size:15px;font-weight:900}
+.when{font-size:11.5px;color:var(--mut);font-weight:700;white-space:nowrap}
+.badges{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0 6px}
+.b{font-size:11px;font-weight:800;border-radius:999px;padding:2px 8px;background:#f2ecd6;color:#6b5a00}
+.b.suc{background:var(--b2);color:var(--b)}.b.ok{background:var(--g2);color:var(--g)}.b.wip{background:var(--r2);color:var(--r)}.b.tab{background:var(--y2)}
+.pl{font-size:13px;margin:2px 0}.pl b{font-weight:900}.pl i{color:var(--mut)}
+.notas{margin-top:5px;font-size:12.5px;background:var(--y2);border-radius:8px;padding:4px 8px;color:#5a4a00}
+.tot{margin-top:6px;font-size:12px;font-weight:800;color:var(--mut)}
+.acts{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.btn{border:0;border-radius:10px;padding:7px 10px;font-weight:800;font-size:12.5px;background:#f2ecd6}
+.btn.p{background:var(--g);color:#fff}.btn.r{background:var(--r);color:#fff}.btn.bl{background:var(--b);color:#fff}.btn.v{background:#7c3aed;color:#fff}.btn.ghost{background:transparent;border:1.5px solid var(--line)}
+.empty{color:var(--mut);font-weight:700;text-align:center;padding:18px 8px;font-size:13px}
+.gate{position:fixed;inset:0;background:var(--ink);display:grid;place-items:center;z-index:99;padding:20px}
+.gate form{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:360px;text-align:center}
+.gate h1{margin:0 0 6px;font-size:22px}
+.gate input{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px;font-size:18px;text-align:center;margin:10px 0;letter-spacing:.2em}
+.gate button{width:100%;border:0;border-radius:12px;padding:12px;background:var(--g);color:#fff;font-weight:900;font-size:15px}
+.gate .err{color:var(--r);font-weight:800;min-height:18px;font-size:13px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 14px;border-radius:999px;font-weight:800;opacity:0;transition:.2s;pointer-events:none;z-index:98}
+.toast.on{opacity:1}
+@media(max-width:700px){.board{grid-auto-columns:88vw}}
+</style>
+</head>
+<body>
+<div class="gate" id="gate"><form id="gateForm"><div style="font-size:44px">🐸</div><h1>Ranitas · Admin</h1><div style="color:var(--mut);font-weight:700">Vista del restaurante</div><input id="pw" type="password" inputmode="numeric" placeholder="Contraseña" autocomplete="current-password"><div class="err" id="gateErr"></div><button type="submit">Entrar</button></form></div>
+<header>
+  <div class="brand">🐸 Ranitas <small>Admin</small><span class="dot" id="dot"></span></div>
+  <div class="filters">
+    <select id="fSuc"></select>
+    <select id="fTab"></select>
+    <button class="btn" id="salir" title="Cerrar sesión">Salir</button>
+  </div>
+</header>
+<div class="stats" id="stats"></div>
+<main class="board" id="board"></main>
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+/* Ranitas · Admin — Ricardo López Reyero (RLR) · _k=ROT13("RLR")="EYE" · _rev=18·12·18 */
+const _RLR="Ricardo López Reyero", _k="EYE", _rev=181218;
+const FIREBASE_CONFIG={apiKey:"AIzaSyDSAFxL2E_S1iHiRfSHGbbuHiR_-2j-HP4",authDomain:"notion-casa.firebaseapp.com",databaseURL:"https://notion-casa-default-rtdb.firebaseio.com",projectId:"notion-casa",storageBucket:"notion-casa.firebasestorage.app",messagingSenderId:"450309398626",appId:"1:450309398626:web:a2d12ad763123c16d6b13b"};
+const ROOT="ranitas", CLAVE="123";   // contraseña provisional
+const SUCURSALES=[{id:"sanatorio",n:"Sanatorio Español"},{id:"vinedos",n:"Viñedos"},{id:"juarez",n:"Juárez"},{id:"ibero",n:"Villas de la Ibero"}];
+const ROLES={papa:"👨",mama:"👩",hijo:"👦",hija:"👧",otro:"🙂"};
+// Etapas del restaurante dentro de "Pedido": proceso → espera → repartiendo. Las familias solo ven Pedido/Entregado.
+const COLS=[
+  {id:"armando",   n:"✏️ Armando",              k:1, f:c=>c.estado==="armando"},
+  {id:"proceso",   n:"🍳 En proceso",            k:2, f:c=>c.estado==="pedido"&&(!c.etapa||c.etapa==="proceso")},
+  {id:"espera",    n:"⏳ Espera de repartidor",  k:3, f:c=>c.estado==="pedido"&&c.etapa==="espera"},
+  {id:"repartiendo",n:"🛵 Repartiendo",          k:4, f:c=>c.estado==="pedido"&&c.etapa==="repartiendo"},
+  {id:"entregado", n:"✅ Entregado",             k:5, f:c=>c.estado==="entregado"},
+  {id:"archivado", n:"📚 Historial",             k:6, f:c=>c.estado==="archivado"}
+];
+const SID=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const toArr=v=>Array.isArray(v)?v:(v&&typeof v==="object"?Object.values(v):[]);
+const nombreDe=p=>(p.nombre||"").trim()||({papa:"Papá",mama:"Mamá",hijo:"Hijo",hija:"Hija"}[p.rol]||"Otro");
+function fmtFecha(ts){ return ts?new Date(ts).toLocaleString("es-MX",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"}).replace(/\./g,""):""; }
+function fmtRel(ts){ if(!ts) return ""; const d=(Date.now()-ts)/1000; if(d<60) return "ahora"; if(d<3600) return "hace "+Math.floor(d/60)+" min"; if(d<86400) return "hace "+Math.floor(d/3600)+" h"; return fmtFecha(ts); }
+function toast(t){ const e=$("#toast"); e.textContent=t; e.classList.add("on"); clearTimeout(e._t); e._t=setTimeout(()=>e.classList.remove("on"),2000); }
+function personLines(p){ const L=[]; toArr(p.gorditas).forEach(l=>L.push(l.cant+" "+l.guiso+(l.detalle?" ("+l.detalle+")":"")+" · "+(l.masa==="maiz"?"maíz":"harina")));
+  if(p.chilaquiles){ const c=p.chilaquiles; const ex=toArr(c.extras).map(x=>x==="Guiso favorito"?(c.guiso?"guiso de "+c.guiso.toLowerCase():"guiso favorito"):x.toLowerCase());
+    L.push((c.cant>1?c.cant+" ":"")+"Chilaquiles"+(c.salsa?" salsa "+c.salsa.toLowerCase():"")+(c.queso?" · queso "+c.queso.toLowerCase():"")+(ex.length?" + "+ex.join(" + "):"")); }
+  toArr(p.bebidas).forEach(l=>L.push(l.cant+" "+l.nombre+(l.detalle?" ("+l.detalle+")":""))); toArr(p.postres).forEach(l=>L.push(l.cant+" "+l.nombre)); return L; }
+function totales(c){ const t={g:0,h:0,m:0,ch:0,b:0,po:0}; toArr(c.personas).forEach(p=>{ toArr(p.gorditas).forEach(l=>{ t.g+=+l.cant||0; if(l.masa==="maiz") t.m+=+l.cant||0; else t.h+=+l.cant||0; }); if(p.chilaquiles) t.ch+=+p.chilaquiles.cant||1; toArr(p.bebidas).forEach(l=>t.b+=+l.cant||0); toArr(p.postres).forEach(l=>t.po+=+l.cant||0); }); return t; }
+function totStr(t){ const s=[]; if(t.g) s.push("🫓 "+t.g+" ("+t.h+"H·"+t.m+"M)"); if(t.ch) s.push("🍳 "+t.ch); if(t.b) s.push("☕ "+t.b); if(t.po) s.push("🍰 "+t.po); return s.join(" · ")||"vacío"; }
+
+/* ---------- acceso ---------- */
+const QS=new URLSearchParams(location.search);
+let ok=localStorage.getItem("ranitas-admin")==="1";
+if(ok) $("#gate").style.display="none"; else setTimeout(()=>$("#pw").focus(),100);
+$("#gateForm").addEventListener("submit",e=>{ e.preventDefault(); if($("#pw").value===CLAVE){ localStorage.setItem("ranitas-admin","1"); ok=true; $("#gate").style.display="none"; } else { $("#gateErr").textContent="Contraseña incorrecta"; $("#pw").value=""; } });
+$("#salir").addEventListener("click",()=>{ localStorage.removeItem("ranitas-admin"); location.reload(); });
+
+/* ---------- datos en vivo ---------- */
+let tableros={}, anfitriones={}, online=false, prev={}, first=true, flash={};
+let fSuc=QS.get("suc")||"", fTab=QS.get("t")||"";
+firebase.initializeApp(FIREBASE_CONFIG); const db=firebase.database();
+db.ref(".info/connected").on("value",s=>{ online=!!s.val(); $("#dot").className="dot"+(online?" on":""); });
+db.ref(ROOT+"/anfitriones").on("value",s=>{ anfitriones=s.val()||{}; renderFilters(); render(); });
+db.ref(ROOT+"/tableros").on("value",s=>{ tableros=s.val()||{}; render(); });
+setInterval(render,30000);
+
+function allCards(){ const out=[]; Object.keys(tableros).forEach(sl=>{ const t=tableros[sl]||{}; const cfg=t.config||{}; Object.keys(t.pedidos||{}).forEach(id=>{ const c=t.pedidos[id]; if(!c) return; out.push(Object.assign({},c,{id,slug:sl,personas:toArr(c.personas),sucursal:c.sucursal||cfg.sucursal||"",tablero:(anfitriones[sl]||{}).nombre||sl})); }); }); return out; }
+function renderFilters(){
+  $("#fSuc").innerHTML=`<option value="">📍 Todas las sucursales</option>`+SUCURSALES.map(s=>`<option value="${s.id}"${fSuc===s.id?" selected":""}>📍 ${s.n}</option>`).join("");
+  const sl=Object.keys(anfitriones).sort((a,b)=>(anfitriones[a].nombre||a).localeCompare(anfitriones[b].nombre||b));
+  $("#fTab").innerHTML=`<option value="">🏠 Todos los tableros</option>`+sl.map(k=>`<option value="${k}"${fTab===k?" selected":""}>🏠 ${esc(anfitriones[k].nombre||k)} · /${k}</option>`).join("");
+}
+$("#fSuc").addEventListener("change",e=>{ fSuc=e.target.value; syncUrl(); render(); });
+$("#fTab").addEventListener("change",e=>{ fTab=e.target.value; syncUrl(); render(); });
+function syncUrl(){ const q=new URLSearchParams(); if(fSuc) q.set("suc",fSuc); if(fTab) q.set("t",fTab); history.replaceState(null,"",location.pathname+(q.toString()?"?"+q:"")); }
+
+function render(){
+  const cards=allCards().filter(c=>(!fSuc||c.sucursal===fSuc)&&(!fTab||c.slug===fTab));
+  // destello de lo que cambió desde otra pantalla
+  const snap={}; const now=Date.now(); Object.keys(flash).forEach(k=>{ if(now-flash[k]>1600) delete flash[k]; });
+  cards.forEach(c=>{ snap[c.id]=JSON.stringify(c); if(!first&&c._w!==SID&&prev[c.id]!==snap[c.id]) flash[c.id]=now; }); prev=snap; first=false;
+  // resumen: lo que la cocina tiene enfrente (armando no cuenta)
+  const enCocina=cards.filter(c=>c.estado==="pedido"&&(!c.etapa||c.etapa==="proceso")); const T={g:0,h:0,m:0,ch:0,b:0,po:0}; enCocina.forEach(c=>{ const t=totales(c); Object.keys(T).forEach(k=>T[k]+=t[k]); });
+  const kit={}; enCocina.forEach(c=>c.personas.forEach(p=>toArr(p.gorditas).forEach(l=>{ const k=l.guiso; kit[k]=kit[k]||{h:0,m:0}; kit[k][l.masa==="maiz"?"m":"h"]+=+l.cant||0; })));
+  const top=Object.entries(kit).sort((a,b)=>(b[1].h+b[1].m)-(a[1].h+a[1].m)).slice(0,6).map(([k,v])=>k+" "+[v.h?v.h+"H":"",v.m?v.m+"M":""].filter(Boolean).join("·")).join(" · ");
+  $("#stats").innerHTML=`<div class="stat"><b>${cards.filter(c=>c.estado==="armando").length}</b>armando</div><div class="stat"><b>${enCocina.length}</b>en cocina · ${esc(totStr(T))}</div><div class="stat"><b>${cards.filter(c=>c.estado==="pedido"&&c.etapa==="espera").length}</b>esperan repartidor</div><div class="stat"><b>${cards.filter(c=>c.estado==="pedido"&&c.etapa==="repartiendo").length}</b>en camino</div>${top?`<div class="stat">🧮 ${esc(top)}</div>`:""}`;
+  $("#board").innerHTML=COLS.map(col=>{ const cs=cards.filter(col.f).sort((a,b)=>(b.actualizado||0)-(a.actualizado||0));
+    return `<section class="col k${col.k}"><div class="col-head"><span>${col.n}</span><span class="n">${cs.length}</span></div><div class="cards">${cs.length?cs.map(cardHTML).join(""):`<div class="empty">Nada por aquí</div>`}</div></section>`; }).join("");
+}
+function cardHTML(c){
+  const suc=SUCURSALES.find(s=>s.id===c.sucursal); const cfg=(tableros[c.slug]||{}).config||{};
+  const persons=c.personas.map(p=>{ const L=personLines(p); return L.length?`<div class="pl">${ROLES[p.rol]||"🙂"} <b>${esc(nombreDe(p))}</b>: ${esc(L.join(" · "))}</div>`:""; }).join("")||`<div class="pl"><i>sin productos</i></div>`;
+  const A={
+    armando:`<span class="b ${c.listo?"ok":"wip"}">${c.listo?"✅ Familia lista":"✏️ armando…"}</span>`,
+    pedido:(!c.etapa||c.etapa==="proceso")?`<button class="btn bl" data-a="etapa" data-v="espera" data-id="${c.id}" data-s="${c.slug}">⏳ Listo, espera repartidor</button>`:
+           c.etapa==="espera"?`<button class="btn v" data-a="etapa" data-v="repartiendo" data-id="${c.id}" data-s="${c.slug}">🛵 Salió a repartir</button><button class="btn ghost" data-a="etapa" data-v="proceso" data-id="${c.id}" data-s="${c.slug}">↩︎</button>`:
+           `<button class="btn p" data-a="entregar" data-id="${c.id}" data-s="${c.slug}">✅ Entregado</button><button class="btn ghost" data-a="etapa" data-v="espera" data-id="${c.id}" data-s="${c.slug}">↩︎</button>`,
+    entregado:`<button class="btn" data-a="archivar" data-id="${c.id}" data-s="${c.slug}">📦 Archivar</button><button class="btn ghost" data-a="etapa" data-v="repartiendo" data-id="${c.id}" data-s="${c.slug}" data-back="1">↩︎</button>`,
+    archivado:``
+  }[c.estado]||"";
+  return `<article class="card${flash[c.id]?" flash":""}">
+    <div class="card-top"><h3>Familia ${esc(c.familia||"sin nombre")}</h3><span class="when">${fmtRel(c.actualizado)}</span></div>
+    <div class="badges"><span class="b tab">🏠 ${esc(c.tablero)}</span>${suc?`<span class="b suc">📍 ${esc(suc.n)}</span>`:""}${c.estado==="pedido"?`<span class="b">📲 ${fmtFecha(c.pedidoEn)}</span>`:""}${c.estado==="entregado"?`<span class="b ok">🛵 ${fmtFecha(c.entregadoEn)}</span>`:""}${cfg.entrega?`<span class="b">⏰ ${esc(cfg.entrega)}</span>`:""}</div>
+    <div>${persons}</div>${c.notas?`<div class="notas">📝 ${esc(c.notas)}</div>`:""}
+    ${c.estado!=="armando"&&cfg.direccion?`<div class="notas">🏠 ${esc(cfg.direccion)}${cfg.telAnfitrion?" · 📞 "+esc(cfg.telAnfitrion):""}</div>`:""}
+    <div class="tot">${esc(totStr(totales(c)))}</div><div class="acts">${A}</div></article>`;
+}
+function upd(slug,id,patch){ patch.actualizado=Date.now(); patch._w=SID; db.ref(ROOT+"/tableros/"+slug+"/pedidos/"+id).update(patch).catch(()=>toast("No se pudo guardar")); }
+document.addEventListener("click",e=>{ const el=e.target.closest("[data-a]"); if(!el) return; const {a,v,id,s}=el.dataset;
+  if(a==="etapa"){ const patch={etapa:v}; if(el.dataset.back){ patch.estado="pedido"; patch.entregadoEn=null; } upd(s,id,patch); toast({proceso:"De vuelta a cocina 🍳",espera:"Esperando repartidor ⏳",repartiendo:"En camino 🛵"}[v]); }
+  if(a==="entregar"){ upd(s,id,{estado:"entregado",etapa:"entregado",entregadoEn:Date.now()}); toast("Entregado ✅"); }
+  if(a==="archivar"){ upd(s,id,{estado:"archivado",archivadoEn:Date.now()}); toast("Archivado 📚"); }
+});
+</script>
+<!-- RLR · eye/181218 -->
+</body>
+</html>

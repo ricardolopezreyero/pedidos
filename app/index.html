@@ -654,7 +654,7 @@ function cardHTML(c){
   const badges=[]; const typing=typingOn(c.id); const fl=(ui.flash||{})[c.id]||{per:{}};
   if(typing.length) badges.push(`<span class="b live">✏️ ${esc((typing[0].fam||c.familia)?"Familia "+(typing[0].fam||c.familia):"Alguien")} está escribiendo…</span>`);
   else if(c.estado==="armando") badges.push(c.listo?`<span class="b ok">✅ Listo</span>`:`<span class="b wip">✏️ Armando…</span>`);
-  if(c.estado==="pedido") badges.push(`<span class="b ok">📲 Pedido ${fmtFecha(c.pedidoEn)}</span>`);
+  if(c.estado==="pedido"){ badges.push(`<span class="b ok">📲 Pedido ${fmtFecha(c.pedidoEn)}</span>`); const et={proceso:"🍳 En cocina",espera:"⏳ Esperando repartidor",repartiendo:"🛵 En camino"}[c.etapa||"proceso"]; if(et) badges.push(`<span class="b${c.etapa==="repartiendo"?" live":""}">${et}</span>`); }
   if(c.estado==="entregado") badges.push(`<span class="b ok">🛵 Entregado ${fmtFecha(c.entregadoEn)}</span>`);
   if(c.estado==="archivado") badges.push(`<span class="b">📚 ${fmtFecha(c.pedidoEn||c.archivadoEn||c.creado,false)}</span>`);
   if(suc&&c.estado!=="armando") badges.push(`<span class="b suc">📍 ${esc(suc.n)}</span>`);
@@ -807,7 +807,7 @@ function openReparto(cards){ cards=cards.filter(Boolean); ui.msgIds=null; $("#mM
   $("#msgFoot").innerHTML=`<div class="sum">Solo se marca en esta pantalla.</div><button class="btn" data-a="copiar">📋 Copiar lista</button><button class="btn p" data-a="close" data-v="mMsg">Cerrar</button>`;
   show("mMsg"); }
 function marcar(id,estado){ const c=pedidos[id]; if(!c) return; c.estado=estado; c.listo=true;
-  if(estado==="pedido"){ c.pedidoEn=Date.now(); c.sucursal=config.sucursal; c.tel=getTel(); if(!c.mensaje) c.mensaje=buildMessage([c]); }
+  if(estado==="pedido"){ c.pedidoEn=Date.now(); c.sucursal=config.sucursal; c.tel=getTel(); c.etapa="proceso"; if(!c.mensaje) c.mensaje=buildMessage([c]); }
   if(estado==="entregado") c.entregadoEn=Date.now();
   if(estado==="archivado") c.archivadoEn=Date.now();
   if(estado==="armando"){ c.listo=false; delete c.pedidoEn; }
