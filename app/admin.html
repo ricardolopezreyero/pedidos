@@ -57,6 +57,21 @@ header select{background:#fff;color:var(--ink);border:0;border-radius:10px;paddi
 .gate input{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px;font-size:18px;text-align:center;margin:10px 0;letter-spacing:.2em}
 .gate button{width:100%;border:0;border-radius:12px;padding:12px;background:var(--g);color:#fff;font-weight:900;font-size:15px}
 .gate .err{color:var(--r);font-weight:800;min-height:18px;font-size:13px}
+/* productos por sucursal */
+.prod{padding:12px 14px 40px;max-width:980px;margin:0 auto}
+.prod-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.prod-top select{background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;font-weight:800;font-size:15px}
+.prod-top .note{font-size:12.5px;color:var(--mut);font-weight:700}
+.grp{background:#fff;border-radius:16px;box-shadow:var(--sh);padding:12px 14px;margin-bottom:12px}
+.grp h3{margin:0 0 6px;font-size:15px;display:flex;justify-content:space-between;align-items:center}
+.grp h3 span{font-size:12px;color:var(--mut);font-weight:700}
+.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px}
+.item{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:12px;padding:8px 10px;font-weight:800;cursor:pointer;user-select:none}
+.item.off{background:var(--r2);border-color:#f3b8b4;color:#b3261e;text-decoration:line-through}
+.sw{width:40px;height:22px;border-radius:999px;background:#ccc;position:relative;flex:none;transition:.15s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.15s}
+.item:not(.off) .sw{background:var(--g)}.item:not(.off) .sw::after{left:21px}
+.item .precio{margin-left:auto;font-size:12px;color:var(--mut);text-decoration:none}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 14px;border-radius:999px;font-weight:800;opacity:0;transition:.2s;pointer-events:none;z-index:98}
 .toast.on{opacity:1}
 @media(max-width:700px){.board{grid-auto-columns:88vw}}
@@ -69,22 +84,37 @@ header select{background:#fff;color:var(--ink);border:0;border-radius:10px;paddi
   <div class="filters">
     <select id="fSuc"></select>
     <select id="fTab"></select>
+    <button class="btn" id="vista" data-vista="productos">🏪 Productos</button>
     <button class="btn" id="salir" title="Cerrar sesión">Salir</button>
   </div>
 </header>
 <div class="stats" id="stats"></div>
 <main class="board" id="board"></main>
+<main class="prod" id="prod" hidden></main>
 <div class="toast" id="toast"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script>
+document.addEventListener("DOMContentLoaded",()=>{ if(new URLSearchParams(location.search).get("v")==="productos") setTimeout(()=>{ if(typeof renderProd==="function") renderProd(); },0); });
 /* Ranitas · Admin — Ricardo López Reyero (RLR) · _k=ROT13("RLR")="EYE" · _rev=18·12·18 */
 const _RLR="Ricardo López Reyero", _k="EYE", _rev=181218;
 const FIREBASE_CONFIG={apiKey:"AIzaSyDSAFxL2E_S1iHiRfSHGbbuHiR_-2j-HP4",authDomain:"notion-casa.firebaseapp.com",databaseURL:"https://notion-casa-default-rtdb.firebaseio.com",projectId:"notion-casa",storageBucket:"notion-casa.firebasestorage.app",messagingSenderId:"450309398626",appId:"1:450309398626:web:a2d12ad763123c16d6b13b"};
 const ROOT="ranitas", CLAVE="123";   // contraseña provisional
 const SUCURSALES=[{id:"sanatorio",n:"Sanatorio Español"},{id:"vinedos",n:"Viñedos"},{id:"juarez",n:"Juárez"},{id:"ibero",n:"Villas de la Ibero"}];
 const ROLES={papa:"👨",mama:"👩",hijo:"👦",hija:"👧",otro:"🙂"};
+// Catálogo (mismo menú que la app). Clave = categoría_slug; se guarda en ranitas/catalogo/<sucursal>/<clave> {on, precio}
+const slugify=x=>(x||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+const catKey=(c,name)=>c+"_"+slugify(name);
+const CATALOGO=[
+  {t:"🫓 Gorditas (harina y maíz)",c:"g",items:["Chicharrón prensado","Chicharrón pella","Carne con chile","Picadillo","Guiso verde","Discada","Choriqueso","Rajas con crema","Rajas con crema y queso","Frijoles","Frijoles con queso","Huevo verde","Huevo rojo","Papas rojas","Asado","Deshebrada","Queso","Barbacoa","Combinada"]},
+  {t:"🍳 Chilaquiles",c:"ch",items:["Chilaquiles"]},
+  {t:"Salsas para chilaquiles",c:"sal",items:["Verde cremosa","Roja","Verde tomatillo","Chipotle con crema","La más picosa 🌶🌶🌶"]},
+  {t:"Quesos para chilaquiles",c:"q",items:["Asadero","Chihuahua"]},
+  {t:"Agregados para chilaquiles",c:"ex",items:["Huevo estrellado","Huevo revuelto","Guiso favorito"]},
+  {t:"☕ Bebidas",c:"b",items:["Café de olla","Café de grano","Jugo de naranja","Refresco"]},
+  {t:"🍰 Postres",c:"po",items:["Gordita Nutella","Gordita Cajeta","Brownie","Pay"]}
+];
 // Etapas del restaurante dentro de "Pedido": proceso → espera → repartiendo. Las familias solo ven Pedido/Entregado.
 const COLS=[
   {id:"armando",   n:"✏️ Armando",              k:1, f:c=>c.estado==="armando"},
@@ -124,6 +154,17 @@ firebase.initializeApp(FIREBASE_CONFIG); const db=firebase.database();
 db.ref(".info/connected").on("value",s=>{ online=!!s.val(); $("#dot").className="dot"+(online?" on":""); });
 db.ref(ROOT+"/anfitriones").on("value",s=>{ anfitriones=s.val()||{}; renderFilters(); render(); });
 db.ref(ROOT+"/tableros").on("value",s=>{ tableros=s.val()||{}; render(); });
+let catalogo={}, pSuc=QS.get("suc")||"vinedos", vista=QS.get("v")==="productos"?"productos":"pedidos";
+db.ref(ROOT+"/catalogo").on("value",s=>{ catalogo=s.val()||{}; renderProd(); });
+$("#vista").addEventListener("click",()=>{ vista=vista==="pedidos"?"productos":"pedidos"; syncUrl(); render(); renderProd(); });
+function renderProd(){ const on=vista==="productos"; $("#prod").hidden=!on; $("#board").hidden=on; $("#stats").hidden=on; $("#vista").textContent=on?"📋 Pedidos":"🏪 Productos"; if(!on) return;
+  const c=catalogo[pSuc]||{}; const apag=Object.keys(c).filter(k=>c[k]&&c[k].on===false).length;
+  $("#prod").innerHTML=`<div class="prod-top"><select id="pSuc">${SUCURSALES.map(x=>{ const a=Object.values(catalogo[x.id]||{}).filter(v=>v&&v.on===false).length; return `<option value="${x.id}"${x.id===pSuc?" selected":""}>📍 ${x.n}${a?" · "+a+" apagado"+(a>1?"s":""):""}</option>`; }).join("")}</select><span class="note">Toca un producto para apagarlo o prenderlo. Se refleja al instante en todos los tableros que piden a esta sucursal. ${apag?`<b style="color:var(--r)">${apag} apagado${apag>1?"s":""}</b>`:"Todo prendido ✅"}</span></div>`+
+    CATALOGO.map(g=>{ const offs=g.items.filter(i=>(c[catKey(g.c,i)]||{}).on===false).length; return `<div class="grp"><h3>${g.t}<span>${offs?offs+" apagado"+(offs>1?"s":""):"todo prendido"}</span></h3><div class="items">${g.items.map(i=>{ const k=catKey(g.c,i); const v=c[k]||{}; const off=v.on===false; return `<div class="item${off?" off":""}" data-k="${k}" data-n="${esc(i)}"><span class="sw"></span><span>${esc(i)}</span>${v.precio?`<span class="precio">$${esc(v.precio)}</span>`:""}</div>`; }).join("")}</div></div>`; }).join("");
+}
+$("#prod").addEventListener("change",e=>{ if(e.target.id==="pSuc"){ pSuc=e.target.value; syncUrl(); renderProd(); } });
+$("#prod").addEventListener("click",e=>{ const it=e.target.closest(".item"); if(!it) return; const k=it.dataset.k; const cur=((catalogo[pSuc]||{})[k]||{}); const on=cur.on===false;   // si estaba apagado, prende
+  db.ref(ROOT+"/catalogo/"+pSuc+"/"+k).update({on,precio:cur.precio||null,ts:Date.now()}).then(()=>toast((on?"✅ Prendido: ":"⛔ Apagado: ")+it.dataset.n)).catch(()=>toast("No se pudo guardar")); });
 setInterval(render,30000);
 
 function allCards(){ const out=[]; Object.keys(tableros).forEach(sl=>{ const t=tableros[sl]||{}; const cfg=t.config||{}; Object.keys(t.pedidos||{}).forEach(id=>{ const c=t.pedidos[id]; if(!c) return; out.push(Object.assign({},c,{id,slug:sl,personas:toArr(c.personas),sucursal:c.sucursal||cfg.sucursal||"",tablero:(anfitriones[sl]||{}).nombre||sl})); }); }); return out; }
@@ -134,9 +175,10 @@ function renderFilters(){
 }
 $("#fSuc").addEventListener("change",e=>{ fSuc=e.target.value; syncUrl(); render(); });
 $("#fTab").addEventListener("change",e=>{ fTab=e.target.value; syncUrl(); render(); });
-function syncUrl(){ const q=new URLSearchParams(); if(fSuc) q.set("suc",fSuc); if(fTab) q.set("t",fTab); history.replaceState(null,"",location.pathname+(q.toString()?"?"+q:"")); }
+function syncUrl(){ const q=new URLSearchParams(); if(vista==="productos"){ q.set("v","productos"); q.set("suc",pSuc); } else { if(fSuc) q.set("suc",fSuc); if(fTab) q.set("t",fTab); } history.replaceState(null,"",location.pathname+(q.toString()?"?"+q:"")); }
 
 function render(){
+  if(vista==="productos") return;
   const cards=allCards().filter(c=>(!fSuc||c.sucursal===fSuc)&&(!fTab||c.slug===fTab));
   // destello de lo que cambió desde otra pantalla
   const snap={}; const now=Date.now(); Object.keys(flash).forEach(k=>{ if(now-flash[k]>1600) delete flash[k]; });

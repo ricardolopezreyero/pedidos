@@ -224,6 +224,10 @@ label.f input,label.f textarea,label.f select{margin-top:4px;font-weight:700}
 .chip.on{border-color:var(--ink);background:var(--ink);color:var(--y)}
 .chip .cnt{background:var(--g);color:#fff;border-radius:999px;padding:1px 7px;font-size:11px;font-weight:900}
 .chip .pic{font-size:11px;letter-spacing:-2px}
+.chip.off,.pill.off{border-color:#f3b8b4;background:#fff5f4;color:#b3261e;text-decoration:line-through;opacity:.85}
+.chip .cnt.no{background:var(--r);text-decoration:none}
+.line.off{background:var(--r2);border-radius:10px;padding-left:6px;padding-right:6px}
+.ln em.no{color:var(--r);text-transform:none;letter-spacing:0;margin-left:8px}
 .lines{margin-top:8px}
 .line{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px dashed var(--line);flex-wrap:wrap}
 .line:first-child{border-top:0}
@@ -388,6 +392,19 @@ const ESTADOS=[
   {id:"archivado",n:"Historial",e:"📚"}
 ];
 
+/* ---------- catálogo por sucursal: ranitas/catalogo/<sucursal>/<clave> {on:false, precio} — RLR ---------- */
+let cat={}, catRef=null, catSuc="";
+const catKey=(c,name)=>c+"_"+slugify(name);
+const disponible=(c,name)=>{ const v=cat[catKey(c,name)]; return !(v&&v.on===false); };
+function suscribirCatalogo(){ if(!db||!SLUG||config.sucursal===catSuc) return; if(catRef) catRef.off(); catSuc=config.sucursal; catRef=db.ref(ROOT+"/catalogo/"+catSuc);
+  catRef.on("value",s=>{ cat=s.val()||{}; renderBoard(); if(ui.draft) renderEditor(); }); }
+// Qué trae un pedido que la sucursal actual ya no tiene
+function faltantes(c){ const F=[]; toArr(c.personas).forEach(p=>{ const n=nombreDe(p);
+  toArr(p.gorditas).forEach(l=>{ if(!disponible("g",l.guiso)) F.push(n+": "+l.guiso); });
+  if(p.chilaquiles){ const ch=p.chilaquiles; if(!disponible("ch","chilaquiles")) F.push(n+": chilaquiles"); else { if(ch.salsa&&!disponible("sal",ch.salsa)) F.push(n+": salsa "+ch.salsa.toLowerCase()); if(ch.queso&&!disponible("q",ch.queso)) F.push(n+": queso "+ch.queso.toLowerCase()); toArr(ch.extras).forEach(x=>{ if(!disponible("ex",x)) F.push(n+": "+x.toLowerCase()); }); if(ch.guiso&&!disponible("g",ch.guiso)) F.push(n+": guiso "+ch.guiso.toLowerCase()); } }
+  toArr(p.bebidas).forEach(l=>{ if(!disponible("b",l.nombre)) F.push(n+": "+l.nombre); });
+  toArr(p.postres).forEach(l=>{ if(!disponible("po",l.nombre)) F.push(n+": "+l.nombre); }); }); return F; }
+
 /* ---------- estado ---------- */
 let pedidos={}, config={sucursal:"vinedos",telIdx:0,anfitrion:"Ricardo",telAnfitrion:"",direccion:"",entrega:"",pago:"efectivo",pagoCon:"",cierre:"",precioG:"",precioCh:"",precioB:"",precioPo:""};
 // Modo anfitrión por tablero: se activa al crear el tablero, con ?host=<celular del anfitrión> o en ⚙️ dando el celular — RLR
@@ -467,8 +484,8 @@ function initFirebase(){
     if(QS.has("host")) history.replaceState(null,"",location.pathname+(LOCAL?"?t="+SLUG:""));
     if(!config.anfitrion||config.anfitrion==="Ricardo"&&SLUG!=="familia-lopez-acosta") config.anfitrion=a.nombre;
     if(!config.telAnfitrion) config.telAnfitrion=a.tel||"";
-    renderHeader(); renderBoard(); attachBoard();
-  }).catch(()=>{ attachBoard(); });
+    renderHeader(); renderBoard(); attachBoard(); suscribirCatalogo();
+  }).catch(()=>{ attachBoard(); suscribirCatalogo(); });
 }
 function attachBoard(){
   // Transición de la liga vieja (github.io): mientras alguien siga con la versión anterior abierta, sus cambios se recogen de la ruta antigua — RLR
@@ -477,7 +494,7 @@ function attachBoard(){
     db.ref(PATH+"/presence").on("value",s=>{ ui.presence=s.val()||{}; renderBoard(); });
     db.ref(PATH+"/online").on("value",s=>{ ui.online=s.val()||{}; renderHeader(); });
     setInterval(heartbeat,45000);
-    db.ref(PATH+"/config").on("value",s=>{ const v=s.val(); if(v) config=Object.assign({},config,v); else db.ref(PATH+"/config").set(clone(config)).catch(()=>{}); cacheLocal(); renderHeader(); });   // no se re-renderiza ⚙️ mientras está abierto: cerraba el teclado en iPhone
+    db.ref(PATH+"/config").on("value",s=>{ const v=s.val(); if(v) config=Object.assign({},config,v); else db.ref(PATH+"/config").set(clone(config)).catch(()=>{}); cacheLocal(); renderHeader(); suscribirCatalogo(); });   // no se re-renderiza ⚙️ mientras está abierto: cerraba el teclado en iPhone
     db.ref(PATH+"/pedidos").on("value",s=>{
       const v=s.val()||{}; const next={};
       Object.keys(v).forEach(k=>{ next[k]=normCard(Object.assign({id:k},v[k])); });
@@ -619,7 +636,7 @@ function renderHeader(){
   $("#btnCall").href="tel:+52"+getTel();
   $("#sucTel").innerHTML="📲 "+(s.tels.length>1?`<select id="telSel">${s.tels.map((t,i)=>`<option value="${i}"${i===idx?" selected":""}>${fmtTel(t)}</option>`).join("")}</select>`:fmtTel(s.tels[0]));
 }
-$("#sucSel").addEventListener("change",e=>{ config.sucursal=e.target.value; config.telIdx=0; saveConfig(); toast("Sucursal: "+getSuc().n+" · "+fmtTel(getTel())); });
+$("#sucSel").addEventListener("change",e=>{ config.sucursal=e.target.value; config.telIdx=0; saveConfig(); suscribirCatalogo(); toast("Sucursal: "+getSuc().n+" · "+fmtTel(getTel())); });
 $("#sucTel").addEventListener("change",e=>{ if(e.target.id==="telSel"){ config.telIdx=+e.target.value; saveConfig(); } });
 
 /* ---------- tablero ---------- */
@@ -671,6 +688,7 @@ function cardHTML(c){
   if(c.estado==="archivado") badges.push(`<span class="b">📚 ${fmtFecha(c.pedidoEn||c.archivadoEn||c.creado,false)}</span>`);
   if(suc&&c.estado!=="armando") badges.push(`<span class="b suc">📍 ${esc(suc.n)}</span>`);
   if(mine.has(c.id)) badges.push(`<span class="b tuyo">tu pedido</span>`);
+  const falt=(c.estado==="armando"||c.estado==="porpedir")?faltantes(c):[]; if(falt.length) badges.push(`<span class="b wip">⛔ Agotado: ${esc(falt.map(f=>f.split(": ")[1]).filter((x,i,a)=>a.indexOf(x)===i).join(", "))}</span>`);
   const persons=c.personas.map(p=>{ const L=personLines(p); const f=fl.per[p.id]; return `<div class="pl${f?" flash":""}">${rolDe(p).e} <b>${esc(nombreDe(p))}</b>: ${L.length?`<span class="l">${esc(L.join(" · "))}</span>`:"<i>sin nada aún</i>"}${f&&typing.length?`<span class="caret">▍</span>`:""}</div>`; }).join("")||`<div class="pl"><i>Sin personas todavía</i></div>`;
   const H=host, M=mine.has(c.id);
   const A={
@@ -716,6 +734,7 @@ function openEditor(id){ const c=pedidos[id]; if(!c) return; ui.editing=id; ui.d
 // Revisión antes de "Listo": lo que la cocina o el repartidor van a preguntar, mejor resolverlo aquí — RLR
 function validarDraft(d){ const err=[]; const vacios=[];
   if(!(d.familia||"").trim()) err.push("Ponle nombre a la familia.");
+  faltantes(d).forEach(f=>err.push("⛔ Agotado en Suc. "+getSuc().n+" → "+f+". Quítalo o cámbialo."));
   d.personas.forEach(p=>{ const n=nombreDe(p);
     if(!personLines(p).length){ vacios.push(p); return; }
     p.gorditas.forEach(l=>{ if(l.guiso==="Combinada"&&!(l.detalle||"").trim()) err.push(n+": ¿la combinada de qué es?"); });
@@ -765,8 +784,8 @@ function checkDup(){ const d=ui.draft; const w=$("#dupWarn"); if(!d||!w) return;
 function personaHTML(p,pi){
   const r=rolDe(p); const cnt={}; p.gorditas.forEach(l=>{ cnt[l.guiso]=cnt[l.guiso]||{harina:0,maiz:0}; cnt[l.guiso][l.masa]+=l.cant; });
   const chips=GUISOS.map(g=>{ const c=cnt[g.n]; const b=c?[c.harina?c.harina+"H":"",c.maiz?c.maiz+"M":""].filter(Boolean).join("·"):"";
-    return `<button class="chip${c?" has":""}" data-a="addG" data-p="${pi}" data-v="${esc(g.n)}">${esc(g.n)}${g.pic?`<span class="pic">${"🌶".repeat(g.pic)}</span>`:""}${b?`<span class="cnt">${b}</span>`:""}</button>`; }).join("");
-  const lines=p.gorditas.map((l,i)=>`<div class="line"><span class="qty"><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="-1">−</button><span class="lq">${l.cant}</span><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="1">+</button></span><span class="ln">${esc(l.guiso)}<em>${l.masa==="maiz"?"maíz":"harina"}</em></span>
+    const off=!disponible("g",g.n); return `<button class="chip${c?" has":""}${off?" off":""}" data-a="${off?"agotado":"addG"}" data-p="${pi}" data-v="${esc(g.n)}">${esc(g.n)}${g.pic&&!off?`<span class="pic">${"🌶".repeat(g.pic)}</span>`:""}${off?`<span class="cnt no">agotado</span>`:b?`<span class="cnt">${b}</span>`:""}</button>`; }).join("");
+  const lines=p.gorditas.map((l,i)=>`<div class="line${disponible("g",l.guiso)?"":" off"}"><span class="qty"><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="-1">−</button><span class="lq">${l.cant}</span><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="1">+</button></span><span class="ln">${esc(l.guiso)}<em>${l.masa==="maiz"?"maíz":"harina"}</em>${disponible("g",l.guiso)?"":`<em class="no">⛔ agotado hoy</em>`}</span>
     ${l.guiso==="Combinada"?`<input class="det" data-in="gdet" data-p="${pi}" data-i="${i}" value="${esc(l.detalle)}" placeholder="¿de qué?">`:""}</div>`).join("");
   const openB=ui.open[p.id+"b"]||p.bebidas.length, openP=ui.open[p.id+"p"]||p.postres.length;
   const col=!!ui.open[p.id+"c"]; const L=personLines(p);
@@ -778,7 +797,7 @@ function personaHTML(p,pi){
     <div class="chips">${chips}</div>
     <div class="lines">${lines}</div>
     <div class="p-extras">
-      <button class="pill${p.chilaquiles?" on":""}" data-a="togChil" data-p="${pi}">🍳 Chilaquiles</button>
+      <button class="pill${p.chilaquiles?" on":""}${disponible("ch","chilaquiles")?"":" off"}" data-a="${p.chilaquiles||disponible("ch","chilaquiles")?"togChil":"agotado"}" data-p="${pi}" data-v="Chilaquiles">🍳 Chilaquiles${disponible("ch","chilaquiles")?"":" · agotado"}</button>
       <button class="pill${openB?" on":""}" data-a="togSec" data-p="${pi}" data-v="b">☕ Bebida</button>
       <button class="pill${openP?" on":""}" data-a="togSec" data-p="${pi}" data-v="p">🍰 Postre</button>
     </div>
@@ -790,15 +809,16 @@ function personaHTML(p,pi){
 function subHTML(p,pi,key,items,title,addA,qtyA,detIn){
   const have={}; p[key].forEach(l=>have[l.nombre]=(have[l.nombre]||0)+l.cant);
   return `<div class="sub"><div class="t">${title}<button data-a="togSec" data-p="${pi}" data-v="${key==="bebidas"?"b":"p"}" data-x="1">quitar</button></div>
-    <div class="chips">${items.map(it=>`<button class="chip${have[it.n]?" has":""}" data-a="${addA}" data-p="${pi}" data-v="${esc(it.n)}">${esc(it.n)}${have[it.n]?`<span class="cnt">${have[it.n]}</span>`:""}</button>`).join("")}</div>
-    <div class="lines">${p[key].map((l,i)=>{ const it=items.find(x=>x.n===l.nombre); return `<div class="line"><span class="qty"><button data-a="${qtyA}" data-p="${pi}" data-i="${i}" data-v="-1">−</button><span class="lq">${l.cant}</span><button data-a="${qtyA}" data-p="${pi}" data-i="${i}" data-v="1">+</button></span><span class="ln">${esc(l.nombre)}</span>
+    <div class="chips">${items.map(it=>{ const off=!disponible(key==="bebidas"?"b":"po",it.n); return `<button class="chip${have[it.n]?" has":""}${off?" off":""}" data-a="${off?"agotado":addA}" data-p="${pi}" data-v="${esc(it.n)}">${esc(it.n)}${off?`<span class="cnt no">agotado</span>`:have[it.n]?`<span class="cnt">${have[it.n]}</span>`:""}</button>`; }).join("")}</div>
+    <div class="lines">${p[key].map((l,i)=>{ const it=items.find(x=>x.n===l.nombre); const off=!disponible(key==="bebidas"?"b":"po",l.nombre); return `<div class="line${off?" off":""}"><span class="qty"><button data-a="${qtyA}" data-p="${pi}" data-i="${i}" data-v="-1">−</button><span class="lq">${l.cant}</span><button data-a="${qtyA}" data-p="${pi}" data-i="${i}" data-v="1">+</button></span><span class="ln">${esc(l.nombre)}${off?`<em class="no">⛔ agotado hoy</em>`:""}</span>
       ${detIn&&it&&it.det?`<input class="det" data-in="${detIn}" data-p="${pi}" data-i="${i}" value="${esc(l.detalle)}" placeholder="${esc(it.det)}">`:""}</div>`; }).join("")}</div></div>`;
 }
 function chilHTML(p,pi){ const c=p.chilaquiles;
   return `<div class="sub"><div class="t">🍳 Chilaquiles <span class="qty" style="margin-left:auto;margin-right:8px"><button data-a="chQty" data-p="${pi}" data-v="-1">−</button><span class="lq">${c.cant}</span><button data-a="chQty" data-p="${pi}" data-v="1">+</button></span><button data-a="togChil" data-p="${pi}">quitar</button></div>
-    <div class="row"><span class="lbl">1 · Salsa</span>${SALSAS.map(s=>`<button class="chip${c.salsa===s?" on":""}" data-a="chSet" data-p="${pi}" data-k="salsa" data-v="${esc(s)}">${esc(s)}</button>`).join("")}</div>
-    <div class="row"><span class="lbl">2 · Queso</span>${QUESOS.map(s=>`<button class="chip${c.queso===s?" on":""}" data-a="chSet" data-p="${pi}" data-k="queso" data-v="${esc(s)}">${esc(s)}</button>`).join("")}</div>
-    <div class="row"><span class="lbl">3 · Agrega (opcional)</span>${EXTRAS.map(s=>`<button class="chip${c.extras.includes(s)?" on":""}" data-a="chExtra" data-p="${pi}" data-v="${esc(s)}">${esc(s)}</button>`).join("")}
+    ${disponible("ch","chilaquiles")?"":`<div class="warn">⛔ Hoy no hay chilaquiles en Suc. ${esc(getSuc().n)}. Quítalos del pedido.</div>`}
+    <div class="row"><span class="lbl">1 · Salsa</span>${SALSAS.map(s=>{ const off=!disponible("sal",s); return `<button class="chip${c.salsa===s?" on":""}${off?" off":""}" data-a="${off?"agotado":"chSet"}" data-p="${pi}" data-k="salsa" data-v="${esc(s)}">${esc(s)}${off?`<span class="cnt no">agotada</span>`:""}</button>`; }).join("")}</div>
+    <div class="row"><span class="lbl">2 · Queso</span>${QUESOS.map(s=>{ const off=!disponible("q",s); return `<button class="chip${c.queso===s?" on":""}${off?" off":""}" data-a="${off?"agotado":"chSet"}" data-p="${pi}" data-k="queso" data-v="${esc(s)}">${esc(s)}${off?`<span class="cnt no">agotado</span>`:""}</button>`; }).join("")}</div>
+    <div class="row"><span class="lbl">3 · Agrega (opcional)</span>${EXTRAS.map(s=>{ const off=!disponible("ex",s); return `<button class="chip${c.extras.includes(s)?" on":""}${off?" off":""}" data-a="${off?"agotado":"chExtra"}" data-p="${pi}" data-v="${esc(s)}">${esc(s)}${off?`<span class="cnt no">agotado</span>`:""}</button>`; }).join("")}
       ${c.extras.includes("Guiso favorito")?`<select data-in="chGuiso" data-p="${pi}" style="margin-top:4px"><option value="">¿Qué guiso?</option>${GUISOS.filter(g=>g.n!=="Combinada").map(g=>`<option${c.guiso===g.n?" selected":""}>${esc(g.n)}</option>`).join("")}</select>`:""}</div></div>`;
 }
 
@@ -806,10 +826,11 @@ function chilHTML(p,pi){ const c=p.chilaquiles;
 function openMessage(cards,markIds){
   const msg=buildMessage(cards); ui.msgIds=markIds; ui.msgText=msg; $("#mMsg h2").textContent="📲 Mensaje para WhatsApp";
   const pend=cardsIn("armando").filter(c=>!cards.includes(c));
-  $("#msgBody").innerHTML=`${pend.length?`<div class="warn">⚠️ Todavía armando (no van en este mensaje): ${esc(pend.map(c=>"Familia "+(c.familia||"sin nombre")).join(", "))}.</div>`:""}
+  const conFalta=cards.filter(c=>faltantes(c).length);
+  $("#msgBody").innerHTML=`${conFalta.length?`<div class="warn">⛔ Productos agotados en Suc. ${esc(getSuc().n)}: ${esc(conFalta.map(c=>"Familia "+(c.familia||"sin nombre")+" ("+faltantes(c).join("; ")+")").join(" · "))}. Hay que ajustar esos pedidos antes de mandar.</div>`:""}${pend.length?`<div class="warn">⚠️ Todavía armando (no van en este mensaje): ${esc(pend.map(c=>"Familia "+(c.familia||"sin nombre")).join(", "))}.</div>`:""}
     <div style="font-weight:800;color:var(--mut);font-size:13px;margin-bottom:6px">Va a: 📍 ${esc(getSuc().n)} · 📲 ${fmtTel(getTel())}</div><textarea class="msg" readonly>${esc(msg)}</textarea>`;
   $("#msgFoot").innerHTML=`<button class="btn" data-a="copiar">📋 Copiar</button><a class="btn wa" href="${waLink(getTel(),msg)}" target="_blank" rel="noopener" data-a="abrirWa">📲 Abrir WhatsApp</a>
-    ${markIds?`<button class="btn p" data-a="marcarVarios">✅ Ya se pidió (${markIds.length})</button>`:""}`;
+    ${markIds?`<button class="btn p" data-a="marcarVarios" ${conFalta.length?"disabled":""}>✅ Ya se pidió (${markIds.length})</button>`:""}`;
   show("mMsg");
 }
 // Lista de reparto: cuando llega la comida, ir entregando a cada quien lo suyo y palomear — RLR
@@ -874,7 +895,7 @@ document.addEventListener("click",e=>{
     case "repetir": hide("mNuevo"); crearPedido(pedidos[id]); break;
     case "edit": openEditor(id); break;
     case "del": { const c=pedidos[id]; if(c&&confirm("¿Eliminar el pedido de Familia "+(c.familia||"sin nombre")+"?")){ deleteCard(id); toast("Pedido eliminado"); } break; }
-    case "marcar": marcar(id,v); if(v==="pedido"){ ui.tab="pedido"; toast("Marcado como pedido 📲"); } if(v==="entregado"){ ui.tab="entregado"; toast("¡Buen provecho! 🛵"); } if(v==="archivado"){ ui.tab="archivado"; toast("Archivado. Lo puedes repetir cuando quieras 🔁"); } renderBoard(); break;
+    case "marcar": if(v==="pedido"&&pedidos[id]&&faltantes(pedidos[id]).length){ toast("⛔ Ese pedido trae productos agotados: "+faltantes(pedidos[id]).join(", ")); break; } marcar(id,v); if(v==="pedido"){ ui.tab="pedido"; toast("Marcado como pedido 📲"); } if(v==="entregado"){ ui.tab="entregado"; toast("¡Buen provecho! 🛵"); } if(v==="archivado"){ ui.tab="archivado"; toast("Archivado. Lo puedes repetir cuando quieras 🔁"); } renderBoard(); break;
     case "enviarTodo": { const cards=cardsIn("porpedir"); if(!cards.length) return; openMessage(cards,cards.map(c=>c.id)); break; }
     case "enviarUno": openMessage([pedidos[id]],[id]); break;
     case "verMsg": { const c=pedidos[id]; ui.msgIds=null; $("#mMsg h2").textContent="📲 Mensaje para WhatsApp"; ui.msgText=c.mensaje||buildMessage([c]);
@@ -903,6 +924,7 @@ document.addEventListener("click",e=>{
     case "delPersona": if(!personLines(p).length||confirm("¿Quitar a "+nombreDe(p)+" y su pedido?")){ d.personas.splice(pi,1); R(); } break;
     case "dupPersona": { const c=clone(p); c.id=uid(); c.nombre=""; d.personas.splice(pi+1,0,c); R(); toast("Copiado. Ponle nombre 👇"); break; }
     case "masa": p.masa=v; R(); break;
+    case "agotado": toast("⛔ "+v+" no está disponible hoy en Suc. "+getSuc().n); break;
     case "colPersona": ui.open[p.id+"c"]=!ui.open[p.id+"c"]; renderEditor(); break;
     case "confirmar": closeEditor(true,true); break;
     case "addG": { const masa=p.masa||"harina"; const l=p.gorditas.find(x=>x.guiso===v&&x.masa===masa); if(l) l.cant++; else p.gorditas.push({guiso:v,masa,cant:1,detalle:""}); R(); break; }
