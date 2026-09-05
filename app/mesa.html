@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Ranitas · Hoja de mesa con QR (tamaño carta) — Ricardo López Reyero (RLR) · build eye · rev 181218 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Ricardo López Reyero">
+<meta name="build" content="eye"><meta name="rev" content="181218">
+<meta name="robots" content="noindex">
+<title>Ranitas · Hoja de mesa</title>
+<link rel="icon" type="image/png" sizes="64x64" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&display=swap" rel="stylesheet">
+<style>
+/* RLR */
+*{box-sizing:border-box}
+body{margin:0;background:#d9d3bf;font-family:'Nunito',system-ui,sans-serif;color:#231F1A;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.bar{display:flex;gap:8px;justify-content:center;padding:12px;background:#231F1A;color:#fff;font-weight:800;position:sticky;top:0;z-index:5;flex-wrap:wrap;align-items:center}
+.bar button{border:0;border-radius:10px;padding:10px 16px;font-weight:900;font-size:15px;background:#2E9E3E;color:#fff;cursor:pointer}
+.bar a{color:#FFD60A}
+.hoja{width:8.5in;height:11in;margin:20px auto;background:#FFD60A;position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.rays{position:absolute;inset:-40%;background:repeating-conic-gradient(from 0deg at 50% 50%,#FFE45C 0deg 9deg,#FFD60A 9deg 18deg);opacity:.9}
+.in{position:absolute;inset:0;padding:.7in .75in .6in;display:flex;flex-direction:column;align-items:center;text-align:center}
+.top{display:flex;align-items:center;gap:18px}
+.frog{width:110px;height:110px;border-radius:50%;background:#E4322B;box-shadow:0 8px 0 rgba(0,0,0,.12),inset 0 0 0 7px #fff;display:grid;place-items:center;font-size:66px;line-height:1}
+.brand{font-weight:900;font-size:46px;letter-spacing:-1px;line-height:1;text-align:left;text-shadow:0 3px 0 rgba(255,255,255,.7)}
+.brand b{color:#E4322B}
+.brand small{display:block;font-size:16px;letter-spacing:.2em;text-transform:uppercase;color:#6b5a00;margin-top:6px;text-shadow:none}
+.mesa{margin-top:.35in;background:#231F1A;color:#FFD60A;border-radius:22px;padding:10px 34px;font-weight:900;font-size:56px;line-height:1.05;box-shadow:0 8px 0 rgba(0,0,0,.18)}
+.mesa small{display:block;color:#fff;font-size:18px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;margin-top:2px}
+h1{font-weight:900;font-size:40px;line-height:1.05;letter-spacing:-1px;margin:.3in 0 .15in}
+h1 span{background:#2E9E3E;color:#fff;padding:0 14px;border-radius:12px;display:inline-block;transform:rotate(-1.5deg)}
+.qrbox{background:#fff;border:6px solid #231F1A;border-radius:26px;padding:16px;box-shadow:8px 8px 0 #231F1A}
+.qrbox #qr img,.qrbox #qr canvas{display:block}
+.url{margin-top:12px;font-weight:900;font-size:16px;background:#fff;border-radius:999px;padding:6px 16px;border:2px solid #231F1A}
+.pasos{display:flex;gap:14px;margin-top:.32in;width:100%}
+.paso{flex:1;background:#fff;border:3px solid #231F1A;border-radius:18px;padding:12px 10px;font-weight:900;font-size:16px;line-height:1.25;box-shadow:4px 4px 0 #231F1A}
+.paso i{display:block;font-style:normal;font-size:30px;margin-bottom:4px}
+.foot{margin-top:auto;font-weight:900;font-size:15px;color:#5a4a00;letter-spacing:.06em}
+@page{size:letter;margin:0}
+@media print{body{background:#fff}.bar{display:none}.hoja{margin:0;box-shadow:none;width:8.5in;height:11in}}
+</style>
+</head>
+<body>
+<div class="bar"><span id="titulo">Hoja de mesa</span><button onclick="window.print()">🖨 Imprimir / Guardar PDF</button><button id="png" style="background:#2b4a9e">⬇ Descargar QR (PNG)</button><a href="/admin?v=mesas" style="margin-left:6px">← Volver a Mesas</a></div>
+<div class="hoja"><div class="rays"></div>
+  <div class="in">
+    <div class="top"><div class="frog">🐸</div><div class="brand"><b>Ranitas</b> Gorditas<small>Pide desde tu mesa</small></div></div>
+    <div class="mesa" id="mesa">Mesa<small id="suc">sucursal</small></div>
+    <h1>Escanea y pide <span>sin hacer fila</span></h1>
+    <div class="qrbox"><div id="qr"></div></div>
+    <div class="url" id="url">ranita.capitaltorreon.com</div>
+    <div class="pasos">
+      <div class="paso"><i>📱</i>Apunta la cámara al código</div>
+      <div class="paso"><i>🫓</i>Pon lo que quiere cada quien</div>
+      <div class="paso"><i>🍳</i>Toca Ordenar y espera en tu lugar</div>
+    </div>
+    <div class="foot">Gorditas de harina y maíz · Chilaquiles · Café de olla · Postres</div>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+/* RLR */
+const s=new URLSearchParams(location.search).get("s")||""; const url="https://ranita.capitaltorreon.com/"+s;
+document.getElementById("url").textContent=url.replace("https://","");
+new QRCode(document.getElementById("qr"),{text:url,width:260,height:260,correctLevel:QRCode.CorrectLevel.H});
+fetch("https://notion-casa-default-rtdb.firebaseio.com/ranitas/anfitriones/"+encodeURIComponent(s)+".json").then(r=>r.json()).then(a=>{ if(!a) return; const num=a.numero||""; document.getElementById("mesa").innerHTML="Mesa "+num+"<small>"+(a.nombre||"").split("·").pop().trim()+"</small>"; document.getElementById("titulo").textContent="Hoja · "+(a.nombre||s); document.title="Ranitas · "+(a.nombre||s); }).catch(()=>{});
+document.getElementById("png").onclick=()=>{ const c=document.querySelector("#qr canvas"); const img=document.querySelector("#qr img"); const src=c?c.toDataURL("image/png"):(img&&img.src); if(!src) return; const a=document.createElement("a"); a.href=src; a.download="qr-"+s+".png"; a.click(); };
+</script>
+<!-- RLR · eye/181218 -->
+</body>
+</html>
