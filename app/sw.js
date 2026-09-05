@@ -5,7 +5,7 @@
    - Externos (fuentes, Firebase SDK, cdnjs): caché primero, refresco silencioso.
    - Firebase Realtime (websocket / long-poll) nunca pasa por aquí.
    - Nueva versión: se instala, avisa a la página y ella decide cuándo recargar. */
-const VERSION="20260904-2336";
+const VERSION="20260904-2337";
 const SHELL="ranitas-shell-"+VERSION, EXT="ranitas-ext-v1";
 const PRECACHE=["/","/index.html","/admin","/admin.html","/manual","/manual.html","/mesa","/mesa.html","/manifest.json","/admin.json","/favicon.png","/icon-192.png","/icon-512.png","/icon-192-maskable.png","/icon-512-maskable.png","/admin-icon-192.png","/admin-icon-512.png","/admin-icon-192-maskable.png","/admin-icon-512-maskable.png","/apple-touch-icon.png","/admin-apple-touch-icon.png"];
 const EXT_OK=["fonts.googleapis.com","fonts.gstatic.com","www.gstatic.com","cdnjs.cloudflare.com"];
@@ -21,6 +21,6 @@ async function cachePrimero(req,nombre){ const c=await caches.open(nombre); cons
 self.addEventListener("fetch",e=>{ const req=e.request; if(req.method!=="GET") return; const url=new URL(req.url);
   if(url.hostname.endsWith("firebaseio.com")||url.hostname.endsWith("firebasedatabase.app")||url.hostname.endsWith("workers.dev")||url.pathname.startsWith("/api")) return;
   if(req.mode==="navigate"){ e.respondWith(navegar(req)); return; }
-  if(url.origin===location.origin){ if(url.pathname==="/sw.js") return; e.respondWith(cachePrimero(req,SHELL)); return; }
+  if(url.origin===location.origin){ if(url.pathname==="/sw"||url.pathname==="/sw.js") return; e.respondWith(cachePrimero(req,SHELL)); return; }
   if(EXT_OK.includes(url.hostname)){ e.respondWith(cachePrimero(req,EXT)); } });
 /* RLR · eye/181218 */

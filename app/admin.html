@@ -1190,7 +1190,7 @@ function imprimirComanda(c){ const cfg=(tableros[c.slug]||{}).config||{}; const 
   if(!("serviceWorker" in navigator)) return; let recargando=false;
   const avisar=reg=>{ const w=reg.waiting; if(!w) return; const bar=document.getElementById("swUp"); bar.classList.add("on"); document.getElementById("swUpBtn").onclick=()=>{ bar.classList.remove("on"); w.postMessage({tipo:"saltar"}); }; };
   navigator.serviceWorker.addEventListener("controllerchange",()=>{ if(recargando) return; recargando=true; location.reload(); });
-  window.addEventListener("load",()=>{ navigator.serviceWorker.register("/sw.js").then(reg=>{ if(reg.waiting&&navigator.serviceWorker.controller) avisar(reg); reg.addEventListener("updatefound",()=>{ const nw=reg.installing; if(!nw) return; nw.addEventListener("statechange",()=>{ if(nw.state==="installed"&&navigator.serviceWorker.controller) avisar(reg); }); }); setInterval(()=>reg.update().catch(()=>{}),30*60*1000); document.addEventListener("visibilitychange",()=>{ if(!document.hidden) reg.update().catch(()=>{}); }); }).catch(()=>{}); });
+  window.addEventListener("load",()=>{ navigator.serviceWorker.register("/sw").then(reg=>{ if(reg.waiting&&navigator.serviceWorker.controller) avisar(reg); reg.addEventListener("updatefound",()=>{ const nw=reg.installing; if(!nw) return; nw.addEventListener("statechange",()=>{ if(nw.state==="installed"&&navigator.serviceWorker.controller) avisar(reg); }); }); setInterval(()=>reg.update().catch(()=>{}),30*60*1000); document.addEventListener("visibilitychange",()=>{ if(!document.hidden) reg.update().catch(()=>{}); }); }).catch(()=>{}); });
 })();
 </script>
 </body>
