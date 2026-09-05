@@ -385,7 +385,7 @@ const nombreDe=p=>(p.nombre||"").trim()||rolDe(p).n;
 const cap=s=>s?s.charAt(0).toUpperCase()+s.slice(1):s;
 function fmtRel(ts){ if(!ts) return ""; const d=(Date.now()-ts)/1000;
   if(d<60) return "ahora"; if(d<3600) return "hace "+Math.floor(d/60)+" min"; if(d<86400) return "hace "+Math.floor(d/3600)+" h";
-  if(d<86400*14) return "hace "+Math.floor(d/86400)+" días"; return fmtFecha(ts,false); }
+  if(d<86400*14){ const x=Math.floor(d/86400); return x===1?"ayer":"hace "+x+" días"; } return fmtFecha(ts,false); }
 function fmtFecha(ts,hora=true){ const o={day:"numeric",month:"short"}; if(hora){o.hour="numeric";o.minute="2-digit";} return new Date(ts).toLocaleString("es-MX",o).replace(/\./g,""); }
 function toast(t){ const e=$("#toast"); e.textContent=t; e.classList.add("on"); clearTimeout(e._t); e._t=setTimeout(()=>e.classList.remove("on"),2200); }
 function show(id){ $("#"+id).classList.add("open"); }
@@ -465,14 +465,16 @@ function attachBoard(){
 
 /* ---------- home: crear tablero de anfitrión / entrar a uno — RLR ---------- */
 function visitados(){ try{ return JSON.parse(localStorage.getItem("ranitas-visitados")||"[]"); }catch(e){ return []; } }
-function recordarTablero(sl,nombre){ const v=visitados().filter(x=>x.slug!==sl); v.unshift({slug:sl,nombre:nombre||sl,ts:Date.now()}); localStorage.setItem("ranitas-visitados",JSON.stringify(v.slice(0,8))); }
+function recordarTablero(sl,nombre){ const v=visitados().filter(x=>x.slug!==sl); v.unshift({slug:sl,nombre:nombre||sl,ts:Date.now()}); localStorage.setItem("ranitas-visitados",JSON.stringify(v.slice(0,20))); }
 function renderHome(){
   document.body.classList.add("is-home");
   const v=visitados();
   $("#home").innerHTML=`
   <section class="hero"><div class="hero-frog">🐸</div><h1><b>Ranitas</b> · Pedidos en familia</h1>
     <p>Cada anfitrión tiene su propio tablero con su liga. Las familias entran, arman su pedido y el anfitrión manda todo junto por WhatsApp a la sucursal.</p></section>
-  ${v.length?`<section class="hcard"><h2>🏠 Tus tableros</h2><div class="famlist">${v.map(x=>`<button data-a="ir" data-v="${esc(x.slug)}"><b>${esc(x.nombre)}</b><span>${esc(APP_URL.replace("https://","")+x.slug)}</span></button>`).join("")}</div></section>`:""}
+  ${(()=>{ const mios=v.filter(x=>localStorage.getItem("ranitas-host-"+x.slug)==="1"), inv=v.filter(x=>localStorage.getItem("ranitas-host-"+x.slug)!=="1");
+    const lista=arr=>`<div class="famlist">${arr.map(x=>`<button data-a="ir" data-v="${esc(x.slug)}"><b>${esc(x.nombre)}</b><span>${esc(APP_URL.replace("https://","")+x.slug)} · ${fmtRel(x.ts)}</span></button>`).join("")}</div>`;
+    return (mios.length?`<section class="hcard"><h2>🏠 Mis tableros</h2><p class="hnote" style="margin:0 0 8px">Los que creaste o donde eres anfitrión.</p>${lista(mios)}</section>`:"")+(inv.length?`<section class="hcard"><h2>🎟️ Tableros a los que te invitaron</h2><p class="hnote" style="margin:0 0 8px">Los que has abierto desde este navegador, para volver a entrar.</p>${lista(inv)}</section>`:""); })()}
   <section class="hcard"><h2>✨ Crear mi tablero</h2>
     <label class="f">Nombre del anfitrión (así saldrá en el mensaje)<input id="hNombre" placeholder="Familia López Acosta · Ricardo" autocomplete="off"></label>
     <label class="f">Celular del anfitrión<input id="hTel" placeholder="871 000 00 00" inputmode="tel"></label>
