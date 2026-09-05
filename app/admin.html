@@ -244,6 +244,19 @@ body.fs aside{display:none} body.fs .app{grid-template-columns:1fr} body.fs main
 .kitem.ch{border-left:6px solid #e0a040}.kitem.b{border-left:6px solid #6b8fd6}.kitem.po{border-left:6px solid #a76bd6}
 .kmine,.kotros{margin-top:10px;font-size:13px;font-weight:700;color:var(--mut);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .empty.big{font-size:17px;padding:60px 20px;background:#fff;border-radius:18px}
+/* etiquetas pago / entrega */
+.tags{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin:0 0 6px}
+.tag{font-size:11.5px;font-weight:900;border-radius:999px;padding:3px 9px;border:1.5px solid transparent;display:inline-flex;align-items:center;gap:4px}
+.tag.pagado{background:#DCFCE7;color:#166534;border-color:#86efac}.tag.porpagar{background:#FEF3C7;color:#92400E;border-color:#fcd34d}
+.tag.entregado{background:#DCFCE7;color:#166534}.tag.porentregar{background:#F3F4F6;color:#4B5563;border-color:#e5e7eb}
+button.tag.click{cursor:pointer}button.tag.click:hover{border-style:dashed;border-color:var(--ink)}
+.pmenu{display:inline-flex;gap:4px;flex-wrap:wrap;background:var(--y3);border:1.5px dashed var(--line);border-radius:12px;padding:4px;width:100%}
+.pmenu .btn{padding:6px 10px;font-size:12px}
+.filtros{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
+.fch{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:6px 11px;font-weight:800;font-size:12.5px;display:inline-flex;gap:5px;align-items:center}
+.fch span{background:#f2ecd6;border-radius:999px;padding:0 6px;font-size:11px}
+.fch.on{background:var(--ink);color:var(--y);border-color:var(--ink)}.fch.on span{background:rgba(255,214,10,.25)}
+.fch.porpagar.on{background:#92400E;color:#FEF3C7;border-color:#92400E}.fch.pagado.on,.fch.entregado.on{background:#166534;color:#DCFCE7;border-color:#166534}
 /* bitácora */
 .live{font-size:12px;color:var(--g);background:var(--g2);border-radius:999px;padding:3px 10px;margin-left:8px;vertical-align:middle;animation:pulse 1.6s infinite}
 .bchips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
@@ -408,7 +421,7 @@ let _rPend=false; function render(){ if(_rPend) return; _rPend=true; setTimeout(
 function renderNow(){ if(!yo) return; if(!yo.vistas.includes(vista)) vista=yo.vistas[0]; if(!vista) return; renderNav(); if(pos.card&&vista==="mostrador"){ renderMostrador(); return; } ({panorama:renderPanorama,pedidos:renderPedidos,mostrador:renderMostrador,cocina:renderCocina,mesas:renderMesas,productos:renderProductos,precios:renderPrecios,usuarios:renderUsuarios,manual:renderManual,bitacora:renderBitacora})[vista](); }
 
 /* ---------- BITÁCORA: feed en vivo, filtros, buscador y línea de tiempo por pedido — RLR ---------- */
-const CATS={pedido:["📦","Pedidos","#8a5a00"],edicion:["✏️","Ediciones","#2b4a9e"],cocina:["🔥","Cocina","#E4322B"],reparto:["🛵","Reparto","#7c3aed"],producto:["🏪","Productos","#0f766e"],precio:["💲","Precios","#0f766e"],usuario:["👥","Usuarios","#555"],tablero:["🏠","Tableros","#c98a00"],sistema:["⚙️","Sistema","#999"]};
+const CATS={pago:["💵","Pagos","#166534"],pedido:["📦","Pedidos","#8a5a00"],edicion:["✏️","Ediciones","#2b4a9e"],cocina:["🔥","Cocina","#E4322B"],reparto:["🛵","Reparto","#7c3aed"],producto:["🏪","Productos","#0f766e"],precio:["💲","Precios","#0f766e"],usuario:["👥","Usuarios","#555"],tablero:["🏠","Tableros","#c98a00"],sistema:["⚙️","Sistema","#999"]};
 const TIPOS={familia:"Familia",anfitrion:"Anfitrión",mesa:"Mesa",admin:"Admin",caja:"Caja",cocina:"Cocina"};
 const bitq={q:"",cats:new Set(),tipos:new Set(),suc:"",tab:"",pedido:"",n:300};
 let bitLog={}, bitOn=false, bitNew=new Set(), bitFirstKey=null, bitLoadedOnce=false;
@@ -448,6 +461,15 @@ document.addEventListener("click",e=>{ if(vista!=="bitacora") return; if(e.targe
 setInterval(()=>{ if(vista==="bitacora"&&bitNew.size) render(); },800);
 function renderManual(){ if($("#manualFrame")) return; $("#main").innerHTML=`<div class="top"><h1>📖 Manuales</h1><a class="btn ghost" href="/manual" target="_blank">↗ Abrir aparte / imprimir</a><div class="sub">Cada quien lee el suyo: anfitrión, familias, caja, cocina, repartidor y dueño. Comparte la liga <b>ranita.capitaltorreon.com/manual</b> con tu gente.</div></div><iframe id="manualFrame" src="/manual" style="width:100%;height:calc(100dvh - 130px);border:0;border-radius:16px;background:#fff;box-shadow:var(--sh)"></iframe>`; }
 const picDe=name=>{ const v=menu["g_"+slugify(name)]; return v&&v.pic!=null?+v.pic:(GUISOS_PIC[name]||0); };
+/* Etiquetas de pago y entrega, iguales que en la app de familias — RLR */
+const METODOS={efectivo:"efectivo",transferencia:"transferencia",tarjeta:"tarjeta"};
+const pagado=c=>!!(c.pago&&c.pago.estado==="pagado"), entregadoC=c=>c.estado==="entregado"||c.estado==="archivado", conTags=c=>c.estado!=="armando";
+let pagoMenu=null, fPago="";
+function tagsHTML(c,slug,editable){ if(!conTags(c)) return ""; const p=pagado(c), e=entregadoC(c); const menu=pagoMenu===c.id;
+  return `<div class="tags">${editable?`<button class="tag ${p?"pagado":"porpagar"} click" data-a="pagoMenu" data-id="${c.id}" data-s="${slug}">${p?"💵 Pagado · "+esc(METODOS[c.pago.metodo]||c.pago.metodo||""):"💵 Por pagar"}</button>`:`<span class="tag ${p?"pagado":"porpagar"}">${p?"💵 Pagado":"💵 Por pagar"}</span>`}<span class="tag ${e?"entregado":"porentregar"}">${e?"✅ Entregado":"📦 Por entregar"}</span>${menu?`<span class="pmenu">${p?`<button class="btn r" data-a="despagar" data-id="${c.id}" data-s="${slug}">Quitar pago</button>`:Object.keys(METODOS).map(m=>`<button class="btn p" data-a="pagar" data-id="${c.id}" data-s="${slug}" data-v="${m}">${m==="efectivo"?"💵":m==="transferencia"?"🏦":"💳"} ${METODOS[m]}</button>`).join("")}<button class="btn ghost" data-a="pagoMenu" data-id="">✕</button></span>`:""}</div>`; }
+function pasaPago(c){ if(!fPago) return true; if(!conTags(c)) return false; return fPago==="porpagar"?!pagado(c):fPago==="pagado"?pagado(c):fPago==="porentregar"?!entregadoC(c):fPago==="entregado"?entregadoC(c):true; }
+function filtroPagoHTML(cards){ const T=cards.filter(conTags); const cnt={"":T.length,porpagar:T.filter(c=>!pagado(c)).length,pagado:T.filter(pagado).length,porentregar:T.filter(c=>!entregadoC(c)).length,entregado:T.filter(entregadoC).length};
+  return `<div class="filtros">${[["","Todos"],["porpagar","💵 Por pagar"],["pagado","✅ Pagados"],["porentregar","📦 Por entregar"],["entregado","🛵 Entregados"]].map(([k,l])=>`<button class="fch${fPago===k?" on":""} ${k}" data-fp="${k}">${l}<span>${cnt[k]}</span></button>`).join("")}</div>`; }
 // ---- precios: costo total de un pedido con el catálogo de su sucursal (harina y maíz por separado). Solo se muestra el total. — RLR
 function precioDe(suc,cat,name,masa){ const v=(catalogo[suc]||{})[catKey(cat,name)]||{}; if(cat==="g"&&masa==="maiz"&&v.precioM!=null&&v.precioM!=="") return +v.precioM; return v.precio!=null&&v.precio!==""?+v.precio:null; }
 function hayPrecios(suc){ return Object.values(catalogo[suc]||{}).some(v=>v&&(v.precio!=null&&v.precio!==""||v.precioM!=null&&v.precioM!=="")); }
@@ -492,6 +514,8 @@ function renderPanorama(){
     <div class="kpi k5"><div class="v">${entHoy.length}</div><div class="l">Entregados hoy</div><div class="d">${TeH.g} gorditas · ${TeH.per} personas</div></div>
   </div>
 
+  ${(()=>{ const T=cards.filter(conTags); const pp=T.filter(c=>!pagado(c)&&c.estado!=="archivado"), pe=T.filter(c=>!entregadoC(c)); const pagHoy=T.filter(c=>pagado(c)&&(c.pago.ts||0)>=t0); const monto=arr=>{ let m=0, ok=false; arr.forEach(c=>{ const x=costo(c); if(x!=null){ ok=true; m+=x; } }); return ok?" · "+money(m):""; };
+    return `<div class="sec"><h2>💵 Cobranza y entrega</h2><span>etiquetas de pago y entrega en todos los pedidos</span></div><div class="grid kpis"><div class="kpi k2"><div class="v">${pp.length}</div><div class="l">Por pagar</div><div class="d">pedidos activos sin cobrar${monto(pp)}</div></div><div class="kpi k5"><div class="v">${pagHoy.length}</div><div class="l">Pagados hoy</div><div class="d">${["efectivo","transferencia","tarjeta"].map(m=>pagHoy.filter(c=>c.pago.metodo===m).length+" "+m).join(" · ")}</div></div><div class="kpi k3"><div class="v">${pe.length}</div><div class="l">Por entregar</div><div class="d">${pe.filter(c=>!pagado(c)).length} de ellos sin pagar</div></div><div class="kpi k6"><div class="v">${T.filter(c=>entregadoC(c)&&!pagado(c)).length}</div><div class="l">Entregados sin pago</div><div class="d">revisar con el anfitrión o caja</div></div></div>`; })()}
   <div class="sec"><h2>Por etapa</h2><span>pedidos, personas y productos en cada paso</span></div>
   ${tabla(etapasRows,["Etapa","Pedidos","Personas","Gorditas","Chilaquiles","Bebidas","Postres"])}
 
@@ -529,10 +553,11 @@ function renderPanorama(){
 /* ---------- 2. PEDIDOS (kanban del negocio) ---------- */
 function coincide(c,q){ if(!q) return true; const t=(c.familia+" "+c.tablero+" "+c.id+" "+toArr(c.personas).map(p=>nombreDe(p)+" "+personLines(p).join(" ")).join(" ")+" "+(c.notas||"")).toLowerCase(); return q.toLowerCase().split(/\s+/).filter(Boolean).every(w=>t.includes(w)); }
 function renderPedidos(){
-  const cards=filtradas().filter(c=>coincide(c,q)); const snap={}; const now=Date.now(); Object.keys(flash).forEach(k=>{ if(now-flash[k]>1600) delete flash[k]; });
+  const cardsAll=filtradas().filter(c=>coincide(c,q)); const cards=cardsAll.filter(pasaPago); const snap={}; const now=Date.now(); Object.keys(flash).forEach(k=>{ if(now-flash[k]>1600) delete flash[k]; });
   cards.forEach(c=>{ snap[c.id]=JSON.stringify(c); if(!first&&c._w!==SID&&prev[c.id]!==snap[c.id]) flash[c.id]=now; }); prev=snap; first=false;
   const Tc=sumT(cards.filter(ETAPAS[2].f));
   $("#main").innerHTML=`<div class="top"><h1>📋 Pedidos</h1><input class="buscar" id="q" value="${esc(q)}" placeholder="🔎 Buscar familia, persona, guiso, tablero…"><span class="sp"></span>${filtrosHTML()}<div class="sub">🍳 En cocina ahora: ${esc(totStr(Tc))} · toca los botones para avanzar cada pedido; las familias lo ven al instante.${q?` · <b>${cards.length}</b> resultado${cards.length===1?"":"s"} para "${esc(q)}"`:""}</div></div>
+  ${filtroPagoHTML(cardsAll)}
   <div class="board">${ETAPAS.map(e=>{ const cs=cards.filter(e.f).sort((a,b)=>(b.actualizado||0)-(a.actualizado||0)); return `<section class="col k${e.k}"><div class="col-head"><span>${e.n}</span><span class="n">${cs.length}</span></div><div class="cards">${cs.length?cs.map(cardHTML).join(""):`<div class="empty">Nada por aquí</div>`}</div></section>`; }).join("")}</div>`;
 }
 function cardHTML(c){
@@ -550,6 +575,7 @@ function cardHTML(c){
   return `<article class="pc${flash[c.id]?" flash":""}">
     <div class="pc-top"><h3>Familia ${esc(c.familia||"sin nombre")}</h3><span class="when">${fmtRel(c.actualizado)}</span></div>
     <div class="badges">${c.mesa?`<span class="b mesa">🪑 MESA · prioridad</span>`:""}${Object.keys(c.faltas||{}).length?`<span class="b wip">⛔ no hubo: ${esc([...new Set(lineasDe(c).filter(l=>(c.faltas||{})[l.k]).map(l=>l.n))].join(", "))}</span>`:""}<span class="b tab">🏠 ${esc(c.tablero)}</span>${suc?`<span class="b suc">📍 ${esc(suc.n)}</span>`:""}${c.estado==="pedido"?`<span class="b">📲 ${fmtFecha(c.pedidoEn)}</span>`:""}${c.estado==="entregado"?`<span class="b ok">🛵 ${fmtFecha(c.entregadoEn)}</span>`:""}${cfg.entrega?`<span class="b">⏰ ${esc(cfg.entrega)}</span>`:""}</div>
+    ${tagsHTML(c,c.slug,true)}
     <div>${persons}</div>${c.notas?`<div class="notas">📝 ${esc(c.notas)}</div>`:""}
     ${c.estado!=="armando"&&cfg.direccion?`<div class="notas">🏠 ${esc(cfg.direccion)}${cfg.telAnfitrion?" · 📞 "+esc(cfg.telAnfitrion):""}</div>`:""}
     <div class="tot">${esc(totStr(totales(c)))}${costo(c)!=null?` · <b>💰 ${money(costo(c))}</b>`:""}</div><div class="acts">${A}${c.estado!=="archivado"?`<button class="btn y" data-a="editar" data-id="${c.id}" data-s="${c.slug}">✏️ Editar</button>`:""}</div></article>`;
@@ -602,6 +628,7 @@ function renderMostrador(){
       <div class="lines">${lineas.join("")||`<div class="empty">Escribe y da Enter para agregar</div>`}</div>
       <label style="display:block;margin-top:10px;font-size:12px;font-weight:800;color:var(--mut)">Notas del pedido<input id="posNotas" value="${esc(c.notas||"")}" placeholder="sin cebolla, salsa aparte…" style="margin-top:4px"></label>
       <div class="pos-tot">${esc(totStr(t))}${$c!=null?`<div class="money">Total ${money($c)}</div>`:""}</div>
+      ${c.estado!=="armando"?tagsHTML(c,pos.slug||"",true):`<div class="tags"><button class="tag ${pagado(c)?"pagado":"porpagar"} click" data-a="pagoMenu" data-id="${c.id}" data-s="${pos.slug||""}">${pagado(c)?"💵 Cobrado · "+esc(METODOS[c.pago.metodo]||""):"💵 Cobrar"}</button>${pagoMenu===c.id?`<span class="pmenu">${pagado(c)?`<button class="btn r" data-a="despagar" data-id="${c.id}" data-s="${pos.slug||""}">Quitar cobro</button>`:Object.keys(METODOS).map(m=>`<button class="btn p" data-a="pagar" data-id="${c.id}" data-s="${pos.slug||""}" data-v="${m}">${METODOS[m]}</button>`).join("")}</span>`:""}</div>`}
     </div>
   </div>`;
   pos._items=filt;
@@ -666,7 +693,7 @@ function renderCocina(){
   const dem={}; cola.forEach(c=>comalDe(c).forEach(x=>{ if(x.cat!=="g") return; const k=x.n+"|"+x.masa; dem[k]=dem[k]||{n:x.n,masa:x.masa,cant:0}; dem[k].cant+=x.cant; })); const demArr=Object.values(dem).sort((a,b)=>b.cant-a.cant);
   const hoy=new Date(); hoy.setHours(0,0,0,0); const hechosHoy=allCards().filter(c=>c.sucursal===suc&&c.listoCocinaEn>=hoy.getTime()); const porCoc={}; hechosHoy.forEach(c=>{ const id=(c.cocinero||{}).id||"?"; porCoc[id]=porCoc[id]||{n:0,t:0}; porCoc[id].n++; porCoc[id].t+=Math.max(0,(c.listoCocinaEn-(c.armadoEn||c.pedidoEn||c.listoCocinaEn))/60000); });
   const espera=t=>{ const m=mins(t); return `<span class="wait${m>=20?" late":m>=10?" warn":""}">⏱ ${m} min</span>`; };
-  const tarjetaCola=c=>`<article class="kc${c.mesa?" mesa":""}"><div class="kc-top"><b>${c.mesa?"🪑 ":""}${esc(c.familia||"sin nombre")}</b>${c.mesa?`<span class="b mesa">MESA · prioridad</span>`:""}${espera(c.pedidoEn)}</div><div class="kc-sub">${esc(c.tablero)} · ${toArr(c.personas).filter(p=>personLines(p).length).length} personas · ${esc(totStr(totales(c)))}</div><div class="kc-lines">${comalDe(c).map(x=>`<span class="kl ${x.cat}">${x.cant} ${esc(x.n)}${x.masa?" <em>"+(x.masa==="maiz"?"M":"H")+"</em>":""}</span>`).join("")}</div>${c.notas?`<div class="kc-nota">📝 ${esc(c.notas)}</div>`:""}<button class="kbtn take" data-tomar="${c.id}" data-s="${c.slug}" ${yo?"":"disabled"}>🔥 Lo tomo${yo?"":" · elige tu nombre"}</button></article>`;
+  const tarjetaCola=c=>`<article class="kc${c.mesa?" mesa":""}"><div class="kc-top"><b>${c.mesa?"🪑 ":""}${esc(c.familia||"sin nombre")}</b>${c.mesa?`<span class="b mesa">MESA · prioridad</span>`:""}${espera(c.pedidoEn)}</div><div class="kc-sub">${esc(c.tablero)} · ${toArr(c.personas).filter(p=>personLines(p).length).length} personas · ${esc(totStr(totales(c)))} · <span class="tag ${pagado(c)?"pagado":"porpagar"}" style="font-size:10.5px;padding:1px 7px">${pagado(c)?"💵 pagado":"💵 por pagar"}</span></div><div class="kc-lines">${comalDe(c).map(x=>`<span class="kl ${x.cat}">${x.cant} ${esc(x.n)}${x.masa?" <em>"+(x.masa==="maiz"?"M":"H")+"</em>":""}</span>`).join("")}</div>${c.notas?`<div class="kc-nota">📝 ${esc(c.notas)}</div>`:""}<button class="kbtn take" data-tomar="${c.id}" data-s="${c.slug}" ${yo?"":"disabled"}>🔥 Lo tomo${yo?"":" · elige tu nombre"}</button></article>`;
   const armadoHTML=c=>{ const av=c.avance||{}; const comal=comalDe(c); const listas=comal.filter(x=>x.keys.every(k=>av[k])).length; const pers=toArr(c.personas).filter(p=>personLines(p).length); const emp=c.empaque||{}; const empacados=pers.filter(p=>emp[p.id]).length; const todoComal=listas===comal.length, todoEmp=empacados===pers.length;
     return `<div class="karm${c.mesa?" mesa":""}"><div class="karm-top"><div><b>${c.mesa?"🪑 ":""}${esc(c.familia||"sin nombre")}</b> <span class="b tab">${esc(c.tablero)}</span>${c.mesa?`<span class="b mesa">MESA</span>`:""} ${espera(c.pedidoEn)} <span class="b">🔥 ${mins(c.armadoEn)} min armando</span></div><div><button class="kbtn ghost" data-soltar="${c.id}" data-s="${c.slug}">↩︎ Soltar</button></div></div>
     ${c.notas?`<div class="kc-nota big">📝 ${esc(c.notas)}</div>`:""}
@@ -760,7 +787,11 @@ document.addEventListener("click",e=>{
 document.addEventListener("change",e=>{ const cb=e.target; if(!cb.dataset||!cb.dataset.uid) return; const u=usuarios[cb.dataset.uid]; const vs=new Set(toArr(u.vistas)); if(cb.checked) vs.add(cb.dataset.vista); else vs.delete(cb.dataset.vista); db.ref(ROOT+"/admin/usuarios/"+cb.dataset.uid+"/vistas").set([...vs]); bit("usuario","vistas",(cb.checked?"Dio":"Quitó")+" la vista "+cb.dataset.vista+" a "+(u.nombre||"")); });
 
 /* ---------- acciones del kanban ---------- */
-document.addEventListener("click",e=>{ const el=e.target.closest("[data-a]"); if(!el) return; const {a,v,id,s}=el.dataset;
+document.addEventListener("click",e=>{ const fp=e.target.closest("[data-fp]"); if(fp){ fPago=fp.dataset.fp; render(); return; } const el=e.target.closest("[data-a]"); if(!el) return; const {a,v,id,s}=el.dataset;
+  if(a==="pagoMenu"){ pagoMenu=pagoMenu===id||!id?null:id; render(); if(vista==="mostrador") renderMostrador(); return; }
+  if(a==="pagar"||a==="despagar"){ const c=((tableros[s]||{}).pedidos||{})[id]||(pos.card&&pos.card.id===id?pos.card:null); const pago=a==="pagar"?{estado:"pagado",metodo:v,ts:Date.now(),por:(yo&&yo.nombre)||"admin"}:{estado:"pendiente",ts:Date.now()}; pagoMenu=null;
+    if(pos.card&&pos.card.id===id){ pos.card.pago=pago; guardarPos(true); renderMostrador(); } else if(s){ upd(s,id,{pago}); }
+    bit("pago",a==="pagar"?"pago":"despago",a==="pagar"?"Marcó pagado ("+v+")":"Quitó la marca de pagado",{pedido:id,familia:c?c.familia:"",tablero:s}); toast(a==="pagar"?"💵 Pagado · "+v:"Marcado por pagar"); return; }
   const fam=(x=>x?x.familia:"")(((tableros[s]||{}).pedidos||{})[id]);
   if(a==="etapa"){ const patch={etapa:v}; if(el.dataset.back){ patch.estado="pedido"; patch.entregadoEn=null; } if(v==="espera") patch.listoCocinaEn=Date.now(); upd(s,id,patch); toast({proceso:"De vuelta a cocina 🍳",espera:"Esperando repartidor ⏳",repartiendo:"En camino 🛵"}[v]); bit(v==="repartiendo"?"reparto":"pedido","etapa",({proceso:"Regresó a En proceso",espera:"Marcó listo, espera repartidor",repartiendo:"Salió a repartir"})[v]+(el.dataset.back?" (regresó desde Entregado)":""),{pedido:id,familia:fam,tablero:s}); }
   if(a==="entregar"){ upd(s,id,{estado:"entregado",etapa:"entregado",entregadoEn:Date.now()}); toast("Entregado ✅"); bit("reparto","entrego","Marcó entregado al cliente",{pedido:id,familia:fam,tablero:s}); }

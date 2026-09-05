@@ -91,6 +91,23 @@ header{position:sticky;top:0;z-index:20;background:var(--y);padding:10px 12px;di
 .col.on{display:block}
 .col[data-col="archivado"]{background:rgba(70,55,10,.14)!important}
 .col[data-col="cocina"] .col-head{color:var(--r)}.col[data-col="camino"] .col-head{color:#7c3aed}.col[data-col="entregado"] .col-head{color:var(--g)}
+.tags{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin:0 0 7px}
+.tag{font-size:11.5px;font-weight:900;border-radius:999px;padding:3px 9px;border:1.5px solid transparent;letter-spacing:.01em;display:inline-flex;align-items:center;gap:4px}
+.tag.pagado{background:#DCFCE7;color:#166534;border-color:#86efac}
+.tag.porpagar{background:#FEF3C7;color:#92400E;border-color:#fcd34d}
+.tag.entregado{background:#DCFCE7;color:#166534}
+.tag.porentregar{background:#F3F4F6;color:#4B5563;border-color:#e5e7eb}
+button.tag.click{cursor:pointer}
+button.tag.click:hover{border-style:dashed;border-color:var(--ink)}
+.pmenu{display:inline-flex;gap:4px;flex-wrap:wrap;background:var(--y3);border:1.5px dashed var(--line);border-radius:12px;padding:4px;width:100%}
+.pmenu .btn{padding:6px 10px;font-size:12.5px}
+.filtros{display:flex;gap:6px;padding:8px 10px 0;overflow-x:auto;scrollbar-width:none;align-items:center}
+.filtros::-webkit-scrollbar{display:none}
+.fch{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:6px 11px;font-weight:800;font-size:12.5px;white-space:nowrap;display:inline-flex;gap:5px;align-items:center}
+.fch span{background:#f2ecd6;border-radius:999px;padding:0 6px;font-size:11px}
+.fch.on{background:var(--ink);color:var(--y);border-color:var(--ink)}.fch.on span{background:rgba(255,214,10,.25)}
+.fch.porpagar.on{background:#92400E;color:#FEF3C7;border-color:#92400E}.fch.pagado.on,.fch.entregado.on{background:#166534;color:#DCFCE7;border-color:#166534}
+@media(min-width:760px){.filtros{padding:10px 14px 0}}
 .card.moved{animation:moved .9s ease-out}
 @keyframes moved{0%{transform:translateX(-18px);opacity:.3}100%{transform:none;opacity:1}}
 .col[data-col="archivado"] .card{background:#FAF6E8;box-shadow:none;border:1px solid #E6DCB8;opacity:.9}
@@ -297,6 +314,7 @@ textarea.msg{width:100%;min-height:46vh;font-family:ui-monospace,SFMono-Regular,
 </header>
 
 <div class="bar" id="bar" hidden></div>
+<div class="filtros" id="filtros" hidden></div>
 <main id="home" hidden></main>
 <nav class="tabs" id="tabs"></nav>
 <main class="board" id="board"></main>
@@ -418,6 +436,14 @@ const ESTADOS=[
   {id:"archivado",n:"Historial",e:"📚"}
 ];
 const MESA=()=>!!(ui.anf&&ui.anf.mesa);
+/* Etiquetas de pago y entrega: independientes de la columna, iguales en todo el sistema — RLR */
+const METODOS={efectivo:"efectivo",transferencia:"transferencia",tarjeta:"tarjeta"};
+const pagado=c=>!!(c.pago&&c.pago.estado==="pagado");
+const entregado=c=>c.estado==="entregado"||c.estado==="archivado";
+const conTags=c=>c.estado!=="armando";
+function tagsHTML(c,editable){ if(!conTags(c)) return ""; const p=pagado(c), e=entregado(c); const menu=ui.pagoMenu===c.id;
+  return `<div class="tags">${editable?`<button class="tag ${p?"pagado":"porpagar"} click" data-a="pagoMenu" data-id="${c.id}" title="${p?"Marcar como por pagar":"Marcar pagado"}">${p?"💵 Pagado · "+esc(METODOS[c.pago.metodo]||c.pago.metodo||""):"💵 Por pagar"}</button>`:`<span class="tag ${p?"pagado":"porpagar"}">${p?"💵 Pagado":"💵 Por pagar"}</span>`}<span class="tag ${e?"entregado":"porentregar"}">${e?"✅ Entregado":"📦 Por entregar"}</span>${menu?`<span class="pmenu">${p?`<button class="btn r" data-a="despagar" data-id="${c.id}">Quitar pago</button>`:Object.keys(METODOS).map(m=>`<button class="btn p" data-a="pagar" data-id="${c.id}" data-v="${m}">${m==="efectivo"?"💵":m==="transferencia"?"🏦":"💳"} ${METODOS[m]}</button>`).join("")}<button class="btn ghost" data-a="pagoMenu" data-id="">✕</button></span>`:""}</div>`; }
+function filtroPasa(c){ const f=ui.filtro; if(!f||!conTags(c)) return !f||c.estado!=="armando"?true:false; return f==="porpagar"?!pagado(c):f==="pagado"?pagado(c):f==="porentregar"?!entregado(c):f==="entregado"?entregado(c):true; }
 const colDe=c=>c.estado==="pedido"?(c.etapa==="armado"?"cocina":(c.etapa==="espera"||c.etapa==="repartiendo")?"camino":"pedido"):c.estado;
 
 /* ---------- catálogo por sucursal: ranitas/catalogo/<sucursal>/<clave> {on:false, precio} — RLR ---------- */
@@ -697,7 +723,7 @@ $("#sucTel").addEventListener("change",e=>{ if(e.target.id==="telSel"){ config.t
 
 /* ---------- tablero ---------- */
 const sorters={armando:(a,b)=>a.creado-b.creado,porpedir:(a,b)=>(a.listoEn||a.actualizado)-(b.listoEn||b.actualizado),pedido:(a,b)=>(b.pedidoEn||0)-(a.pedidoEn||0),cocina:(a,b)=>(b.armadoEn||0)-(a.armadoEn||0),camino:(a,b)=>(b.listoCocinaEn||0)-(a.listoCocinaEn||0),entregado:(a,b)=>(b.entregadoEn||0)-(a.entregadoEn||0),archivado:(a,b)=>(b.archivadoEn||0)-(a.archivadoEn||0)};
-function cardsIn(est){ return Object.values(pedidos).filter(c=>colDe(c)===est).sort(sorters[est]); }
+function cardsIn(est){ return Object.values(pedidos).filter(c=>colDe(c)===est&&filtroPasa(c)).sort(sorters[est]); }
 let _rbPend=false; function renderBoard(){ if(_rbPend) return; _rbPend=true; setTimeout(()=>{ _rbPend=false; renderBoardNow(); },0); }   // agrupa ráfagas de eventos en un solo pintado (también en segundo plano) — RLR
 function renderBoardNow(){
   // ¿Qué cambió desde el último render? (solo brillan los cambios que vienen de OTRA pantalla)
@@ -719,6 +745,8 @@ function renderBoardNow(){
   if(MESA()){ const now2=Date.now(); if(!ui._mesaSweep||now2-ui._mesaSweep>60000){ ui._mesaSweep=now2; Object.values(pedidos).forEach(c=>{ if(c.estado==="entregado"&&(c.entregadoEn||0)<now2-10*60000) marcar(c.id,"archivado"); else if(c.estado!=="archivado"&&c.estado!=="entregado"&&(c.creado||0)<now2-4*3600e3) marcar(c.id,"archivado"); }); } }
   const NOM_MESA={pedido:"En cola",camino:"Por servir"}; const EST=ESTADOS.filter(e=>!MESA()||(e.id!=="porpedir"&&e.id!=="archivado")).map(e=>MESA()&&NOM_MESA[e.id]?Object.assign({},e,{n:NOM_MESA[e.id]}):e);
   if(MESA()&&(ui.tab==="porpedir"||ui.tab==="archivado")) ui.tab="armando";
+  { const T=Object.values(pedidos).filter(conTags); const nPP=T.filter(c=>!pagado(c)).length, nP=T.filter(pagado).length, nPE=T.filter(c=>!entregado(c)).length, nE=T.filter(entregado).length; const $f=$("#filtros");
+    if(T.length){ $f.hidden=false; $f.innerHTML=[["","Todos",T.length],["porpagar","💵 Por pagar",nPP],["pagado","✅ Pagados",nP],["porentregar","📦 Por entregar",nPE],["entregado","🛵 Entregados",nE]].map(([k,l,nn])=>`<button class="fch${ui.filtro===k?" on":""} ${k}" data-a="filtro" data-v="${k}">${l}<span>${nn}</span></button>`).join(""); } else { $f.hidden=true; if(ui.filtro){ ui.filtro=""; } } }
   $("#tabs").innerHTML=EST.map(e=>`<button class="tab${ui.tab===e.id?" on":""}" data-a="tab" data-v="${e.id}">${e.e} ${e.n}<span class="n">${counts[e.id]}</span></button>`).join("");
   $("#board").innerHTML=EST.map(e=>{
     const cards=cardsIn(e.id);
@@ -766,6 +794,7 @@ function cardHTML(c){
   return `<article class="card${mine.has(c.id)?" mine":""}${fl.card?" flash":""}${fl.moved?" moved":""}${typing.length?" typing":""}">
     <div class="card-top"><h3>Familia ${esc(c.familia||"sin nombre")}${fl.card&&typing.length&&!Object.keys(fl.per).length?`<span class="caret">▍</span>`:""}</h3><span class="when">${typing.length?"en vivo":fmtRel(c.actualizado)}</span></div>
     <div class="badges">${badges.join("")}</div>
+    ${tagsHTML(c,host&&!MESA())}
     <div class="persons">${persons}</div>
     ${c.notas?`<div class="notas">📝 ${esc(c.notas)}</div>`:""}
     <div class="tot">${esc(totStr(t))}${$c!=null?`<span>💰 aprox. ${money($c)}</span>`:""}</div>
@@ -961,6 +990,10 @@ document.addEventListener("click",e=>{
   const R=()=>{ renderEditor(); queueSave(); };
   switch(a){
     case "tab": ui.tab=v; renderBoard(); break;
+    case "filtro": ui.filtro=v; renderBoard(); break;
+    case "pagoMenu": ui.pagoMenu=ui.pagoMenu===id?null:id; renderBoard(); break;
+    case "pagar": { const c=pedidos[id]; if(!c) break; c.pago={estado:"pagado",metodo:v,ts:Date.now(),por:host?"anfitrion":"familia"}; ui.pagoMenu=null; saveCard(c); bit("pago","pago","Marcó pagado ("+v+")",{pedido:id,familia:c.familia}); toast("💵 Pagado · "+v); break; }
+    case "despagar": { const c=pedidos[id]; if(!c) break; c.pago={estado:"pendiente",ts:Date.now()}; ui.pagoMenu=null; saveCard(c); bit("pago","despago","Quitó la marca de pagado",{pedido:id,familia:c.familia}); toast("Marcado por pagar"); break; }
     case "hideHint": localStorage.setItem("ranitas-hint","1"); renderBoard(); break;
     case "nuevo": openNuevo(); break;
     case "crear": hide("mNuevo"); crearPedido(null); break;
