@@ -276,7 +276,7 @@ const FIREBASE_CONFIG={apiKey:"AIzaSyDSAFxL2E_S1iHiRfSHGbbuHiR_-2j-HP4",authDoma
 const ROOT="ranitas", CLAVE_MAESTRA="123";   // usuario maestro (provisional)
 const SUCURSALES=[{id:"sanatorio",n:"Sanatorio Español"},{id:"vinedos",n:"Viñedos"},{id:"juarez",n:"Juárez"},{id:"ibero",n:"Villas de la Ibero"}];
 const ROLES={papa:"👨",mama:"👩",hijo:"👦",hija:"👧",otro:"🙂"};
-const VISTAS=[{id:"panorama",n:"Panorama",e:"📊"},{id:"pedidos",n:"Pedidos",e:"📋"},{id:"mostrador",n:"Mostrador",e:"🧾"},{id:"cocina",n:"Cocina",e:"🔥"},{id:"productos",n:"Productos",e:"🏪"},{id:"precios",n:"Precios",e:"💲"},{id:"usuarios",n:"Usuarios",e:"👥"}];
+const VISTAS=[{id:"panorama",n:"Panorama",e:"📊"},{id:"pedidos",n:"Pedidos",e:"📋"},{id:"mostrador",n:"Mostrador",e:"🧾"},{id:"cocina",n:"Cocina",e:"🔥"},{id:"productos",n:"Productos",e:"🏪"},{id:"precios",n:"Precios",e:"💲"},{id:"usuarios",n:"Usuarios",e:"👥"},{id:"manual",n:"Manuales",e:"📖"}];   // Manuales lo ven todos
 const GUISOS_PIC={"Chicharrón prensado":2,"Chicharrón pella":2,"Carne con chile":2,"Guiso verde":1,"Huevo verde":1,"Huevo rojo":1,"Asado":1};   // picor de fábrica (editable en Productos → ranitas/menu)
 const SALSAS=["Verde cremosa","Roja","Verde tomatillo","Chipotle con crema","La más picosa 🌶🌶🌶"], QUESOS=["Asadero","Chihuahua"], EXTRAS=["Huevo estrellado","Huevo revuelto","Guiso favorito"];
 const slugify=x=>(x||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
@@ -323,10 +323,11 @@ const porGuiso=cards=>{ const m={}; cards.forEach(c=>toArr(c.personas).forEach(p
 /* ---------- acceso: maestro + usuarios con vistas ---------- */
 let usuarios={}, yo=null;
 function sesion(){ try{ return JSON.parse(localStorage.getItem("ranitas-admin-sesion")||"null"); }catch(e){ return null; } }
-function entrar(clave){ if(clave===CLAVE_MAESTRA) return {id:"maestro",nombre:"Maestro",vistas:VISTAS.map(v=>v.id)}; const u=Object.entries(usuarios).find(([id,u])=>u&&u.clave===clave); return u?Object.assign({id:u[0]},u[1],{vistas:toArr(u[1].vistas)}):null; }
-function refrescarYo(){ const s=sesion(); if(!s) return; if(s.id==="maestro"){ yo=entrar(CLAVE_MAESTRA); } else { const u=usuarios[s.id]; yo=u?Object.assign({id:s.id},u,{vistas:toArr(u.vistas)}):null; if(!yo){ localStorage.removeItem("ranitas-admin-sesion"); $("#gate").style.display="grid"; return; } } render(); }
+function entrar(clave){ if(clave===CLAVE_MAESTRA) return {id:"maestro",nombre:"Maestro",vistas:VISTAS.map(v=>v.id)}; const u=Object.entries(usuarios).find(([id,u])=>u&&u.clave===clave); return u?Object.assign({id:u[0]},u[1],{vistas:toArr(u[1].vistas).concat(["manual"])}):null; }
+function refrescarYo(){ const s=sesion(); if(!s) return; if(s.id==="maestro"){ yo=entrar(CLAVE_MAESTRA); } else { const u=usuarios[s.id]; yo=u?Object.assign({id:s.id},u,{vistas:toArr(u.vistas).concat(["manual"])}):null; if(!yo){ localStorage.removeItem("ranitas-admin-sesion"); $("#gate").style.display="grid"; return; } } render(); }
 $("#gateForm").addEventListener("submit",e=>{ e.preventDefault(); const u=entrar($("#pw").value); if(u){ yo=u; localStorage.setItem("ranitas-admin-sesion",JSON.stringify({id:u.id})); $("#gate").style.display="none"; if(!yo.vistas.includes(vista)) vista=yo.vistas[0]||"pedidos"; render(); } else { $("#gateErr").textContent="Contraseña incorrecta"; $("#pw").value=""; } });
 $("#salir").addEventListener("click",()=>{ localStorage.removeItem("ranitas-admin-sesion"); location.href=location.pathname; });
+if(new URLSearchParams(location.search).get("k")){ const u=entrar(new URLSearchParams(location.search).get("k")); if(u){ localStorage.setItem("ranitas-admin-sesion",JSON.stringify({id:u.id})); } }
 if(sesion()) $("#gate").style.display="none"; else setTimeout(()=>$("#pw").focus(),100);
 
 /* ---------- datos en vivo ---------- */
@@ -337,7 +338,7 @@ if(!VISTAS.some(v=>v.id===vista)) vista="panorama";
 firebase.initializeApp(FIREBASE_CONFIG); const db=firebase.database();
 db.ref(".info/connected").on("value",s=>{ online=!!s.val(); $("#dot").className="dot"+(online?" on":""); $("#conn").textContent=online?"en vivo":"sin conexión"; });
 db.ref(ROOT+"/anfitriones").on("value",s=>{ anfitriones=s.val()||{}; render(); });
-db.ref(ROOT+"/tableros").on("value",s=>{ tableros=s.val()||{}; render(); });
+db.ref(ROOT+"/tableros").on("value",s=>{ tableros=s.val()||{}; if(QS.get("ped")&&!pos._auto){ const [sl,id]=QS.get("ped").split("/"); if(tableros[sl]&&tableros[sl].pedidos&&tableros[sl].pedidos[id]){ pos._auto=1; abrirEnMostrador(sl,id); return; } } render(); });
 db.ref(ROOT+"/catalogo").on("value",s=>{ catalogo=s.val()||{}; render(); });
 db.ref(ROOT+"/menu").on("value",s=>{ menu=s.val()||{}; render(); });
 let cocineros={}; db.ref(ROOT+"/cocina").on("value",s=>{ cocineros=s.val()||{}; render(); });
@@ -355,7 +356,8 @@ function renderNav(){ const cards=allCards(); const vis=yo?yo.vistas:[];
   $("#who").textContent=yo?yo.nombre:""; }
 $("#nav").addEventListener("click",e=>{ const b=e.target.closest("[data-v]"); if(!b) return; vista=b.dataset.v; syncUrl(); render(); });
 let _rPend=false; function render(){ if(_rPend) return; _rPend=true; setTimeout(()=>{ _rPend=false; renderNow(); },0); }
-function renderNow(){ if(!yo) return; if(!yo.vistas.includes(vista)) vista=yo.vistas[0]; if(!vista) return; renderNav(); if(pos.card&&vista==="mostrador"){ renderMostrador(); return; } ({panorama:renderPanorama,pedidos:renderPedidos,mostrador:renderMostrador,cocina:renderCocina,productos:renderProductos,precios:renderPrecios,usuarios:renderUsuarios})[vista](); }
+function renderNow(){ if(!yo) return; if(!yo.vistas.includes(vista)) vista=yo.vistas[0]; if(!vista) return; renderNav(); if(pos.card&&vista==="mostrador"){ renderMostrador(); return; } ({panorama:renderPanorama,pedidos:renderPedidos,mostrador:renderMostrador,cocina:renderCocina,productos:renderProductos,precios:renderPrecios,usuarios:renderUsuarios,manual:renderManual})[vista](); }
+function renderManual(){ if($("#manualFrame")) return; $("#main").innerHTML=`<div class="top"><h1>📖 Manuales</h1><a class="btn ghost" href="/manual" target="_blank">↗ Abrir aparte / imprimir</a><div class="sub">Cada quien lee el suyo: anfitrión, familias, caja, cocina, repartidor y dueño. Comparte la liga <b>ranita.capitaltorreon.com/manual</b> con tu gente.</div></div><iframe id="manualFrame" src="/manual" style="width:100%;height:calc(100dvh - 130px);border:0;border-radius:16px;background:#fff;box-shadow:var(--sh)"></iframe>`; }
 const picDe=name=>{ const v=menu["g_"+slugify(name)]; return v&&v.pic!=null?+v.pic:(GUISOS_PIC[name]||0); };
 // ---- precios: costo total de un pedido con el catálogo de su sucursal (harina y maíz por separado). Solo se muestra el total. — RLR
 function precioDe(suc,cat,name,masa){ const v=(catalogo[suc]||{})[catKey(cat,name)]||{}; if(cat==="g"&&masa==="maiz"&&v.precioM!=null&&v.precioM!=="") return +v.precioM; return v.precio!=null&&v.precio!==""?+v.precio:null; }
@@ -546,7 +548,7 @@ document.addEventListener("keydown",e=>{ if(vista!=="mostrador") return; const t
 });
 
 /* ---------- 2c. COCINA: cola → lo tomo → comal por guiso → empaque por persona → listo — RLR ---------- */
-const kit={miId:localStorage.getItem("ranitas-cocinero-id")||"",vista:"comal",abierto:null};
+const kit={miId:QS.get("coc")||localStorage.getItem("ranitas-cocinero-id")||"",vista:"comal",abierto:null};
 const mins=ts=>ts?Math.max(0,Math.round((Date.now()-ts)/60000)):0;
 const lineKey=(p,cat,i)=>p.id+":"+cat+":"+i;
 // Líneas del pedido con clave estable, para marcar avance
@@ -623,8 +625,8 @@ function renderUsuarios(){ const us=Object.entries(usuarios);
   $("#main").innerHTML=`<div class="top"><h1>👥 Usuarios</h1><div class="sub">Cada usuario entra con su clave y ve solo las vistas que le prendas. El usuario <b>Maestro</b> (clave actual) siempre ve todo. Aquí no hay permisos finos: es qué pestañas ve cada quien.</div></div>
   <div class="card" style="margin-bottom:14px"><h3 style="margin-bottom:8px">➕ Nuevo usuario</h3><div class="form"><label>Nombre<input id="uNombre" placeholder="Sucursal Viñedos · Cocina · Pepe"></label><label>Clave para entrar<input id="uClave" placeholder="ej. 4521" autocomplete="off"></label><button class="btn p" id="uCrear">Crear</button></div></div>
   <div class="users">
-    <div class="user"><div><div class="nm">👑 Maestro</div><div class="cl">Ve todas las vistas · no se puede borrar</div></div><span class="b ok">siempre</span><div class="chk">${VISTAS.map(v=>`<label class="on">${v.e} ${v.n}</label>`).join("")}</div></div>
-    ${us.map(([id,u])=>{ const vs=toArr(u.vistas); return `<div class="user" data-id="${id}"><div><div class="nm">${esc(u.nombre)}</div><div class="cl">clave: <b>${esc(u.clave)}</b> · creado ${fmtFecha(u.creado)}</div></div><button class="btn r" data-del="${id}">🗑 Borrar</button><div class="chk">${VISTAS.map(v=>`<label class="${vs.includes(v.id)?"on":""}"><input type="checkbox" hidden data-uid="${id}" data-vista="${v.id}" ${vs.includes(v.id)?"checked":""}>${v.e} ${v.n}</label>`).join("")}</div></div>`; }).join("")||`<div class="empty">Todavía no hay usuarios además del maestro.</div>`}
+    <div class="user"><div><div class="nm">👑 Maestro</div><div class="cl">Ve todas las vistas · no se puede borrar</div></div><span class="b ok">siempre</span><div class="chk">${VISTAS.filter(v=>v.id!=="manual").map(v=>`<label class="on">${v.e} ${v.n}</label>`).join("")}</div></div>
+    ${us.map(([id,u])=>{ const vs=toArr(u.vistas); return `<div class="user" data-id="${id}"><div><div class="nm">${esc(u.nombre)}</div><div class="cl">clave: <b>${esc(u.clave)}</b> · creado ${fmtFecha(u.creado)}</div></div><button class="btn r" data-del="${id}">🗑 Borrar</button><div class="chk">${VISTAS.filter(v=>v.id!=="manual").map(v=>`<label class="${vs.includes(v.id)?"on":""}"><input type="checkbox" hidden data-uid="${id}" data-vista="${v.id}" ${vs.includes(v.id)?"checked":""}>${v.e} ${v.n}</label>`).join("")}</div></div>`; }).join("")||`<div class="empty">Todavía no hay usuarios además del maestro.</div>`}
   </div>`; }
 document.addEventListener("click",e=>{
   if(e.target.id==="uCrear"){ const nombre=$("#uNombre").value.trim(), clave=$("#uClave").value.trim(); if(nombre.length<2||clave.length<3) return toast("Pon nombre y una clave de al menos 3 caracteres"); if(clave===CLAVE_MAESTRA||Object.values(usuarios).some(u=>u&&u.clave===clave)) return toast("Esa clave ya está en uso");
