@@ -195,7 +195,13 @@ Las reglas de la base están abiertas (lectura y escritura sin login). Es acepta
 1. Poner el Auth Token clásico: `cd ~/Desktop/HTML/Pedidos_Ranitas/sms && npx wrangler secret put TWILIO_AUTH_TOKEN` (el Worker lo prefiere si existe).
 2. O dar permiso de mensajes a la app OAuth en la consola de Twilio.
 
-Probar con `curl -X POST https://ranitas-sms.noisy-shape-4fc9.workers.dev/notify -d '{"tel":"871…","texto":"prueba"}'`. Ricardo dijo que rotará las credenciales que pegó en el chat.
+Probar con:
+
+```bash
+curl -X POST https://ranitas-sms.noisy-shape-4fc9.workers.dev/notify -H "Content-Type: application/json" -d '{"slug":"familia-lopez-acosta","cardId":"<id de una tarjeta>","evento":"lista"}'
+```
+
+El Worker lee el tablero en Firebase, saca el celular del anfitrión y le manda el texto (`evento` puede ser `nueva` o `lista`). Ricardo dijo que rotará las credenciales que pegó en el chat.
 
 ---
 
