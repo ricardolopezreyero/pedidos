@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<!--
+  Ranitas · Pedidos — pedidos familiares de Gorditas Ranitas (Torreón)
+  Autor: Ricardo López Reyero (RLR) · build eye · rev 181218
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="author" content="Ricardo López Reyero">
+<meta name="build" content="eye">
+<meta name="rev" content="181218">
+<meta name="theme-color" content="#FFD60A">
+<title>Ranitas · Pedidos</title>
+<meta name="description" content="Arma el pedido de tu familia en Gorditas Ranitas (Torreón) en 1 minuto: gorditas de harina o maíz, chilaquiles, café y postres. Todo llega en un solo WhatsApp a la sucursal.">
+<link rel="canonical" href="https://ranita.capitaltorreon.com/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_MX">
+<meta property="og:site_name" content="Ranitas · Pedidos">
+<meta property="og:title" content="Ranitas Gorditas · Arma el pedido de tu familia en 1 minuto">
+<meta property="og:description" content="Cada quien pone sus gorditas (harina o maíz), chilaquiles, café y postre. Todo llega en un solo WhatsApp a la sucursal. Servicio a domicilio en Torreón.">
+<meta property="og:url" content="https://ranita.capitaltorreon.com/">
+<meta property="og:image" content="https://ranita.capitaltorreon.com/og.png">
+<meta property="og:image:secure_url" content="https://ranita.capitaltorreon.com/og.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Ranitas Gorditas · Pedidos en familia · 4 sucursales en Torreón">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Ranitas Gorditas · Arma el pedido de tu familia en 1 minuto">
+<meta name="twitter:description" content="Gorditas de harina o maíz, chilaquiles, café y postres. Todo en un solo WhatsApp.">
+<meta name="twitter:image" content="https://ranita.capitaltorreon.com/og.png">
+<link rel="icon" type="image/png" sizes="64x64" href="/favicon.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Ranitas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* RLR */
+:root{--y:#FFD60A;--y2:#FFF1B8;--y3:#FFFBEA;--r:#E4322B;--r2:#FDE7E5;--g:#2E9E3E;--g2:#E3F5E6;--wa:#25D366;--ink:#231F1A;--mut:#7A736B;--line:#EEE3BF;--card:#fff;--sh:0 6px 18px rgba(90,70,0,.10);--rad:16px}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--y3);color:var(--ink);font-family:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.35;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+input,select,textarea{border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;width:100%;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(46,158,62,.15)}
+h1,h2,h3{margin:0}
+
+/* ---------- header ---------- */
+header{position:sticky;top:0;z-index:20;background:var(--y);padding:10px 12px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px 10px;box-shadow:0 2px 0 rgba(0,0,0,.06)}
+.suc{grid-column:1/-1;grid-row:2}
+.brand{grid-row:1;grid-column:1}
+.hbtns{grid-row:1;grid-column:2}
+@media(min-width:760px){header{display:flex;padding:10px 14px}.suc{flex:1}}
+.brand{font-weight:900;font-size:21px;letter-spacing:-.3px;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.brand b{color:var(--r)}
+.brand small{font-weight:800;font-size:13px;color:#6b5a00;margin-left:2px}
+.suc{display:flex;align-items:center;gap:6px;min-width:0}
+.suc select{width:auto;flex:1;padding:8px 10px;border-radius:10px;font-weight:800;background:#fff}
+.suc .tel{display:flex;align-items:center;gap:6px;font-weight:800;font-size:13px;background:#fff;border-radius:10px;padding:8px 10px;white-space:nowrap}
+.suc .tel select{border:0;padding:0;width:auto;font-size:13px;font-weight:800;background:transparent}
+.hbtns{display:flex;gap:6px;margin-left:auto;justify-self:end}
+.ib{width:38px;height:38px;border-radius:12px;border:0;background:#fff;font-size:18px;display:grid;place-items:center;box-shadow:0 1px 0 rgba(0,0,0,.08)}
+.dot{width:9px;height:9px;border-radius:50%;background:#bbb;display:inline-block;margin-left:4px}
+.dot.on{background:var(--g);box-shadow:0 0 0 3px rgba(46,158,62,.2)}
+
+/* ---------- tabs (móvil) ---------- */
+.tabs{display:flex;gap:6px;padding:10px 10px 0;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:1;white-space:nowrap;border:0;background:#fff;border-radius:12px;padding:9px 10px;font-weight:800;font-size:13.5px;color:var(--mut);box-shadow:0 1px 0 rgba(0,0,0,.05)}
+.tab.on{background:var(--ink);color:var(--y)}
+.tab .n{display:inline-block;min-width:20px;padding:0 6px;border-radius:999px;background:rgba(0,0,0,.08);font-size:12px;margin-left:4px}
+.tab.on .n{background:rgba(255,214,10,.25)}
+
+/* ---------- board ---------- */
+.board{padding:10px;display:block}
+.col{display:none}
+.col.on{display:block}
+.col-head{display:flex;align-items:center;justify-content:space-between;padding:8px 4px 10px;font-weight:900;font-size:16px}
+.col-head .n{background:#fff;border-radius:999px;padding:2px 9px;font-size:12px;color:var(--mut);margin-left:6px}
+.col-tools{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.cards{display:flex;flex-direction:column;gap:10px}
+.empty{background:#fff;border:1.5px dashed var(--line);border-radius:var(--rad);padding:22px 16px;text-align:center;color:var(--mut);font-weight:700}
+.empty span{font-size:28px;display:block;margin-bottom:6px}
+@media(min-width:960px){
+  .tabs{display:none}
+  .board{display:grid;grid-template-columns:repeat(4,minmax(250px,1fr));gap:14px;padding:14px;align-items:start}
+  .col{display:block;background:rgba(255,255,255,.45);border-radius:18px;padding:8px;min-height:60vh}
+}
+
+/* ---------- card ---------- */
+.card{background:var(--card);border-radius:var(--rad);box-shadow:var(--sh);padding:12px 12px 10px;border:2px solid transparent}
+.card.mine{border-color:var(--y)}
+.card-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.card-top h3{font-size:16.5px;font-weight:900}
+.card-top .when{font-size:12px;color:var(--mut);white-space:nowrap;font-weight:700}
+.badges{display:flex;gap:5px;flex-wrap:wrap;margin:5px 0 7px}
+.b{font-size:11px;font-weight:800;border-radius:999px;padding:2px 8px;background:#f2ecd6;color:#6b5a00}
+.b.ok{background:var(--g2);color:var(--g)}
+.b.wip{background:var(--r2);color:var(--r)}
+.b.tuyo{background:var(--y);color:#5a4a00}
+.b.suc{background:#eef3ff;color:#2b4a9e}
+.b.live{background:var(--r);color:#fff;animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.55}}
+.online{font-size:12px;font-weight:800;color:#6b5a00;margin-left:6px;white-space:nowrap}
+@media(max-width:480px){.ib{width:34px;height:34px;font-size:16px}.hbtns{gap:4px}.brand{font-size:19px}.online .long{display:none}.suc select{min-width:0}.suc .tel{flex:none;padding:8px 8px}}
+/* destello cuando otra pantalla cambia algo — RLR */
+.card.flash{animation:cardflash 1.8s ease-out}
+@keyframes cardflash{0%{box-shadow:0 0 0 4px var(--y),0 10px 28px rgba(228,50,43,.25);background:#FFF6C4}100%{box-shadow:var(--sh);background:#fff}}
+.card.typing{border-color:var(--r)}
+.pl.flash{animation:plflash 1.8s ease-out;border-radius:6px}
+@keyframes plflash{0%{background:#FFE98A}100%{background:transparent}}
+.cierre{background:#fff;border:2px solid var(--y);border-radius:12px;padding:8px 12px;font-weight:800;font-size:13.5px;color:#5a4a00}
+.cierre.past{border-color:var(--r);color:var(--r);background:var(--r2)}
+.cfg2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.cfg4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:4px}
+.cfg4 input{padding:8px;font-size:13px}
+@media(max-width:520px){.cfg2{grid-template-columns:1fr}.cfg4{grid-template-columns:1fr 1fr}}
+.hostrow{display:flex;gap:10px;align-items:flex-start;background:var(--y2);border-radius:12px;padding:10px 12px;color:var(--ink);font-weight:700;margin-top:12px}
+.hostrow input{width:22px;height:22px;margin:0;flex:none}
+.rep-fam{border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:10px}
+.rep-fam h3{font-size:16px;margin-bottom:4px}
+.rep-per{margin:6px 0}
+.rep-nom{font-weight:900;font-size:15px;margin:4px 0}
+.rep-line{display:block;width:100%;text-align:left;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;font-weight:800;font-size:15px;margin:4px 0}
+.rep-line::before{content:"☐  "}
+.rep-line.done{background:var(--g2);border-color:var(--g);color:var(--g);text-decoration:line-through}
+.rep-line.done::before{content:"☑  "}
+/* home / barra del tablero — RLR */
+.bar{background:#fff;border-bottom:1px solid var(--line);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-weight:800;font-size:13.5px}
+.linkbtn{border:1.5px dashed #cdbf8a;background:var(--y3);border-radius:999px;padding:5px 11px;font-weight:800;font-size:12.5px;color:#6b5a00;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.is-home .suc,body.is-home #btnCall,body.is-home #btnShare,body.is-home #btnCfg,body.is-home .tabs,body.is-home .board{display:none!important}
+#home{max-width:680px;margin:0 auto;padding:18px 14px 40px}
+.hero{text-align:center;padding:18px 8px 8px}
+.hero-frog{font-size:72px;line-height:1;filter:drop-shadow(0 8px 0 rgba(0,0,0,.08))}
+.hero h1{font-size:30px;font-weight:900;letter-spacing:-.5px;margin-top:8px}
+.hero h1 b{color:var(--r)}
+.hero p{color:#5a4a00;font-weight:700;font-size:15px;max-width:48ch;margin:8px auto 0}
+.hcard{background:#fff;border-radius:20px;box-shadow:var(--sh);padding:16px;margin-top:16px}
+.hcard h2{font-size:18px;font-weight:900;margin-bottom:4px}
+.slugrow{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:12px;background:#fff;overflow:hidden;margin-top:4px}
+.slugrow span{padding:10px 0 10px 12px;color:var(--mut);font-weight:800;font-size:13px;white-space:nowrap}
+.slugrow input{border:0;border-radius:0;padding:10px 12px 10px 2px;font-weight:900}
+.slugrow input:focus{box-shadow:none}
+.hmsg{min-height:20px;font-weight:800;font-size:13px;color:var(--r);margin:8px 0}
+.hnote{font-size:12.5px;color:var(--mut);font-weight:700;margin-top:10px}
+.hfoot{text-align:center;color:var(--mut);font-weight:700;font-size:12px;margin-top:22px}
+.caret{display:inline-block;color:var(--r);font-weight:900;animation:blink .9s steps(2,start) infinite;margin-left:1px}
+@keyframes blink{to{visibility:hidden}}
+.persons{display:flex;flex-direction:column;gap:4px;font-size:13.5px}
+.pl b{font-weight:900}
+.pl i{color:var(--mut)}
+.pl .l{color:#3c3630}
+.notas{margin-top:6px;font-size:13px;color:#5a4a00;background:var(--y2);border-radius:8px;padding:5px 8px}
+.tot{margin-top:8px;font-size:12.5px;font-weight:800;color:var(--mut);display:flex;gap:10px;flex-wrap:wrap}
+.acts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.btn{border:0;border-radius:11px;padding:9px 12px;font-weight:800;font-size:13.5px;background:#f2ecd6;color:var(--ink);display:inline-flex;align-items:center;gap:5px;justify-content:center;line-height:1.1}
+.btn.p{background:var(--g);color:#fff}
+.btn.y{background:var(--y);color:#3d3200}
+.btn.wa{background:var(--wa);color:#fff}
+.btn.r{background:var(--r2);color:var(--r)}
+.btn.ghost{background:transparent;border:1.5px solid var(--line)}
+.btn.big{padding:13px 16px;font-size:15px;border-radius:14px;width:100%;flex-wrap:wrap}
+.btn.big .sm{width:100%;font-size:11.5px;margin-top:1px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn .sm{font-size:11px;opacity:.8;font-weight:700}
+.hint{background:#fff;border-radius:var(--rad);padding:10px 12px;font-size:13px;color:#4a4238;display:flex;gap:8px;align-items:flex-start;box-shadow:var(--sh)}
+.hint b{color:var(--r)}
+.hint button{border:0;background:transparent;font-size:16px;margin-left:auto;color:var(--mut)}
+
+/* ---------- modales ---------- */
+.modal{position:fixed;inset:0;background:rgba(30,22,0,.5);display:none;align-items:flex-end;justify-content:center;z-index:50}
+.modal.open{display:flex}
+.sheet{background:#fff;width:100%;max-width:780px;max-height:96dvh;border-radius:22px 22px 0 0;display:flex;flex-direction:column;box-shadow:0 -10px 40px rgba(0,0,0,.25);animation:up .18s ease-out}
+@keyframes up{from{transform:translateY(30px);opacity:.6}to{transform:none;opacity:1}}
+.sheet .head{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;border-bottom:1px solid var(--line)}
+.sheet .head h2{font-size:18px;font-weight:900;flex:1}
+.sheet .body{overflow:auto;padding:14px 16px;flex:1;-webkit-overflow-scrolling:touch}
+.sheet .foot{padding:10px 16px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#fff}
+.sheet .foot .sum{flex:1;font-weight:800;font-size:13px;color:var(--mut);min-width:140px}
+#mEditor .foot .sum{width:100%;flex:none}
+#mEditor .foot .btn{flex:1}
+@media(min-width:760px){#mEditor .foot .sum{width:auto;flex:1}#mEditor .foot .btn{flex:none}}
+@media(min-width:760px){.modal{align-items:center;padding:20px}.sheet{border-radius:22px;max-height:90vh}}
+.x{width:36px;height:36px;border-radius:50%;border:0;background:#f2ecd6;font-size:16px;font-weight:900}
+label.f{display:block;font-weight:800;font-size:13px;color:var(--mut);margin:10px 0 4px}
+label.f input,label.f textarea,label.f select{margin-top:4px;font-weight:700}
+.fam input{font-size:18px;font-weight:900}
+
+/* ---------- editor: personas ---------- */
+.persona{background:var(--y3);border:1.5px solid var(--line);border-radius:18px;padding:12px;margin:12px 0}
+.p-head{display:flex;align-items:center;gap:8px}
+.p-emoji{font-size:26px;width:36px;text-align:center}
+.p-name{flex:1;font-weight:900;font-size:16px;padding:9px 12px}
+.p-head .ib{background:#fff;width:36px;height:36px;font-size:15px}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin:12px 0 8px;font-weight:900;font-size:14px}
+.seg{display:inline-flex;background:#ECE4C8;border-radius:999px;padding:3px}
+.seg button{border:0;background:transparent;padding:6px 14px;border-radius:999px;font-weight:900;font-size:13px;color:#6b5a00}
+.seg button.on{background:var(--ink);color:var(--y)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:7px 11px;font-weight:800;font-size:13.5px;display:inline-flex;align-items:center;gap:5px}
+.chip:active{transform:scale(.97)}
+.chip.has{border-color:var(--g);background:var(--g2)}
+.chip.on{border-color:var(--ink);background:var(--ink);color:var(--y)}
+.chip .cnt{background:var(--g);color:#fff;border-radius:999px;padding:1px 7px;font-size:11px;font-weight:900}
+.chip .pic{font-size:11px;letter-spacing:-2px}
+.lines{margin-top:8px}
+.line{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px dashed var(--line);flex-wrap:wrap}
+.line:first-child{border-top:0}
+.lq{min-width:30px;height:32px;border-radius:9px;background:var(--y);font-weight:900;display:grid;place-items:center;font-size:15px}
+.qty{display:inline-flex;align-items:center;gap:3px;flex:none}
+.qty button{width:32px;height:32px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-size:18px;font-weight:900;line-height:1;padding:0}
+.ln{flex:1 1 auto;font-weight:800;font-size:14px;min-width:120px}
+.ln em{font-style:normal;color:var(--mut);font-weight:800;font-size:11px;text-transform:uppercase;margin-left:5px;letter-spacing:.3px}
+.line input.det{flex:1 1 150px;min-width:0;width:auto;padding:7px 9px;font-size:13px;border-radius:9px}
+.stp{display:inline-flex;gap:3px}
+.stp button{width:34px;height:34px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-size:18px;font-weight:900;line-height:1}
+.p-extras{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.pill{border:1.5px dashed #cdbf8a;background:#fff;border-radius:999px;padding:7px 12px;font-weight:800;font-size:13px;color:#6b5a00}
+.pill.on{border-style:solid;border-color:var(--g);background:var(--g2);color:var(--g)}
+.sub{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:10px}
+.sub .t{font-weight:900;font-size:13.5px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.sub .t>button{border:0;background:transparent;color:var(--r);font-weight:800;font-size:12px}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0}
+.row .lbl{font-size:12px;font-weight:900;color:var(--mut);width:100%;text-transform:uppercase;letter-spacing:.3px}
+.addp{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:14px 0 4px;font-weight:800;color:var(--mut);font-size:13px}
+.addp .btn{background:#fff;border:1.5px solid var(--line)}
+
+/* ---------- mensaje ---------- */
+textarea.msg{width:100%;min-height:46vh;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.45;white-space:pre;resize:vertical}
+.warn{background:var(--r2);color:var(--r);border-radius:10px;padding:8px 10px;font-weight:800;font-size:13px;margin-bottom:10px}
+.famlist{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.famlist button{text-align:left;border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.famlist button b{font-size:15px}
+.famlist button span{font-size:12.5px;color:var(--mut);font-weight:700}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-weight:800;font-size:14px;opacity:0;transition:.2s;z-index:99;pointer-events:none;max-width:92vw;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">🐸 <span><b>Ranitas</b> <small>Pedidos</small></span><span class="dot" id="dot" title="Conexión"></span><span class="online" id="online"></span></div>
+  <div class="suc">
+    <select id="sucSel" title="Sucursal"></select>
+    <div class="tel" id="sucTel"></div>
+  </div>
+  <div class="hbtns">
+    <a class="ib" id="btnCall" title="Llamar a la sucursal" href="#">📞</a><button class="ib" id="btnShare" title="Compartir liga">🔗</button>
+    <button class="ib" id="btnCfg" title="Configuración">⚙️</button>
+  </div>
+</header>
+
+<div class="bar" id="bar" hidden></div>
+<main id="home" hidden></main>
+<nav class="tabs" id="tabs"></nav>
+<main class="board" id="board"></main>
+
+<!-- Editor -->
+<div class="modal" id="mEditor">
+  <div class="sheet">
+    <div class="head"><h2>✏️ Pedido de familia</h2><button class="x" data-a="closeEditor" data-v="0">✕</button></div>
+    <div class="body" id="edBody"></div>
+    <div class="foot">
+      <div class="sum" id="edSum"></div>
+      <button class="btn ghost" data-a="closeEditor" data-v="0">Seguir después</button>
+      <button class="btn p" data-a="closeEditor" data-v="1">✅ Listo, ya quedó</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nuevo pedido -->
+<div class="modal" id="mNuevo">
+  <div class="sheet">
+    <div class="head"><h2>🐸 Nuevo pedido</h2><button class="x" data-a="close" data-v="mNuevo">✕</button></div>
+    <div class="body" id="nuevoBody"></div>
+  </div>
+</div>
+
+<!-- Mensaje WhatsApp -->
+<div class="modal" id="mMsg">
+  <div class="sheet">
+    <div class="head"><h2>📲 Mensaje para WhatsApp</h2><button class="x" data-a="close" data-v="mMsg">✕</button></div>
+    <div class="body" id="msgBody"></div>
+    <div class="foot" id="msgFoot"></div>
+  </div>
+</div>
+
+<!-- Config -->
+<div class="modal" id="mCfg">
+  <div class="sheet">
+    <div class="head"><h2>⚙️ Configuración</h2><button class="x" data-a="close" data-v="mCfg">✕</button></div>
+    <div class="body" id="cfgBody"></div>
+    <div class="foot"><div class="sum">Se comparte con todos los que abran la liga.</div><button class="btn p" data-a="close" data-v="mCfg">Guardar</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+/* ============================================================
+   Ranitas · Pedidos — Ricardo López Reyero (RLR)
+   Candado: _k = ROT13("RLR") = "EYE" · _rev = R·L·R = 18·12·18
+   ============================================================ */
+const _RLR="Ricardo López Reyero", _k="EYE", _rev=181218;
+
+const FIREBASE_CONFIG={
+  apiKey:"AIzaSyDSAFxL2E_S1iHiRfSHGbbuHiR_-2j-HP4",
+  authDomain:"notion-casa.firebaseapp.com",
+  databaseURL:"https://notion-casa-default-rtdb.firebaseio.com",
+  projectId:"notion-casa",
+  storageBucket:"notion-casa.firebasestorage.app",
+  messagingSenderId:"450309398626",
+  appId:"1:450309398626:web:a2d12ad763123c16d6b13b"
+};
+const ROOT="ranitas";
+const APP_URL="https://ranita.capitaltorreon.com/";
+/* ---------- ruta: cada anfitrión tiene su tablero en /su-liga (o ?t=su-liga en local) — RLR ---------- */
+const slugify=x=>(x||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40);
+const QS=new URLSearchParams(location.search);
+const LOCAL=location.hostname==="localhost"||location.hostname==="127.0.0.1";
+let SLUG=slugify(QS.get("t")||(LOCAL?"":location.pathname.split("/").filter(Boolean).pop()||""));
+if(SLUG==="index-html") SLUG="";
+const PATH=ROOT+"/tableros/"+SLUG;
+const boardUrl=sl=>APP_URL+sl;
+const goTo=sl=>{ location.href=LOCAL?location.pathname+"?t="+sl:"/"+sl; };
+
+/* ---------- Menú Ranitas (según menú oficial) ---------- */
+const SUCURSALES=[
+  {id:"sanatorio",n:"Sanatorio Español",tels:["8717189478","8715093598"]},
+  {id:"vinedos",  n:"Viñedos",          tels:["8712036783","8714189903"]},
+  {id:"juarez",   n:"Juárez",           tels:["8719432960"]},
+  {id:"ibero",    n:"Villas de la Ibero",tels:["8714334785"]}
+];
+const ROLES=[
+  {id:"papa",n:"Papá",e:"👨"},{id:"mama",n:"Mamá",e:"👩"},
+  {id:"hijo",n:"Hijo",e:"👦"},{id:"hija",n:"Hija",e:"👧"},{id:"otro",n:"Otro",e:"🙂"}
+];
+const GUISOS=[
+  ["Chicharrón prensado",2],["Chicharrón pella",2],["Carne con chile",2],["Picadillo",0],
+  ["Guiso verde",1],["Discada",0],["Choriqueso",0],["Rajas con crema",0],["Rajas con crema y queso",0],
+  ["Frijoles",0],["Frijoles con queso",0],["Huevo verde",1],["Huevo rojo",1],["Papas rojas",0],
+  ["Asado",1],["Deshebrada",0],["Queso",0],["Barbacoa",0],["Combinada",0]
+].map(g=>({n:g[0],pic:g[1]}));
+const BEBIDAS=[{n:"Café de olla"},{n:"Café de grano"},{n:"Jugo de naranja"},{n:"Refresco",det:"¿Cuál?"}];
+const POSTRES=[{n:"Gordita Nutella"},{n:"Gordita Cajeta"},{n:"Brownie"},{n:"Pay"}];
+const SALSAS=["Verde cremosa","Roja","Verde tomatillo","Chipotle con crema","La más picosa 🌶🌶🌶"];
+const QUESOS=["Asadero","Chihuahua"];
+const EXTRAS=["Huevo estrellado","Huevo revuelto","Guiso favorito"];
+const ESTADOS=[
+  {id:"armando",  n:"Armando",  e:"✏️"},
+  {id:"pedido",   n:"Pedido",   e:"📲"},
+  {id:"entregado",n:"Entregado",e:"🛵"},
+  {id:"archivado",n:"Historial",e:"📚"}
+];
+
+/* ---------- estado ---------- */
+let pedidos={}, config={sucursal:"vinedos",telIdx:0,anfitrion:"Ricardo",telAnfitrion:"",direccion:"",entrega:"",pago:"efectivo",pagoCon:"",cierre:"",precioG:"",precioCh:"",precioB:"",precioPo:""};
+// Modo anfitrión por tablero: se activa al crear el tablero, con ?host=<celular del anfitrión> o en ⚙️ dando el celular — RLR
+const HOST_KEY="ranitas-host-"+SLUG;
+let host=localStorage.getItem(HOST_KEY)==="1";
+if(SLUG==="familia-lopez-acosta"&&localStorage.getItem("ranitas-host")==="1"){ host=true; localStorage.setItem(HOST_KEY,"1"); }   // migración de la liga vieja
+const digits=x=>String(x||"").replace(/\D/g,"").slice(-10);
+function activarHost(){ host=true; localStorage.setItem(HOST_KEY,"1"); }
+let ui={tab:"armando",editing:null,draft:null,open:{},msgIds:null,msgText:"",lastLocalEdit:0,presence:{},online:{},anf:null};
+let mine=new Set(JSON.parse(localStorage.getItem("ranitas-mine")||"[]"));
+let db=null, online=false, saveTimer=null, presTimer=0;
+const SID=Date.now().toString(36)+Math.random().toString(36).slice(2,6);                  // id de esta pantalla (presencia / autor de cada cambio) — RLR
+let prevSnap={}, firstRender=true;  // para detectar qué cambió y hacerlo brillar
+
+try{ pedidos=SLUG?(JSON.parse(localStorage.getItem("ranitas-pedidos-"+SLUG)||"{}")||{}):{}; }catch(e){}
+try{ if(SLUG) config=Object.assign(config,JSON.parse(localStorage.getItem("ranitas-config-"+SLUG)||"{}")); }catch(e){}
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const clone=o=>JSON.parse(JSON.stringify(o));
+const toArr=v=>Array.isArray(v)?v:(v&&typeof v==="object"?Object.values(v):[]);
+const rolDe=p=>ROLES.find(r=>r.id===p.rol)||ROLES[4];
+const nombreDe=p=>(p.nombre||"").trim()||rolDe(p).n;
+const cap=s=>s?s.charAt(0).toUpperCase()+s.slice(1):s;
+function fmtRel(ts){ if(!ts) return ""; const d=(Date.now()-ts)/1000;
+  if(d<60) return "ahora"; if(d<3600) return "hace "+Math.floor(d/60)+" min"; if(d<86400) return "hace "+Math.floor(d/3600)+" h";
+  if(d<86400*14) return "hace "+Math.floor(d/86400)+" días"; return fmtFecha(ts,false); }
+function fmtFecha(ts,hora=true){ const o={day:"numeric",month:"short"}; if(hora){o.hour="numeric";o.minute="2-digit";} return new Date(ts).toLocaleString("es-MX",o).replace(/\./g,""); }
+function toast(t){ const e=$("#toast"); e.textContent=t; e.classList.add("on"); clearTimeout(e._t); e._t=setTimeout(()=>e.classList.remove("on"),2200); }
+function show(id){ $("#"+id).classList.add("open"); }
+function hide(id){ $("#"+id).classList.remove("open"); }
+function getSuc(){ return SUCURSALES.find(s=>s.id===config.sucursal)||SUCURSALES[1]; }
+function getTel(){ const s=getSuc(); return s.tels[Math.min(config.telIdx||0,s.tels.length-1)]; }
+function fmtTel(t){ return t.replace(/(\d{3})(\d{3})(\d{2})(\d{2})/,"$1 $2 $3 $4"); }
+// api.whatsapp.com directo: el redirect de wa.me rompe los emojis (salen como �) — RLR
+function waLink(tel,text){ return "https://api.whatsapp.com/send?phone=52"+tel+"&text="+encodeURIComponent(text); }
+
+function normPersona(p){ p=p||{}; return {id:p.id||uid(),rol:p.rol||"otro",nombre:p.nombre||"",masa:p.masa||"harina",
+  gorditas:toArr(p.gorditas).map(l=>({guiso:l.guiso,masa:l.masa||"harina",cant:+l.cant||1,detalle:l.detalle||""})),
+  bebidas:toArr(p.bebidas).map(l=>({nombre:l.nombre,cant:+l.cant||1,detalle:l.detalle||""})),
+  postres:toArr(p.postres).map(l=>({nombre:l.nombre,cant:+l.cant||1})),
+  chilaquiles:p.chilaquiles?{salsa:p.chilaquiles.salsa||"",queso:p.chilaquiles.queso||"",extras:toArr(p.chilaquiles.extras),guiso:p.chilaquiles.guiso||"",cant:+p.chilaquiles.cant||1}:null}; }
+function normCard(c){ c=c||{}; return Object.assign({},c,{id:c.id,familia:c.familia||"",estado:c.estado||"armando",notas:c.notas||"",listo:!!c.listo,
+  creado:c.creado||Date.now(),actualizado:c.actualizado||c.creado||Date.now(),personas:toArr(c.personas).map(normPersona)}); }
+
+/* ---------- persistencia (local + Firebase) — RLR ---------- */
+function cacheLocal(){ if(!SLUG) return; try{ localStorage.setItem("ranitas-pedidos-"+SLUG,JSON.stringify(pedidos)); localStorage.setItem("ranitas-config-"+SLUG,JSON.stringify(config)); }catch(e){} }
+function saveMine(){ localStorage.setItem("ranitas-mine",JSON.stringify([...mine])); }
+function saveCard(card,silent){ card.actualizado=Date.now(); card._w=SID; pedidos[card.id]=card; cacheLocal();
+  if(db) db.ref(PATH+"/pedidos/"+card.id).set(clone(card)).catch(()=>{});
+  if(!silent) renderBoard(); }
+function deleteCard(id){ delete pedidos[id]; cacheLocal(); if(db) db.ref(PATH+"/pedidos/"+id).remove().catch(()=>{}); renderBoard(); }
+function saveConfig(){ cacheLocal(); if(db) db.ref(PATH+"/config").set(clone(config)).catch(()=>{}); renderHeader(); }
+function queueSave(){ ui.lastLocalEdit=Date.now(); touchPresence(); clearTimeout(saveTimer); saveTimer=setTimeout(()=>{ if(ui.draft) saveCard(ui.draft); },120); }
+
+/* ---------- presencia en vivo (quién está escribiendo / quién está viendo) — RLR ---------- */
+function presRef(){ return (db&&ui.editing)?db.ref(PATH+"/presence/"+ui.editing+"/"+SID):null; }
+function setPresence(){ const r=presRef(); if(!r) return; r.set({ts:Date.now(),fam:(ui.draft&&ui.draft.familia)||""}).catch(()=>{}); r.onDisconnect().remove(); }
+function touchPresence(){ const now=Date.now(); if(now-presTimer<700) return; presTimer=now; setPresence(); }
+function clearPresence(id){ if(db&&id) db.ref(PATH+"/presence/"+id+"/"+SID).remove().catch(()=>{}); }
+function heartbeat(){ if(!db) return; const r=db.ref(PATH+"/online/"+SID); r.set({ts:Date.now()}).catch(()=>{}); r.onDisconnect().remove(); }
+function typingOn(id){ const p=ui.presence[id]||{}; const now=Date.now();
+  return Object.keys(p).filter(k=>k!==SID&&now-(p[k].ts||0)<6000).map(k=>p[k]); }
+function onlineCount(){ const now=Date.now(); return Object.values(ui.online).filter(o=>now-(o.ts||0)<3*60000).length; }
+
+function initFirebase(){
+  try{ firebase.initializeApp(FIREBASE_CONFIG); db=firebase.database(); }catch(e){ db=null; renderHeader(); return; }
+  db.ref(".info/connected").on("value",s=>{ online=!!s.val(); if(online&&SLUG){ heartbeat(); if(ui.editing) setPresence(); } renderHeader(); });
+  if(!SLUG){ renderHome(); return; }
+  db.ref(ROOT+"/anfitriones/"+SLUG).once("value").then(s=>{
+    const a=s.val();
+    if(!a){ renderNotFound(); return; }
+    ui.anf=a; recordarTablero(SLUG,a.nombre);
+    const hq=QS.get("host"); if(hq!=null&&(hq===""||hq==="1"||digits(hq)===digits(a.tel))&&(hq!==""&&hq!=="1"||SLUG==="familia-lopez-acosta")){ activarHost(); }
+    if(QS.has("host")) history.replaceState(null,"",location.pathname+(LOCAL?"?t="+SLUG:""));
+    if(!config.anfitrion||config.anfitrion==="Ricardo"&&SLUG!=="familia-lopez-acosta") config.anfitrion=a.nombre;
+    if(!config.telAnfitrion) config.telAnfitrion=a.tel||"";
+    renderHeader(); renderBoard(); attachBoard();
+  }).catch(()=>{ attachBoard(); });
+}
+function attachBoard(){
+  // Transición de la liga vieja (github.io): mientras alguien siga con la versión anterior abierta, sus cambios se recogen de la ruta antigua — RLR
+  if(SLUG==="familia-lopez-acosta"&&db){ db.ref(ROOT+"/pedidos").once("value").then(s=>{ const v=s.val()||{}; Object.keys(v).forEach(k=>{ const old=normCard(Object.assign({id:k},v[k])); const cur=pedidos[k]; if(!cur||(old.actualizado||0)>(cur.actualizado||0)+1000){ db.ref(PATH+"/pedidos/"+k).set(clone(old)).catch(()=>{}); } }); }).catch(()=>{}); }
+  try{
+    db.ref(PATH+"/presence").on("value",s=>{ ui.presence=s.val()||{}; renderBoard(); });
+    db.ref(PATH+"/online").on("value",s=>{ ui.online=s.val()||{}; renderHeader(); });
+    setInterval(heartbeat,45000);
+    db.ref(PATH+"/config").on("value",s=>{ const v=s.val(); if(v) config=Object.assign({},config,v); else db.ref(PATH+"/config").set(clone(config)).catch(()=>{}); cacheLocal(); renderHeader(); if($("#mCfg").classList.contains("open")) renderCfg(); });
+    db.ref(PATH+"/pedidos").on("value",s=>{
+      const v=s.val()||{}; const next={};
+      Object.keys(v).forEach(k=>{ next[k]=normCard(Object.assign({id:k},v[k])); });
+      if(ui.editing&&ui.draft){
+        const rem=next[ui.editing];
+        // Otra pantalla cambió la tarjeta que tengo abierta y yo llevo >1.2 s sin teclear: adopto su versión sin perder el foco.
+        if(rem&&rem._w&&rem._w!==SID&&Date.now()-ui.lastLocalEdit>1200&&JSON.stringify(rem)!==JSON.stringify(ui.draft)){ ui.draft=clone(rem); ui.draft.listo=false; renderEditor(); }
+        else next[ui.editing]=ui.draft;   // mi borrador manda mientras escribo
+      }
+      pedidos=next; cacheLocal(); renderBoard();
+      // Limpieza automática (solo anfitrión): lo entregado hace más de 12 h se va al historial solo
+      if(host){ const lim=Date.now()-12*3600e3; Object.values(pedidos).filter(c=>c.estado==="entregado"&&(c.entregadoEn||0)<lim).forEach(c=>marcar(c.id,"archivado")); }
+    });
+  }catch(e){ renderHeader(); }
+}
+
+/* ---------- home: crear tablero de anfitrión / entrar a uno — RLR ---------- */
+function visitados(){ try{ return JSON.parse(localStorage.getItem("ranitas-visitados")||"[]"); }catch(e){ return []; } }
+function recordarTablero(sl,nombre){ const v=visitados().filter(x=>x.slug!==sl); v.unshift({slug:sl,nombre:nombre||sl,ts:Date.now()}); localStorage.setItem("ranitas-visitados",JSON.stringify(v.slice(0,8))); }
+function renderHome(){
+  document.body.classList.add("is-home");
+  const v=visitados();
+  $("#home").innerHTML=`
+  <section class="hero"><div class="hero-frog">🐸</div><h1><b>Ranitas</b> · Pedidos en familia</h1>
+    <p>Cada anfitrión tiene su propio tablero con su liga. Las familias entran, arman su pedido y el anfitrión manda todo junto por WhatsApp a la sucursal.</p></section>
+  ${v.length?`<section class="hcard"><h2>🏠 Tus tableros</h2><div class="famlist">${v.map(x=>`<button data-a="ir" data-v="${esc(x.slug)}"><b>${esc(x.nombre)}</b><span>${esc(APP_URL.replace("https://","")+x.slug)}</span></button>`).join("")}</div></section>`:""}
+  <section class="hcard"><h2>✨ Crear mi tablero</h2>
+    <label class="f">Nombre del anfitrión (así saldrá en el mensaje)<input id="hNombre" placeholder="Familia López Acosta · Ricardo" autocomplete="off"></label>
+    <label class="f">Celular del anfitrión<input id="hTel" placeholder="871 000 00 00" inputmode="tel"></label>
+    <label class="f">Tu liga<div class="slugrow"><span>${esc(APP_URL.replace("https://",""))}</span><input id="hSlug" placeholder="familia-lopez-acosta" autocomplete="off" spellcheck="false"></div></label>
+    <div id="hMsg" class="hmsg"></div>
+    <button class="btn p big" data-a="crearTablero">🐸 Crear mi tablero</button>
+    <p class="hnote">La liga se queda para siempre con el historial de lo que pidió cada familia. Con tu celular activas el modo anfitrión en cualquier otro dispositivo.</p></section>
+  <section class="hcard"><h2>🔗 Ya tengo una liga</h2>
+    <label class="f">Pega la liga que te pasaron<input id="hEntrar" placeholder="ranita.capitaltorreon.com/familia-…" autocomplete="off" spellcheck="false"></label>
+    <button class="btn y big" data-a="entrarTablero">Entrar al tablero</button></section>
+  <p class="hfoot">Gorditas Ranitas · Torreón · ${SUCURSALES.map(x=>x.n).join(" · ")}</p>`;
+  $("#home").hidden=false;
+}
+function renderNotFound(){
+  document.body.classList.add("is-home");
+  $("#home").innerHTML=`<section class="hero"><div class="hero-frog">🐸</div><h1>Este tablero no existe</h1><p>La liga <b>${esc(APP_URL.replace("https://","")+SLUG)}</b> todavía no está creada. Revisa que esté bien escrita o créala tú.</p>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px"><button class="btn p big" style="width:auto" data-a="ir" data-v="">🏠 Ir al inicio</button></div></section>`;
+  $("#home").hidden=false;
+}
+let slugTocado=false;
+document.addEventListener("input",e=>{ if(e.target.id==="hNombre"&&!slugTocado){ $("#hSlug").value=slugify(e.target.value); } if(e.target.id==="hSlug"){ slugTocado=true; const v=slugify(e.target.value); if(v!==e.target.value) e.target.value=v; } });
+async function crearTablero(){
+  const nombre=($("#hNombre").value||"").trim(), tel=digits($("#hTel").value), sl=slugify($("#hSlug").value); const m=$("#hMsg");
+  if(nombre.length<2) return m.textContent="Pon el nombre del anfitrión.";
+  if(tel.length<10) return m.textContent="Pon un celular de 10 dígitos.";
+  if(sl.length<3) return m.textContent="La liga necesita al menos 3 letras.";
+  if(!db) return m.textContent="Sin conexión. Intenta de nuevo.";
+  m.textContent="Revisando la liga…";
+  const ref=db.ref(ROOT+"/anfitriones/"+sl); const ex=(await ref.once("value")).val();
+  if(ex){ m.innerHTML=`Esa liga ya la tiene <b>${esc(ex.nombre)}</b>. ${digits(ex.tel)===tel?`Es tu celular: <button class="btn y" data-a="irHost" data-v="${esc(sl)}">entrar como anfitrión</button>`:"Prueba otra, por ejemplo <b>"+esc(sl)+"-"+tel.slice(-2)+"</b>."}`; return; }
+  await ref.set({nombre,tel,slug:sl,creado:Date.now()});
+  await db.ref(ROOT+"/tableros/"+sl+"/config").set({sucursal:"vinedos",telIdx:0,anfitrion:nombre,telAnfitrion:tel,direccion:"",entrega:"",pago:"efectivo",pagoCon:"",cierre:"",precioG:"",precioCh:"",precioB:"",precioPo:""});
+  localStorage.setItem("ranitas-host-"+sl,"1"); recordarTablero(sl,nombre);
+  m.textContent="¡Listo! Abriendo tu tablero…"; goTo(sl);
+}
+function entrarTablero(){ const raw=($("#hEntrar").value||"").trim(); const sl=slugify(raw.replace(/^https?:\/\//,"").replace(/^[^/]*\//,"").split(/[?#]/)[0].split("/").filter(Boolean).pop()||raw); if(sl.length<3){ toast("Pega la liga completa"); return; } goTo(sl); }
+
+/* ---------- cálculos ---------- */
+function personLines(p){ const L=[];
+  p.gorditas.forEach(l=>L.push(l.cant+" "+l.guiso+(l.detalle?" ("+l.detalle+")":"")+" · "+(l.masa==="maiz"?"maíz":"harina")));
+  if(p.chilaquiles){ const c=p.chilaquiles;
+    const ex=(c.extras||[]).map(x=>x==="Guiso favorito"?(c.guiso?"guiso de "+c.guiso.toLowerCase():"guiso favorito"):x.toLowerCase());
+    L.push((c.cant>1?c.cant+" ":"")+"Chilaquiles"+(c.salsa?" salsa "+c.salsa.toLowerCase():" (falta salsa)")+(c.queso?" · queso "+c.queso.toLowerCase():" · (falta queso)")+(ex.length?" + "+ex.join(" + "):"")); }
+  p.bebidas.forEach(l=>L.push(l.cant+" "+l.nombre+(l.detalle?" ("+l.detalle+")":"")));
+  p.postres.forEach(l=>L.push(l.cant+" "+l.nombre));
+  return L; }
+function totales(c){ const t={g:0,h:0,m:0,ch:0,b:0,po:0,per:0};
+  c.personas.forEach(p=>{ if(personLines(p).length) t.per++;
+    p.gorditas.forEach(l=>{ t.g+=l.cant; if(l.masa==="maiz") t.m+=l.cant; else t.h+=l.cant; });
+    if(p.chilaquiles) t.ch+=p.chilaquiles.cant||1; p.bebidas.forEach(l=>t.b+=l.cant); p.postres.forEach(l=>t.po+=l.cant); });
+  return t; }
+function totStr(t){ const s=[]; if(t.g) s.push("🫓 "+t.g+" gordita"+(t.g>1?"s":"")+" ("+t.h+"H · "+t.m+"M)");
+  if(t.ch) s.push("🍳 "+t.ch); if(t.b) s.push("☕ "+t.b); if(t.po) s.push("🍰 "+t.po); return s.length?s.join("  ·  "):"Sin nada todavía"; }
+function totCorto(t){ const s=[]; if(t.g) s.push(t.g+" gordita"+(t.g>1?"s":"")); if(t.ch) s.push(t.ch+" chilaquiles"); if(t.b) s.push(t.b+" bebida"+(t.b>1?"s":"")); if(t.po) s.push(t.po+" postre"+(t.po>1?"s":"")); return s.join(" · "); }
+// Precios opcionales (⚙️): si Ricardo los captura, se estima cuánto es por familia y en total — RLR
+const num=v=>{ const x=parseFloat(String(v||"").replace(/[^0-9.]/g,"")); return isNaN(x)?0:x; };
+function hayPrecios(){ return num(config.precioG)>0||num(config.precioCh)>0||num(config.precioB)>0||num(config.precioPo)>0; }
+function costo(c){ if(!hayPrecios()) return null; const t=totales(c); return t.g*num(config.precioG)+t.ch*num(config.precioCh)+t.b*num(config.precioB)+t.po*num(config.precioPo); }
+const money=x=>"$"+Math.round(x).toLocaleString("es-MX");
+function cierreInfo(){ const c=(config.cierre||"").trim(); const m=/^(\d{1,2}):(\d{2})$/.exec(c); if(!m) return null;
+  const d=new Date(); d.setHours(+m[1],+m[2],0,0); const diff=Math.round((d-Date.now())/60000);
+  const hora=d.toLocaleTimeString("es-MX",{hour:"numeric",minute:"2-digit"}).replace(/\./g,"");
+  return {hora,min:diff,pasado:diff<0}; }
+function beep(){ try{ const A=new (window.AudioContext||window.webkitAudioContext)(); const o=A.createOscillator(), g=A.createGain(); o.connect(g); g.connect(A.destination); o.frequency.value=880; g.gain.value=.08; o.start(); o.frequency.setValueAtTime(1175,A.currentTime+.09); o.stop(A.currentTime+.18); }catch(e){} }
+function pagoStr(){ const p=config.pago||"efectivo"; const con=num(config.pagoCon); return p==="efectivo"?"Efectivo"+(con?" · pago con "+money(con)+" (favor de traer cambio)":""):p==="transferencia"?"Transferencia":"Tarjeta (favor de traer terminal)"; }
+
+/* ---------- mensaje de WhatsApp — RLR ---------- */
+function buildMessage(cards){
+  const suc=getSuc(); const L=[];
+  L.push("🐸 *PEDIDO RANITAS GORDITAS*");
+  L.push("📍 Suc. "+suc.n+" · "+fmtFecha(Date.now()));
+  if(config.anfitrion) L.push("👤 "+config.anfitrion+(config.telAnfitrion?" · "+config.telAnfitrion:""));
+  if(config.direccion) L.push("🏠 Entregar en: "+config.direccion);
+  L.push("⏰ Para: "+((config.entrega||"").trim()||"lo antes posible"));
+  L.push("💵 Pago: "+pagoStr());
+  const T={g:0,h:0,m:0,ch:0,b:0,po:0}; cards.forEach(c=>{ const t=totales(c); Object.keys(T).forEach(k=>T[k]+=t[k]); });
+  L.push("📦 *Total: "+(totCorto(T)||"sin productos")+"*"+(cards.length>1?" · "+cards.length+" familias":""));
+  L.push("");
+  const kit={}, beb={}, pos={}; let ch=0, g=0, h=0, m=0, costoTotal=0;
+  cards.forEach(c=>{
+    L.push("👨‍👩‍👧‍👦 *FAMILIA "+(c.familia||"SIN NOMBRE").toUpperCase()+"*");
+    c.personas.forEach(p=>{ const lines=personLines(p); if(!lines.length) return;
+      L.push("• *"+nombreDe(p)+"*"+(p.nombre?" ("+rolDe(p).n.toLowerCase()+")":""));
+      lines.forEach(l=>L.push("    "+l));
+      p.gorditas.forEach(l=>{ const k=l.guiso+(l.detalle?" ("+l.detalle+")":""); kit[k]=kit[k]||{h:0,m:0}; kit[k][l.masa==="maiz"?"m":"h"]+=l.cant; g+=l.cant; if(l.masa==="maiz") m+=l.cant; else h+=l.cant; });
+      if(p.chilaquiles) ch+=p.chilaquiles.cant||1;
+      p.bebidas.forEach(l=>{ const k=l.nombre+(l.detalle?" ("+l.detalle+")":""); beb[k]=(beb[k]||0)+l.cant; });
+      p.postres.forEach(l=>{ pos[l.nombre]=(pos[l.nombre]||0)+l.cant; });
+    });
+    if(c.notas) L.push("    📝 "+c.notas);
+    const $c=costo(c); if($c!=null){ costoTotal+=$c; L.push("    💰 aprox. "+money($c)); }
+    L.push("");
+  });
+  L.push("🧮 *RESUMEN PARA COCINA*");
+  if(g) L.push("🫓 Gorditas: "+g+" ("+h+" harina · "+m+" maíz)");
+  Object.keys(kit).sort((a,b)=>(kit[b].h+kit[b].m)-(kit[a].h+kit[a].m)||a.localeCompare(b)).forEach(k=>{ const v=kit[k]; const parts=[]; if(v.h) parts.push(v.h+" harina"); if(v.m) parts.push(v.m+" maíz"); L.push("    · "+k+": "+parts.join(", ")); });
+  if(ch) L.push("🍳 Chilaquiles: "+ch);
+  const bk=Object.keys(beb); if(bk.length) L.push("☕ Bebidas: "+bk.reduce((a,k)=>a+beb[k],0)+" ("+bk.map(k=>beb[k]+" "+k.toLowerCase()).join(", ")+")");
+  const pk=Object.keys(pos); if(pk.length) L.push("🍰 Postres: "+pk.reduce((a,k)=>a+pos[k],0)+" ("+pk.map(k=>pos[k]+" "+k.toLowerCase()).join(", ")+")");
+  if(hayPrecios()) L.push("💰 Total aprox.: "+money(costoTotal));
+  L.push("");
+  L.push("¡Gracias! 🐸");
+  return L.join("\n");
+}
+
+/* ---------- header ---------- */
+function renderHeader(){
+  $("#dot").className="dot"+(online?" on":""); $("#dot").title=online?"Sincronizado en vivo":"Sin conexión (guardado local)";
+  if(SLUG&&ui.anf){ $("#bar").hidden=false; $("#bar").innerHTML=`<span>🏠 Tablero de <b>${esc(ui.anf.nombre)}</b>${host?` <span class="b tuyo">anfitrión</span>`:""}</span><button class="linkbtn" data-a="copiarLiga" title="Copiar liga">🔗 ${esc(APP_URL.replace("https://",""))}${esc(SLUG)}</button>`; }
+  const n=onlineCount(); $("#online").innerHTML=online?(n>1?"👀 "+n+"<span class=\"long\"> en línea</span>":"👀<span class=\"long\"> solo tú</span>"):"<span class=\"long\">sin conexión</span>";
+  $("#sucSel").innerHTML=SUCURSALES.map(s=>`<option value="${s.id}"${s.id===config.sucursal?" selected":""}>📍 ${s.n}</option>`).join("");
+  const s=getSuc(); const idx=Math.min(config.telIdx||0,s.tels.length-1);
+  $("#btnCall").href="tel:+52"+getTel();
+  $("#sucTel").innerHTML="📲 "+(s.tels.length>1?`<select id="telSel">${s.tels.map((t,i)=>`<option value="${i}"${i===idx?" selected":""}>${fmtTel(t)}</option>`).join("")}</select>`:fmtTel(s.tels[0]));
+}
+$("#sucSel").addEventListener("change",e=>{ config.sucursal=e.target.value; config.telIdx=0; saveConfig(); toast("Sucursal: "+getSuc().n+" · "+fmtTel(getTel())); });
+$("#sucTel").addEventListener("change",e=>{ if(e.target.id==="telSel"){ config.telIdx=+e.target.value; saveConfig(); } });
+
+/* ---------- tablero ---------- */
+const sorters={armando:(a,b)=>a.creado-b.creado,pedido:(a,b)=>(b.pedidoEn||0)-(a.pedidoEn||0),entregado:(a,b)=>(b.entregadoEn||0)-(a.entregadoEn||0),archivado:(a,b)=>(b.archivadoEn||0)-(a.archivadoEn||0)};
+function cardsIn(est){ return Object.values(pedidos).filter(c=>c.estado===est).sort(sorters[est]); }
+function renderBoard(){
+  // ¿Qué cambió desde el último render? (solo brillan los cambios que vienen de OTRA pantalla)
+  const snap={}; const now=Date.now(); ui.flash=ui.flash||{};
+  Object.keys(ui.flash).forEach(k=>{ if(now-ui.flash[k].ts>1800) delete ui.flash[k]; });   // el destello dura 1.8 s aunque haya otros renders
+  Object.values(pedidos).forEach(c=>{ const per={}; c.personas.forEach(p=>per[p.id]=nombreDe(p)+"|"+personLines(p).join("|")); snap[c.id]={j:JSON.stringify(c),per,listo:c.listo,estado:c.estado};
+    const prev=prevSnap[c.id]; if(firstRender||c._w===SID) return;
+    // Aviso al anfitrión: una familia acaba de dar "Listo" (o llegó una familia nueva)
+    if(host&&c.estado==="armando"){ if(prev&&!prev.listo&&c.listo){ toast("✅ Familia "+(c.familia||"sin nombre")+" ya quedó"); beep(); } else if(!prev){ toast("🐸 Familia "+(c.familia||"nueva")+" está armando su pedido"); } }
+    if(!prev){ ui.flash[c.id]={card:true,per:{},ts:now}; return; }
+    if(prev.j!==snap[c.id].j){ const f=ui.flash[c.id]||{card:true,per:{}}; f.card=true; f.ts=now; Object.keys(per).forEach(k=>{ if(prev.per[k]!==per[k]) f.per[k]=true; }); ui.flash[c.id]=f; } });
+  prevSnap=snap; firstRender=false;
+  const counts={}; ESTADOS.forEach(e=>counts[e.id]=cardsIn(e.id).length);
+  const arm=cardsIn("armando"), listas=arm.filter(c=>c.listo).length;
+  document.title=(arm.length?"("+listas+"/"+arm.length+") ":"")+"Ranitas · Pedidos";
+  $("#tabs").innerHTML=ESTADOS.map(e=>`<button class="tab${ui.tab===e.id?" on":""}" data-a="tab" data-v="${e.id}">${e.e} ${e.n}<span class="n">${counts[e.id]}</span></button>`).join("");
+  $("#board").innerHTML=ESTADOS.map(e=>{
+    const cards=cardsIn(e.id);
+    let tools="";
+    if(e.id==="armando"){
+      const hint=localStorage.getItem("ranitas-hint")?"":`<div class="hint">🐸 <div>${host?`<b>Modo anfitrión.</b> Comparte la liga 🔗, espera los ✅ de cada familia y manda todo junto por WhatsApp.`:`<b>¿Cómo funciona?</b> Toca <b>+ Pedido de familia</b>, pon a cada quien con sus gorditas y dale <b>Listo</b>. ${esc(config.anfitrion||"El anfitrión")} manda todo junto a la sucursal por WhatsApp.`}</div><button data-a="hideHint" title="Cerrar">✕</button></div>`;
+      const ci=cierreInfo(); const cierre=ci?`<div class="cierre${ci.pasado?" past":""}">⏰ ${ci.pasado?`Los pedidos cerraron a las ${ci.hora}`:`Cierre de pedidos a las ${ci.hora} · <b>${ci.min<60?"quedan "+ci.min+" min":"quedan "+Math.floor(ci.min/60)+" h "+(ci.min%60)+" min"}</b>`}</div>`:"";
+      tools=`<div class="col-tools">${hint}${cierre}<button class="btn y big" data-a="nuevo">➕ Pedido de familia</button>
+        ${host?`<button class="btn wa big" data-a="enviarTodo" ${cards.length?"":"disabled"}>📲 Mandar todo por WhatsApp <span class="sm">· ${listas} de ${cards.length} lista${cards.length===1?"":"s"} · Suc. ${esc(getSuc().n)}</span></button>`:""}</div>`;
+    }
+    if(e.id==="pedido"&&cards.length){ tools=`<div class="col-tools"><button class="btn big" data-a="reparto" data-v="todos">📋 Lista de reparto <span class="sm">· para entregar a cada quien cuando llegue</span></button>${host?`<button class="btn p big" data-a="llegoTodo">🛵 Llegó todo <span class="sm">· marcar ${cards.length} como entregado${cards.length===1?"":"s"}</span></button>`:""}</div>`; }
+    if(e.id==="archivado"){ const top=topGuisos(); if(top.length) tools=`<div class="hint" style="margin-bottom:10px">🏆 <div><b>Lo más pedido:</b> ${esc(top.map(x=>x[0]+" ("+x[1]+")").join(" · "))}</div></div>`; }
+    return `<section class="col${ui.tab===e.id?" on":""}" data-col="${e.id}">
+      <div class="col-head"><span>${e.e} ${e.n}<span class="n">${cards.length}</span></span></div>${tools}
+      <div class="cards">${cards.length?cards.map(cardHTML).join(""):emptyHTML(e.id)}</div></section>`;
+  }).join("");
+}
+function topGuisos(){ const m={}; Object.values(pedidos).filter(c=>c.estado==="archivado"||c.estado==="entregado").forEach(c=>c.personas.forEach(p=>p.gorditas.forEach(l=>{ m[l.guiso]=(m[l.guiso]||0)+l.cant; })));
+  return Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,3); }
+function emptyHTML(est){ const t={armando:["🫓","Nadie está armando pedido.<br>Toca <b>+ Pedido de familia</b>."],pedido:["📲","Aquí aparecen los pedidos ya mandados a la sucursal."],entregado:["🛵","Cuando lleguen las gorditas, márcalas como entregadas."],archivado:["📚","El historial guarda los pedidos para repetirlos en la próxima invitación."]}[est];
+  return `<div class="empty"><span>${t[0]}</span>${t[1]}</div>`; }
+function cardHTML(c){
+  const t=totales(c); const suc=SUCURSALES.find(s=>s.id===c.sucursal);
+  const badges=[]; const typing=typingOn(c.id); const fl=(ui.flash||{})[c.id]||{per:{}};
+  if(typing.length) badges.push(`<span class="b live">✏️ ${esc((typing[0].fam||c.familia)?"Familia "+(typing[0].fam||c.familia):"Alguien")} está escribiendo…</span>`);
+  else if(c.estado==="armando") badges.push(c.listo?`<span class="b ok">✅ Listo</span>`:`<span class="b wip">✏️ Armando…</span>`);
+  if(c.estado==="pedido") badges.push(`<span class="b ok">📲 Pedido ${fmtFecha(c.pedidoEn)}</span>`);
+  if(c.estado==="entregado") badges.push(`<span class="b ok">🛵 Entregado ${fmtFecha(c.entregadoEn)}</span>`);
+  if(c.estado==="archivado") badges.push(`<span class="b">📚 ${fmtFecha(c.pedidoEn||c.archivadoEn||c.creado,false)}</span>`);
+  if(suc&&c.estado!=="armando") badges.push(`<span class="b suc">📍 ${esc(suc.n)}</span>`);
+  if(mine.has(c.id)) badges.push(`<span class="b tuyo">tu pedido</span>`);
+  const persons=c.personas.map(p=>{ const L=personLines(p); const f=fl.per[p.id]; return `<div class="pl${f?" flash":""}">${rolDe(p).e} <b>${esc(nombreDe(p))}</b>: ${L.length?`<span class="l">${esc(L.join(" · "))}</span>`:"<i>sin nada aún</i>"}${f&&typing.length?`<span class="caret">▍</span>`:""}</div>`; }).join("")||`<div class="pl"><i>Sin personas todavía</i></div>`;
+  const H=host, M=mine.has(c.id);
+  const A={
+    armando:`<button class="btn y" data-a="edit" data-id="${c.id}">✏️ Editar</button>${H?`<button class="btn wa" data-a="enviarUno" data-id="${c.id}">📲</button><button class="btn p" data-a="marcar" data-id="${c.id}" data-v="pedido">✅ Ya se pidió</button>`:""}${H||M?`<button class="btn r" data-a="del" data-id="${c.id}">🗑</button>`:""}`,
+    pedido:`<button class="btn" data-a="reparto" data-id="${c.id}">📋 Reparto</button>${H?`<button class="btn" data-a="verMsg" data-id="${c.id}">📄</button><button class="btn p" data-a="marcar" data-id="${c.id}" data-v="entregado">🛵 Entregado</button><button class="btn ghost" data-a="marcar" data-id="${c.id}" data-v="armando">↩︎</button>`:""}`,
+    entregado:`<button class="btn" data-a="reparto" data-id="${c.id}">📋 Reparto</button><button class="btn y" data-a="repetir" data-id="${c.id}">🔁 Repetir</button>${H?`<button class="btn p" data-a="marcar" data-id="${c.id}" data-v="archivado">📦 Archivar</button><button class="btn ghost" data-a="marcar" data-id="${c.id}" data-v="pedido">↩︎</button>`:""}`,
+    archivado:`<button class="btn y" data-a="repetir" data-id="${c.id}">🔁 Repetir este pedido</button>${H?`<button class="btn r" data-a="del" data-id="${c.id}">🗑</button>`:""}`
+  }[c.estado];
+  const $c=costo(c);
+  return `<article class="card${mine.has(c.id)?" mine":""}${fl.card?" flash":""}${typing.length?" typing":""}">
+    <div class="card-top"><h3>Familia ${esc(c.familia||"sin nombre")}${fl.card&&typing.length&&!Object.keys(fl.per).length?`<span class="caret">▍</span>`:""}</h3><span class="when">${typing.length?"en vivo":fmtRel(c.actualizado)}</span></div>
+    <div class="badges">${badges.join("")}</div>
+    <div class="persons">${persons}</div>
+    ${c.notas?`<div class="notas">📝 ${esc(c.notas)}</div>`:""}
+    <div class="tot">${esc(totStr(t))}${$c!=null?`<span>💰 aprox. ${money($c)}</span>`:""}</div>
+    <div class="acts">${A}</div></article>`;
+}
+
+/* ---------- crear / clonar ---------- */
+function nuevaPersona(rol){ return normPersona({rol,masa:"harina"}); }
+function crearPedido(from){
+  const c=from?normCard(clone(from)):normCard({familia:"",personas:[nuevaPersona("papa"),nuevaPersona("mama")]});
+  c.id=uid(); c.estado="armando"; c.listo=false; c.creado=Date.now(); c.actualizado=c.creado;
+  delete c.pedidoEn; delete c.entregadoEn; delete c.archivadoEn; delete c.mensaje; delete c.sucursal; delete c.tel;
+  c.personas.forEach(p=>p.id=uid());
+  mine.add(c.id); saveMine(); saveCard(c); ui.tab="armando"; openEditor(c.id);
+  if(from) toast("Pedido copiado de Familia "+(from.familia||"sin nombre")+". Ajusta lo que cambie.");
+}
+function familiasHistorial(){ const m={};
+  Object.values(pedidos).filter(c=>c.estado!=="armando").forEach(c=>{ const k=(c.familia||"").trim().toLowerCase(); if(!k) return; const ts=c.pedidoEn||c.actualizado; if(!m[k]||ts>m[k].ts) m[k]={c,ts}; });
+  return Object.values(m).sort((a,b)=>b.ts-a.ts).map(x=>x.c); }
+function openNuevo(){
+  const fams=familiasHistorial();
+  $("#nuevoBody").innerHTML=`<button class="btn y big" data-a="crear">✨ Familia nueva (empezar de cero)</button>
+    ${fams.length?`<label class="f">O repite un pedido anterior — solo ajustas lo que cambie:</label><div class="famlist">${fams.map(c=>{ const t=totales(c); return `<button data-a="repetir" data-id="${c.id}"><b>🔁 Familia ${esc(c.familia)}</b><span>${esc(c.personas.map(nombreDe).join(", "))}</span><span>${esc(totStr(t))} · ${fmtRel(c.pedidoEn||c.actualizado)}</span></button>`; }).join("")}</div>`:`<p style="color:var(--mut);font-weight:700;margin-top:14px">Cuando un pedido se marque como entregado o archivado, aparecerá aquí para repetirlo con un toque.</p>`}`;
+  show("mNuevo");
+}
+
+/* ---------- editor — RLR ---------- */
+function openEditor(id){ const c=pedidos[id]; if(!c) return; ui.editing=id; ui.draft=clone(c); ui.draft.listo=false; ui.open={}; ui.dupIgnorado=false; ui.lastLocalEdit=0; $("#edBody").scrollTop=0; renderEditor(); $("#edBody").scrollTop=0; show("mEditor"); presTimer=0; setPresence();
+  if(!ui.draft.familia){ setTimeout(()=>{ const i=$("#edBody input[data-in=familia]"); if(i) i.focus(); },150); } }
+// Revisión antes de "Listo": lo que la cocina o el repartidor van a preguntar, mejor resolverlo aquí — RLR
+function validarDraft(d){ const err=[]; const vacios=[];
+  if(!(d.familia||"").trim()) err.push("Ponle nombre a la familia.");
+  d.personas.forEach(p=>{ const n=nombreDe(p);
+    if(!personLines(p).length){ vacios.push(p); return; }
+    p.gorditas.forEach(l=>{ if(l.guiso==="Combinada"&&!(l.detalle||"").trim()) err.push(n+": ¿la combinada de qué es?"); });
+    p.bebidas.forEach(l=>{ if(l.nombre==="Refresco"&&!(l.detalle||"").trim()) err.push(n+": ¿qué refresco?"); });
+    if(p.chilaquiles){ if(!p.chilaquiles.salsa) err.push(n+": falta la salsa de los chilaquiles."); if(!p.chilaquiles.queso) err.push(n+": falta el queso de los chilaquiles."); if(p.chilaquiles.extras.includes("Guiso favorito")&&!p.chilaquiles.guiso) err.push(n+": ¿qué guiso llevan los chilaquiles?"); } });
+  return {err,vacios}; }
+function closeEditor(listo){ if(!ui.draft) return; clearTimeout(saveTimer);
+  const d=ui.draft; d.familia=(d.familia||"").trim(); const id=ui.editing;
+  if(listo){ const v=validarDraft(d);
+    if(v.err.length){ toast("⚠️ "+v.err[0]); if(!d.familia){ const i=$("#edBody input[data-in=familia]"); if(i) i.focus(); } return; }
+    if(v.vacios.length===d.personas.length&&d.personas.length){ toast("⚠️ Nadie tiene nada todavía"); return; }
+    if(v.vacios.length){ const nombres=v.vacios.map(nombreDe).join(", "); if(confirm(nombres+(v.vacios.length>1?" no tienen":" no tiene")+" nada en el pedido. ¿Quitarlos?")) d.personas=d.personas.filter(p=>!v.vacios.includes(p)); }
+  }
+  d.listo=!!listo;
+  ui.editing=null; ui.draft=null; saveCard(d); hide("mEditor"); clearPresence(id);
+  if(listo) toast("¡Listo! Pedido de Familia "+(d.familia||"sin nombre")+" guardado ✅"); }
+function renderEditor(){
+  const d=ui.draft; const body=$("#edBody"); const st=body.scrollTop;
+  // Recordar dónde estaba el cursor para no perder el foco si el render viene de otra pantalla — RLR
+  const ae=document.activeElement; const fk=(ae&&ae.dataset&&ae.dataset.in&&body.contains(ae))?{in:ae.dataset.in,p:ae.dataset.p,i:ae.dataset.i,s:ae.selectionStart,e:ae.selectionEnd}:null;
+  body.innerHTML=`<label class="f fam">Familia<input data-in="familia" value="${esc(d.familia)}" placeholder="Apellido (ej. Garza)" autocomplete="off" enterkeyhint="next"></label><div id="dupWarn"></div>
+    ${d.personas.map((p,pi)=>personaHTML(p,pi)).join("")}
+    <div class="addp">Agregar: ${ROLES.map(r=>`<button class="btn" data-a="addPersona" data-v="${r.id}">${r.e} ${r.n}</button>`).join("")}</div>
+    <label class="f">Notas para el pedido<input data-in="notas" value="${esc(d.notas)}" placeholder="Ej. sin cebolla, salsa aparte…" autocomplete="off"></label>
+    <div class="chips" style="margin-top:6px">${NOTAS_RAPIDAS.map(x=>`<button class="chip${tieneNota(d,x)?" on":""}" data-a="notaChip" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>`;
+  body.scrollTop=st; updateSum(); checkDup();
+  if(fk){ let sel=`[data-in="${fk.in}"]`; if(fk.p!=null) sel+=`[data-p="${fk.p}"]`; if(fk.i!=null) sel+=`[data-i="${fk.i}"]`;
+    const el=body.querySelector(sel); if(el){ el.focus({preventScroll:true}); try{ el.setSelectionRange(fk.s,fk.e); }catch(e){} } }
+}
+function updateSum(){ if(ui.draft) $("#edSum").textContent=totStr(totales(ui.draft)); }
+const NOTAS_RAPIDAS=["Sin cebolla","Salsa aparte","Salsa extra 🌶","Sin picante","Cubiertos y servilletas"];
+function tieneNota(d,x){ return (d.notas||"").toLowerCase().includes(x.toLowerCase()); }
+// Dos personas de la misma familia abrieron "+ Pedido": avisar para no mandar la familia dos veces — RLR
+function checkDup(){ const d=ui.draft; const w=$("#dupWarn"); if(!d||!w) return; const k=(d.familia||"").trim().toLowerCase();
+  const otro=k?Object.values(pedidos).find(c=>c.id!==d.id&&c.estado==="armando"&&(c.familia||"").trim().toLowerCase()===k):null;
+  w.innerHTML=otro?`<div class="warn" style="margin-top:8px">⚠️ Ya hay un pedido de <b>Familia ${esc(otro.familia)}</b> armándose (${esc(totStr(totales(otro)))}). <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><button class="btn y" data-a="irDuplicado" data-id="${otro.id}">Abrir ese y no duplicar</button><button class="btn ghost" data-a="ignorarDup">Es otra familia</button></div></div>`:""; }
+function personaHTML(p,pi){
+  const r=rolDe(p); const cnt={}; p.gorditas.forEach(l=>{ cnt[l.guiso]=cnt[l.guiso]||{harina:0,maiz:0}; cnt[l.guiso][l.masa]+=l.cant; });
+  const chips=GUISOS.map(g=>{ const c=cnt[g.n]; const b=c?[c.harina?c.harina+"H":"",c.maiz?c.maiz+"M":""].filter(Boolean).join("·"):"";
+    return `<button class="chip${c?" has":""}" data-a="addG" data-p="${pi}" data-v="${esc(g.n)}">${esc(g.n)}${g.pic?`<span class="pic">${"🌶".repeat(g.pic)}</span>`:""}${b?`<span class="cnt">${b}</span>`:""}</button>`; }).join("");
+  const lines=p.gorditas.map((l,i)=>`<div class="line"><span class="qty"><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="-1">−</button><span class="lq">${l.cant}</span><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="1">+</button></span><span class="ln">${esc(l.guiso)}<em>${l.masa==="maiz"?"maíz":"harina"}</em></span>
+    ${l.guiso==="Combinada"?`<input class="det" data-in="gdet" data-p="${pi}" data-i="${i}" value="${esc(l.detalle)}" placeholder="¿de qué?">`:""}</div>`).join("");
+  const openB=ui.open[p.id+"b"]||p.bebidas.length, openP=ui.open[p.id+"p"]||p.postres.length;
+  return `<section class="persona">
+    <div class="p-head"><span class="p-emoji">${r.e}</span><input class="p-name" data-in="nombre" data-p="${pi}" value="${esc(p.nombre)}" placeholder="Nombre (${r.n})" autocomplete="off">
+      <button class="ib" data-a="dupPersona" data-p="${pi}" title="Duplicar pedido de esta persona">⧉</button><button class="ib" data-a="delPersona" data-p="${pi}" title="Quitar">✕</button></div>
+    <div class="sec-head"><span>🫓 Gorditas</span><div class="seg"><button class="${p.masa!=="maiz"?"on":""}" data-a="masa" data-p="${pi}" data-v="harina">Harina</button><button class="${p.masa==="maiz"?"on":""}" data-a="masa" data-p="${pi}" data-v="maiz">Maíz</button></div></div>
+    <div class="chips">${chips}</div>
+    <div class="lines">${lines}</div>
+    <div class="p-extras">
+      <button class="pill${p.chilaquiles?" on":""}" data-a="togChil" data-p="${pi}">🍳 Chilaquiles</button>
+      <button class="pill${openB?" on":""}" data-a="togSec" data-p="${pi}" data-v="b">☕ Bebida</button>
+      <button class="pill${openP?" on":""}" data-a="togSec" data-p="${pi}" data-v="p">🍰 Postre</button>
+    </div>
+    ${p.chilaquiles?chilHTML(p,pi):""}
+    ${openB?subHTML(p,pi,"bebidas",BEBIDAS,"☕ Bebida","addB","bQty","bdet"):""}
+    ${openP?subHTML(p,pi,"postres",POSTRES,"🍰 Postre","addP","pQty",null):""}
+  </section>`;
+}
+function subHTML(p,pi,key,items,title,addA,qtyA,detIn){
+  const have={}; p[key].forEach(l=>have[l.nombre]=(have[l.nombre]||0)+l.cant);
+  return `<div class="sub"><div class="t">${title}<button data-a="togSec" data-p="${pi}" data-v="${key==="bebidas"?"b":"p"}" data-x="1">quitar</button></div>
+    <div class="chips">${items.map(it=>`<button class="chip${have[it.n]?" has":""}" data-a="${addA}" data-p="${pi}" data-v="${esc(it.n)}">${esc(it.n)}${have[it.n]?`<span class="cnt">${have[it.n]}</span>`:""}</button>`).join("")}</div>
+    <div class="lines">${p[key].map((l,i)=>{ const it=items.find(x=>x.n===l.nombre); return `<div class="line"><span class="qty"><button data-a="${qtyA}" data-p="${pi}" data-i="${i}" data-v="-1">−</button><span class="lq">${l.cant}</span><button data-a="${qtyA}" data-p="${pi}" data-i="${i}" data-v="1">+</button></span><span class="ln">${esc(l.nombre)}</span>
+      ${detIn&&it&&it.det?`<input class="det" data-in="${detIn}" data-p="${pi}" data-i="${i}" value="${esc(l.detalle)}" placeholder="${esc(it.det)}">`:""}</div>`; }).join("")}</div></div>`;
+}
+function chilHTML(p,pi){ const c=p.chilaquiles;
+  return `<div class="sub"><div class="t">🍳 Chilaquiles <span class="qty" style="margin-left:auto;margin-right:8px"><button data-a="chQty" data-p="${pi}" data-v="-1">−</button><span class="lq">${c.cant}</span><button data-a="chQty" data-p="${pi}" data-v="1">+</button></span><button data-a="togChil" data-p="${pi}">quitar</button></div>
+    <div class="row"><span class="lbl">1 · Salsa</span>${SALSAS.map(s=>`<button class="chip${c.salsa===s?" on":""}" data-a="chSet" data-p="${pi}" data-k="salsa" data-v="${esc(s)}">${esc(s)}</button>`).join("")}</div>
+    <div class="row"><span class="lbl">2 · Queso</span>${QUESOS.map(s=>`<button class="chip${c.queso===s?" on":""}" data-a="chSet" data-p="${pi}" data-k="queso" data-v="${esc(s)}">${esc(s)}</button>`).join("")}</div>
+    <div class="row"><span class="lbl">3 · Agrega (opcional)</span>${EXTRAS.map(s=>`<button class="chip${c.extras.includes(s)?" on":""}" data-a="chExtra" data-p="${pi}" data-v="${esc(s)}">${esc(s)}</button>`).join("")}
+      ${c.extras.includes("Guiso favorito")?`<select data-in="chGuiso" data-p="${pi}" style="margin-top:4px"><option value="">¿Qué guiso?</option>${GUISOS.filter(g=>g.n!=="Combinada").map(g=>`<option${c.guiso===g.n?" selected":""}>${esc(g.n)}</option>`).join("")}</select>`:""}</div></div>`;
+}
+
+/* ---------- mensaje / envío ---------- */
+function openMessage(cards,markIds){
+  const msg=buildMessage(cards); ui.msgIds=markIds; ui.msgText=msg; $("#mMsg h2").textContent="📲 Mensaje para WhatsApp";
+  const pend=cards.filter(c=>c.estado==="armando"&&!c.listo);
+  $("#msgBody").innerHTML=`${pend.length?`<div class="warn">⚠️ Todavía armando: ${esc(pend.map(c=>"Familia "+(c.familia||"sin nombre")).join(", "))}. Puedes mandar de todas formas.</div>`:""}
+    <div style="font-weight:800;color:var(--mut);font-size:13px;margin-bottom:6px">Va a: 📍 ${esc(getSuc().n)} · 📲 ${fmtTel(getTel())}</div><textarea class="msg" readonly>${esc(msg)}</textarea>`;
+  $("#msgFoot").innerHTML=`<button class="btn" data-a="copiar">📋 Copiar</button><a class="btn wa" href="${waLink(getTel(),msg)}" target="_blank" rel="noopener" data-a="abrirWa">📲 Abrir WhatsApp</a>
+    ${markIds?`<button class="btn p" data-a="marcarVarios">✅ Ya se pidió (${markIds.length})</button>`:""}`;
+  show("mMsg");
+}
+// Lista de reparto: cuando llega la comida, ir entregando a cada quien lo suyo y palomear — RLR
+function openReparto(cards){ cards=cards.filter(Boolean); ui.msgIds=null; $("#mMsg h2").textContent="📋 Lista de reparto";
+  const T={g:0,h:0,m:0,ch:0,b:0,po:0}; cards.forEach(c=>{ const t=totales(c); Object.keys(T).forEach(k=>T[k]+=t[k]); });
+  ui.msgText=cards.map(c=>"FAMILIA "+(c.familia||"sin nombre").toUpperCase()+"\n"+c.personas.map(p=>{ const L=personLines(p); return L.length?"• "+nombreDe(p)+": "+L.join(", "):""; }).filter(Boolean).join("\n")).join("\n\n");
+  $("#msgBody").innerHTML=`<div style="font-weight:800;color:var(--mut);font-size:13px;margin-bottom:8px">Toca cada renglón cuando ya lo entregaste. 📦 ${esc(totCorto(T)||"sin productos")}</div>`+cards.map(c=>`<div class="rep-fam"><h3>👨‍👩‍👧‍👦 Familia ${esc(c.familia||"sin nombre")}</h3>${c.personas.map(p=>{ const L=personLines(p); return L.length?`<div class="rep-per"><div class="rep-nom">${rolDe(p).e} ${esc(nombreDe(p))}</div>${L.map(l=>`<button class="rep-line" data-a="chk">${esc(l)}</button>`).join("")}</div>`:""; }).join("")}${c.notas?`<div class="notas">📝 ${esc(c.notas)}</div>`:""}</div>`).join("")||`<div class="empty">Nada que repartir.</div>`;
+  $("#msgFoot").innerHTML=`<div class="sum">Solo se marca en esta pantalla.</div><button class="btn" data-a="copiar">📋 Copiar lista</button><button class="btn p" data-a="close" data-v="mMsg">Cerrar</button>`;
+  show("mMsg"); }
+function marcar(id,estado){ const c=pedidos[id]; if(!c) return; c.estado=estado; c.listo=true;
+  if(estado==="pedido"){ c.pedidoEn=Date.now(); c.sucursal=config.sucursal; c.tel=getTel(); if(!c.mensaje) c.mensaje=buildMessage([c]); }
+  if(estado==="entregado") c.entregadoEn=Date.now();
+  if(estado==="archivado") c.archivadoEn=Date.now();
+  if(estado==="armando"){ c.listo=false; delete c.pedidoEn; }
+  saveCard(c); }
+
+/* ---------- compartir ---------- */
+async function compartir(){ const ci=cierreInfo(); const text="🐸 Pide tus gorditas Ranitas aquí: "+boardUrl(SLUG)+"\nArma el pedido de tu familia (cada quien sus gorditas, harina o maíz) y dale Listo. Yo lo mando junto a la sucursal"+(ci&&!ci.pasado?" a las "+ci.hora:"")+".";
+  try{ if(navigator.share){ await navigator.share({title:"Ranitas · Pedidos",text}); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
+  try{ await navigator.clipboard.writeText(text); toast("Liga copiada 🔗"); }catch(e){ window.open("https://api.whatsapp.com/send?text="+encodeURIComponent(text),"_blank"); } }
+
+/* ---------- config ---------- */
+function renderCfg(){ $("#cfgBody").innerHTML=`
+  <label class="f">Anfitrión (quien manda el pedido)<input data-cfg="anfitrion" value="${esc(config.anfitrion)}" placeholder="Ricardo"></label>
+  <label class="f">Teléfono del anfitrión (para el mensaje)<input data-cfg="telAnfitrion" value="${esc(config.telAnfitrion)}" placeholder="871 000 00 00" inputmode="tel"></label>
+  <label class="f">Dirección de entrega<textarea data-cfg="direccion" rows="3" placeholder="Calle, número, colonia · referencias">${esc(config.direccion)}</textarea></label>
+  <label class="f">Sucursal para pedir<select data-cfg="sucursal">${SUCURSALES.map(s=>`<option value="${s.id}"${s.id===config.sucursal?" selected":""}>${s.n} · ${s.tels.map(fmtTel).join(" / ")}</option>`).join("")}</select></label>
+  <div class="cfg2">
+    <label class="f">¿Para cuándo? (va en el mensaje)<input data-cfg="entrega" value="${esc(config.entrega)}" placeholder="lo antes posible · 8:30 pm"></label>
+    <label class="f">Cierre de pedidos (aviso a las familias)<input data-cfg="cierre" type="time" value="${esc(config.cierre)}"></label>
+    <label class="f">Forma de pago<select data-cfg="pago"><option value="efectivo"${config.pago==="efectivo"?" selected":""}>Efectivo</option><option value="transferencia"${config.pago==="transferencia"?" selected":""}>Transferencia</option><option value="tarjeta"${config.pago==="tarjeta"?" selected":""}>Tarjeta (terminal)</option></select></label>
+    <label class="f">Pago con (para que traigan cambio)<input data-cfg="pagoCon" value="${esc(config.pagoCon)}" placeholder="$500" inputmode="numeric"></label>
+  </div>
+  <label class="f">Precios opcionales — si los pones, se estima cuánto es por familia</label>
+  <div class="cfg4"><input data-cfg="precioG" value="${esc(config.precioG)}" placeholder="🫓 gordita" inputmode="decimal"><input data-cfg="precioCh" value="${esc(config.precioCh)}" placeholder="🍳 chilaquiles" inputmode="decimal"><input data-cfg="precioB" value="${esc(config.precioB)}" placeholder="☕ bebida" inputmode="decimal"><input data-cfg="precioPo" value="${esc(config.precioPo)}" placeholder="🍰 postre" inputmode="decimal"></div>
+  <label class="f hostrow"><input type="checkbox" data-a="hostToggle" ${host?"checked":""}> <span><b>Soy el anfitrión</b> (solo en esta pantalla): ver los botones de mandar por WhatsApp y mover pedidos. Se confirma con el celular del anfitrión${ui.anf?" ("+esc(ui.anf.nombre)+")":""}.</span></label>
+  <p style="font-size:12.5px;color:var(--mut);font-weight:700">Servicio a domicilio en las 4 sucursales (también Uber Eats, DiDi Food y Rappi). Los cambios se guardan solos.</p>`; }
+$("#btnCfg").addEventListener("click",()=>{ renderCfg(); show("mCfg"); });
+$("#btnShare").addEventListener("click",compartir);
+document.addEventListener("input",e=>{ const el=e.target.closest("[data-cfg]"); if(!el) return; config[el.dataset.cfg]=el.value.trim?el.value:el.value; if(el.dataset.cfg==="sucursal") config.telIdx=0; clearTimeout(saveTimer); saveTimer=setTimeout(saveConfig,400); });
+$("#mCfg").addEventListener("input",()=>{});
+
+/* ---------- eventos del editor ---------- */
+document.addEventListener("input",e=>{ const el=e.target.closest("[data-in]"); if(!el||!ui.draft) return; const d=ui.draft; const k=el.dataset.in; const p=d.personas[+el.dataset.p]; const i=+el.dataset.i;
+  if(k==="familia"){ d.familia=el.value; if(!ui.dupIgnorado) checkDup(); } else if(k==="notas"){ d.notas=el.value; } else if(k==="nombre") p.nombre=el.value;
+  else if(k==="gdet") p.gorditas[i].detalle=el.value; else if(k==="bdet") p.bebidas[i].detalle=el.value; else if(k==="chGuiso") p.chilaquiles.guiso=el.value;
+  queueSave(); });
+
+document.addEventListener("click",e=>{
+  const el=e.target.closest("[data-a]"); if(!el) return; const a=el.dataset.a, v=el.dataset.v, id=el.dataset.id; const d=ui.draft; const pi=+el.dataset.p; const p=d&&d.personas[pi]; const i=+el.dataset.i;
+  const R=()=>{ renderEditor(); queueSave(); };
+  switch(a){
+    case "tab": ui.tab=v; renderBoard(); break;
+    case "hideHint": localStorage.setItem("ranitas-hint","1"); renderBoard(); break;
+    case "nuevo": openNuevo(); break;
+    case "crear": hide("mNuevo"); crearPedido(null); break;
+    case "repetir": hide("mNuevo"); crearPedido(pedidos[id]); break;
+    case "edit": openEditor(id); break;
+    case "del": { const c=pedidos[id]; if(c&&confirm("¿Eliminar el pedido de Familia "+(c.familia||"sin nombre")+"?")){ deleteCard(id); toast("Pedido eliminado"); } break; }
+    case "marcar": if(v==="pedido"&&pedidos[id]&&!pedidos[id].listo&&!confirm("Familia "+(pedidos[id].familia||"sin nombre")+" todavía no da Listo. ¿Marcar como pedido de todas formas?")) break; marcar(id,v); if(v==="pedido"){ ui.tab="pedido"; toast("Marcado como pedido 📲"); } if(v==="entregado"){ ui.tab="entregado"; toast("¡Buen provecho! 🛵"); } if(v==="archivado"){ ui.tab="archivado"; toast("Archivado. Lo puedes repetir cuando quieras 🔁"); } renderBoard(); break;
+    case "enviarTodo": { const cards=cardsIn("armando"); if(!cards.length) return; openMessage(cards,cards.map(c=>c.id)); break; }
+    case "enviarUno": openMessage([pedidos[id]],[id]); break;
+    case "verMsg": { const c=pedidos[id]; ui.msgIds=null; $("#mMsg h2").textContent="📲 Mensaje para WhatsApp"; ui.msgText=c.mensaje||buildMessage([c]);
+      $("#msgBody").innerHTML=`<textarea class="msg" readonly>${esc(ui.msgText)}</textarea>`;
+      $("#msgFoot").innerHTML=`<button class="btn" data-a="copiar">📋 Copiar</button><a class="btn wa" href="${waLink(c.tel||getTel(),ui.msgText)}" target="_blank" rel="noopener">📲 Reenviar por WhatsApp</a>`; show("mMsg"); break; }
+    case "copiar": navigator.clipboard.writeText(ui.msgText).then(()=>toast("Mensaje copiado 📋"),()=>{ const t=$("#msgBody textarea"); t.select(); document.execCommand("copy"); toast("Mensaje copiado 📋"); }); break;
+    case "abrirWa": break;
+    case "marcarVarios": { (ui.msgIds||[]).forEach(x=>{ const c=pedidos[x]; if(c){ c.mensaje=ui.msgText; marcar(x,"pedido"); } }); hide("mMsg"); ui.tab="pedido"; renderBoard(); toast("Pedido registrado 📲 · "+ui.msgIds.length+" familia"+(ui.msgIds.length===1?"":"s")); break; }
+    case "close": hide(v); if(v==="mCfg"){ saveConfig(); renderBoard(); } break;
+    case "closeEditor": closeEditor(v==="1"); break;
+    case "notaChip": { const has=tieneNota(d,v); const parts=(d.notas||"").split(/,\s*/).map(x=>x.trim()).filter(Boolean); d.notas=(has?parts.filter(x=>x.toLowerCase()!==v.toLowerCase()):parts.concat([v])).join(", "); R(); break; }
+    case "irDuplicado": { const cur=ui.editing; const vacio=!d.personas.some(p=>personLines(p).length); ui.editing=null; ui.draft=null; clearTimeout(saveTimer); hide("mEditor"); clearPresence(cur); if(vacio&&mine.has(cur)) deleteCard(cur); openEditor(id); toast("Editando el pedido que ya existía"); break; }
+    case "ignorarDup": ui.dupIgnorado=true; $("#dupWarn").innerHTML=""; break;
+    case "reparto": openReparto(v==="todos"?cardsIn("pedido").concat(cardsIn("entregado")):[pedidos[id]]); break;
+    case "chk": el.classList.toggle("done"); break;
+    case "llegoTodo": { const cs=cardsIn("pedido"); if(confirm("¿Marcar "+cs.length+" pedido"+(cs.length===1?"":"s")+" como entregado"+(cs.length===1?"":"s")+"?")){ cs.forEach(c=>marcar(c.id,"entregado")); ui.tab="entregado"; renderBoard(); toast("¡Buen provecho! 🛵"); } break; }
+    case "hostToggle": { if(el.checked){ const t=digits(prompt("Celular del anfitrión (para confirmar que eres tú):")||""); if(ui.anf&&t&&t===digits(ui.anf.tel)){ activarHost(); toast("Modo anfitrión activado"); } else { el.checked=false; toast("Ese celular no coincide"); } } else { host=false; localStorage.setItem(HOST_KEY,"0"); toast("Modo anfitrión desactivado"); } renderHeader(); renderBoard(); break; }
+    case "copiarLiga": navigator.clipboard.writeText(boardUrl(SLUG)).then(()=>toast("Liga copiada 🔗"),()=>toast(boardUrl(SLUG))); break;
+    case "ir": if(v) goTo(v); else location.href=LOCAL?location.pathname:"/"; break;
+    case "irHost": localStorage.setItem("ranitas-host-"+v,"1"); goTo(v); break;
+    case "crearTablero": crearTablero(); break;
+    case "entrarTablero": entrarTablero(); break;
+    /* editor */
+    case "addPersona": d.personas.push(nuevaPersona(v)); R(); setTimeout(()=>{ const ins=$("#edBody").querySelectorAll(".p-name"); const last=ins[ins.length-1]; if(last){ last.scrollIntoView({block:"center",behavior:"smooth"}); last.focus(); } },50); break;
+    case "delPersona": if(!personLines(p).length||confirm("¿Quitar a "+nombreDe(p)+" y su pedido?")){ d.personas.splice(pi,1); R(); } break;
+    case "dupPersona": { const c=clone(p); c.id=uid(); c.nombre=""; d.personas.splice(pi+1,0,c); R(); toast("Copiado. Ponle nombre 👇"); break; }
+    case "masa": p.masa=v; R(); break;
+    case "addG": { const masa=p.masa||"harina"; const l=p.gorditas.find(x=>x.guiso===v&&x.masa===masa); if(l) l.cant++; else p.gorditas.push({guiso:v,masa,cant:1,detalle:""}); R(); break; }
+    case "gQty": p.gorditas[i].cant+=+v; if(p.gorditas[i].cant<=0) p.gorditas.splice(i,1); R(); break;
+    case "togChil": if(p.chilaquiles) p.chilaquiles=null; else p.chilaquiles={salsa:"",queso:"",extras:[],guiso:"",cant:1}; R(); break;
+    case "chSet": p.chilaquiles[el.dataset.k]=(p.chilaquiles[el.dataset.k]===v?"":v); R(); break;
+    case "chExtra": { const ex=p.chilaquiles.extras; const k=ex.indexOf(v); if(k>=0) ex.splice(k,1); else ex.push(v); R(); break; }
+    case "chQty": p.chilaquiles.cant=Math.max(1,p.chilaquiles.cant+(+v)); R(); break;
+    case "togSec": { const key=v==="b"?"bebidas":"postres"; const k=p.id+v; if(el.dataset.x||ui.open[k]||p[key].length){ ui.open[k]=false; p[key]=[]; } else ui.open[k]=true; R(); break; }
+    case "addB": { const l=p.bebidas.find(x=>x.nombre===v); if(l) l.cant++; else p.bebidas.push({nombre:v,cant:1,detalle:""}); R(); break; }
+    case "bQty": p.bebidas[i].cant+=+v; if(p.bebidas[i].cant<=0) p.bebidas.splice(i,1); R(); break;
+    case "addP": { const l=p.postres.find(x=>x.nombre===v); if(l) l.cant++; else p.postres.push({nombre:v,cant:1}); R(); break; }
+    case "pQty": p.postres[i].cant+=+v; if(p.postres[i].cant<=0) p.postres.splice(i,1); R(); break;
+  }
+});
+document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{ if(e.target===m){ if(m.id==="mEditor") closeEditor(false); else { m.classList.remove("open"); if(m.id==="mCfg"){ saveConfig(); renderBoard(); } } } }));
+document.addEventListener("keydown",e=>{ if(e.key==="Enter"&&e.target&&(e.target.id==="hEntrar"||e.target.id==="hSlug"||e.target.id==="hTel")){ e.preventDefault(); if(e.target.id==="hEntrar") entrarTablero(); else crearTablero(); }
+  if(e.key==="Enter"&&e.target&&e.target.dataset&&e.target.dataset.in==="familia"){ e.preventDefault(); const n=$("#edBody .p-name"); if(n) n.focus(); }
+  if(e.key==="Escape"){ if($("#mEditor").classList.contains("open")) closeEditor(false); ["mNuevo","mMsg","mCfg"].forEach(hide); } });
+
+/* ---------- arranque ---------- */
+Object.keys(pedidos).forEach(k=>pedidos[k]=normCard(Object.assign({id:k},pedidos[k])));
+if(SLUG){ renderHeader(); renderBoard(); } initFirebase();
+setInterval(()=>{ if(!ui.editing) renderBoard(); },60000);   // refresca "hace X min"
+setInterval(()=>{ if(Object.keys(ui.presence).length||Object.keys(ui.flash||{}).length) renderBoard(); },2500);   // apaga "escribiendo…" cuando paran
+window.addEventListener("beforeunload",()=>{ if(ui.editing) clearPresence(ui.editing); });
+</script>
+<!-- RLR · Ricardo López Reyero · eye/181218 -->
+</body>
+</html>
