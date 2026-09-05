@@ -103,6 +103,9 @@ tr.tot td{font-weight:900;background:var(--y3)}
 .cards{display:flex;flex-direction:column;gap:8px}
 .pc{background:#fff;border-radius:14px;box-shadow:var(--sh);padding:10px 12px;border-left:5px solid var(--y)}
 .pc.flash{animation:fl 1.6s ease-out}
+.pc.moved{animation:pmoved .7s cubic-bezier(.2,.8,.2,1)}
+@keyframes pmoved{0%{transform:translateY(18px) scale(.97);opacity:0;box-shadow:0 0 0 4px var(--y)}70%{box-shadow:0 0 0 4px var(--y)}100%{transform:none;opacity:1}}
+.pc.flip{transition:transform .55s cubic-bezier(.2,.8,.2,1)}
 @keyframes fl{0%{background:#FFF3B0}100%{background:#fff}}
 .pc-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
 .pc-top h3{font-size:15px;font-weight:900}
@@ -173,6 +176,11 @@ tr.tot td{font-weight:900;background:var(--y3)}
 .chip-ped.on{border-color:var(--ink);background:var(--y)}
 .chip-ped.nuevo{background:var(--g);color:#fff;border-color:var(--g);font-weight:900;justify-content:center}
 .chip-ped.nuevo small{opacity:.8}
+.chip-ped.mesa{border-color:#c7b26a;background:#FFFBEA}.chip-ped.mesa.on{background:var(--y);border-color:var(--ink)}
+.posmesas{margin:-4px 0 12px;border:1.5px dashed var(--line);border-radius:12px;background:#fff8}
+.pm-h{width:100%;display:flex;justify-content:space-between;align-items:center;border:0;background:none;padding:8px 12px;font-weight:900;font-size:13px;cursor:pointer;color:var(--ink)}
+.pm-h .n{background:var(--ink);color:var(--y);border-radius:999px;padding:0 7px;font-size:11px;margin-left:4px}.pm-h .mut{color:var(--mut);font-weight:800;font-size:12px}
+.pm-grid{display:flex;gap:6px;flex-wrap:wrap;padding:0 10px 10px}
 .pos{display:grid;grid-template-columns:1.4fr 1fr;gap:12px;align-items:start}
 @media(max-width:900px){.pos{grid-template-columns:1fr}.pos-right{order:-1}.pos input.big{position:sticky;top:0}}
 .pos input{border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-weight:800;width:100%}
@@ -338,6 +346,8 @@ button.tag.click{cursor:pointer}button.tag.click:hover{border-style:dashed;borde
 .mesa-acts{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
 .b.mesa{background:#0f766e;color:#fff}
 .kc.mesa,.karm.mesa{border-left-color:#0f766e;box-shadow:0 0 0 2px #99e6dc,var(--sh)}
+.kprio{margin:-6px -8px 8px;background:#0f766e;color:#fff;font-weight:900;font-size:12.5px;padding:5px 10px;border-radius:8px}
+.kc.flip{transition:transform .55s cubic-bezier(.2,.8,.2,1)}
 .kagot{background:var(--r);color:#fff;border-radius:14px;padding:12px 14px;font-weight:800;margin-bottom:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .kagot .kbtn.ghost{border-color:#fff;color:#fff;margin:0}
 .krow{position:relative}
@@ -701,12 +711,20 @@ function renderPanorama(){
 function coincide(c,q){ if(!q) return true; const t=(c.familia+" "+c.tablero+" "+c.id+" "+toArr(c.personas).map(p=>nombreDe(p)+" "+personLines(p).join(" ")).join(" ")+" "+(c.notas||"")).toLowerCase(); return q.toLowerCase().split(/\s+/).filter(Boolean).every(w=>t.includes(w)); }
 function renderPedidos(){
   const cardsAll=filtradas().filter(c=>coincide(c,q)); const cards=cardsAll.filter(pasaPago); const snap={}; const now=Date.now(); Object.keys(flash).forEach(k=>{ if(now-flash[k]>1600) delete flash[k]; });
-  cards.forEach(c=>{ snap[c.id]=JSON.stringify(c); if(!first&&c._w!==SID&&prev[c.id]!==snap[c.id]) flash[c.id]=now; }); prev=snap; first=false;
+  const colPrev=prevCol; prevCol={}; cards.forEach(c=>{ snap[c.id]=JSON.stringify(c); const col=colDeAdmin(c); prevCol[c.id]=col; if(!first&&c._w!==SID&&prev[c.id]!==snap[c.id]) flash[c.id]=now; if(!first&&colPrev[c.id]&&colPrev[c.id]!==col) moved[c.id]=now; }); prev=snap; first=false; Object.keys(moved).forEach(k=>{ if(now-moved[k]>900) delete moved[k]; });
+  const antes=flipAntes($("#main"));
   const Tc=sumT(cards.filter(ETAPAS[2].f));
   $("#main").innerHTML=`<div class="top"><h1>📋 Pedidos</h1><input class="buscar" id="q" value="${esc(q)}" placeholder="🔎 Buscar familia, persona, guiso, tablero…"><span class="sp"></span>${filtrosHTML()}<div class="sub">🍳 En cocina ahora: ${esc(totStr(Tc))} · toca los botones para avanzar cada pedido; las familias lo ven al instante.${q?` · <b>${cards.length}</b> resultado${cards.length===1?"":"s"} para "${esc(q)}"`:""}</div></div>
   ${filtroPagoHTML(cardsAll)}
-  <div class="board">${ETAPAS.map(e=>{ const cs=cards.filter(e.f).sort((a,b)=>(b.actualizado||0)-(a.actualizado||0)); return `<section class="col k${e.k}"><div class="col-head"><span>${e.n}</span><span class="n">${cs.length}</span></div><div class="cards">${cs.length?cs.map(cardHTML).join(""):`<div class="empty">Nada por aquí</div>`}</div></section>`; }).join("")}</div>`;
+  <div class="board">${ETAPAS.map(e=>{ const cs=cards.filter(e.f).sort(e.k===3?(a,b)=>(b.entregadoEn||b.archivadoEn||b.actualizado||0)-(a.entregadoEn||a.archivadoEn||a.actualizado||0):(a,b)=>(turno(a)-turno(b))); /* por turnos: el más antiguo arriba, el nuevo entra abajo; Historial al revés — RLR */ return `<section class="col k${e.k}"><div class="col-head"><span>${e.n}</span><span class="n">${cs.length}</span></div><div class="cards">${cs.length?cs.map(cardHTML).join(""):`<div class="empty">Nada por aquí</div>`}</div></section>`; }).join("")}</div>`;
+  flipDespues($("#main"),antes);
 }
+const turno=c=>({armando:c.creado,porpedir:c.listoEn||c.actualizado,pedido:c.pedidoEn,entregado:c.entregadoEn,archivado:c.archivadoEn}[c.estado])||c.creado||c.actualizado||0;
+function colDeAdmin(c){ const e=ETAPAS.find(e=>e.f(c)); return e?e.id:""; }
+let prevCol={}, moved={};
+let flipKey=""; function flipAntes(root){ const m={}; if(!root) return m; if(flipKey!==vista+"|"+pSuc){ flipKey=vista+"|"+pSuc; return m; } /* solo dentro de la misma vista — RLR */ root.querySelectorAll("[data-id]").forEach(el=>{ const r=el.getBoundingClientRect(); m[el.dataset.id]=[r.left,r.top]; }); return m; }
+function flipDespues(root,antes){ if(!root||matchMedia("(prefers-reduced-motion:reduce)").matches) return; const mov=[]; root.querySelectorAll("[data-id]").forEach(el=>{ const a=antes[el.dataset.id]; if(!a||el.classList.contains("moved")) return; const r=el.getBoundingClientRect(); const dx=a[0]-r.left, dy=a[1]-r.top; if(Math.abs(dx)<1&&Math.abs(dy)<1) return; el.style.transition="none"; el.style.transform=`translate(${dx}px,${dy}px)`; mov.push(el); });
+  if(!mov.length) return; void root.offsetHeight; mov.forEach(el=>{ el.classList.add("flip"); el.style.transition=""; el.style.transform=""; el.addEventListener("transitionend",()=>el.classList.remove("flip"),{once:true}); }); }
 function cardHTML(c){
   const suc=SUCURSALES.find(s=>s.id===c.sucursal); const cfg=(tableros[c.slug]||{}).config||{};
   const persons=c.personas.map(p=>{ const L=personLines(p); return L.length?`<div class="pl"><span class="pn">${ROLES[p.rol]||"🙂"} ${esc(nombreDe(p))}</span>${personaFilas(p)}</div>`:""; }).join("")||`<div class="pl"><i>sin productos</i></div>`;
@@ -720,7 +738,7 @@ function cardHTML(c){
     entregado:`<button class="btn" data-a="archivar" data-id="${c.id}" data-s="${c.slug}">📦 Archivar</button><button class="btn ghost" data-a="etapa" data-v="repartiendo" data-id="${c.id}" data-s="${c.slug}" data-back="1">↩︎</button>`,
     archivado:``
   }[c.estado]||"";
-  return `<article class="pc${flash[c.id]?" flash":""}">
+  return `<article class="pc${flash[c.id]?" flash":""}${moved[c.id]?" moved":""}" data-id="${esc(c.id)}">
     <div class="pc-top"><h3>Familia ${esc(c.familia||"sin nombre")}</h3><span class="when">${fmtRel(c.actualizado)}</span></div>
     <div class="badges">${c.estado==="armando"?`<span class="b wip">✏️ armando…</span>`:c.estado==="porpedir"?`<span class="b ok">✅ Lista · aún sin WhatsApp</span>`:""}${c.mesa?`<span class="b mesa">🪑 MESA · prioridad</span>`:""}${Object.keys(c.faltas||{}).length?`<span class="b wip">⛔ no hubo: ${esc([...new Set(lineasDe(c).filter(l=>(c.faltas||{})[l.k]).map(l=>l.n))].join(", "))}</span>`:""}<span class="b tab">🏠 ${esc(c.tablero)}</span>${suc?`<span class="b suc">📍 ${esc(suc.n)}</span>`:""}${c.estado==="pedido"?`<span class="b">📲 ${fmtFecha(c.pedidoEn)}</span>`:""}${c.estado==="entregado"?`<span class="b ok">🛵 ${fmtFecha(c.entregadoEn)}</span>`:""}${cfg.entrega?`<span class="b">⏰ ${esc(cfg.entrega)}</span>`:""}</div>
     ${tagsHTML(c,c.slug,true)}
@@ -754,6 +772,14 @@ function diffPedido(a,b){ const out=[]; a=a||{personas:[]}; b=b||{personas:[]};
   const A={}; toArr(a.personas).forEach(p=>A[p.id]=p); const B={}; toArr(b.personas).forEach(p=>B[p.id]=p); const cnt=L=>{ const m={}; L.forEach(l=>m[l]=(m[l]||0)+1); return m; };
   Object.keys(B).forEach(id=>{ const pb=B[id], pa=A[id]; const lb=personLines(pb); if(!pa){ out.push("+ "+nombreDe(pb)+(lb.length?": "+lb.join(", "):" (sin pedido)")); return; } const la=personLines(pa); if(nombreDe(pa)!==nombreDe(pb)) out.push(nombreDe(pa)+" → "+nombreDe(pb)); const ca=cnt(la), cb=cnt(lb); const add=[],rem=[]; Object.keys(cb).forEach(k=>{ if(!ca[k]) add.push(k); }); Object.keys(ca).forEach(k=>{ if(!cb[k]) rem.push(k); }); if(add.length||rem.length) out.push(nombreDe(pb)+": "+add.map(x=>"+"+x).concat(rem.map(x=>"−"+x)).join(", ")); });
   Object.keys(A).forEach(id=>{ if(!B[id]) out.push("quitó a "+nombreDe(A[id])); }); return out.join(" · "); }
+/* Atajo: el comensal llega al mostrador ("soy la mesa 5") → un toque abre su pedido para revisarlo, cambiarlo o mandarlo a cocina — RLR */
+let posMesasAbierto=localStorage.getItem("ranitas-pos-mesas")!=="0";
+const ESTADO_CORTO=c=>c.estado==="armando"?"✏️ armando":c.estado==="porpedir"?"📋 lista, sin ordenar":c.estado==="pedido"?({proceso:"🍳 en cola",armado:"🔥 en cocina",espera:"🔔 lista para llevar",repartiendo:"🛵 en camino"}[c.etapa||"proceso"]||"🍳 en cola"):c.estado==="entregado"?"✅ entregada":"";
+function mesasPosHTML(){ const mesas=mesasDe(pSuc); if(!mesas.length) return "";
+  const act=mesas.map(m=>{ const cs=Object.entries(((tableros[m.slug]||{}).pedidos)||{}).map(([id,c])=>Object.assign({id},c)).filter(c=>c.estado!=="archivado"&&c.estado!=="entregado").sort((a,b)=>(b.actualizado||0)-(a.actualizado||0)); return {m,cs}; }).filter(x=>x.cs.length);
+  const n=act.reduce((a,x)=>a+x.cs.length,0);
+  return `<div class="posmesas${posMesasAbierto?" abierto":""}"><button class="pm-h" id="posMesasTgl"><span>🪑 Mesas con pedido <b class="n">${n}</b></span><span class="mut">${act.length?(posMesasAbierto?"ocultar ▴":"ver ▾"):"ninguna ahora"}</span></button>
+    ${posMesasAbierto&&act.length?`<div class="pm-grid">${act.map(({m,cs})=>cs.map(c=>`<button class="chip-ped mesa${pos.card&&pos.card.id===c.id?" on":""}" data-abrirmesa="${esc(m.slug)}:${esc(c.id)}" title="Abrir el pedido de la mesa ${m.numero}"><b>🪑 Mesa ${m.numero}${cs.length>1?" · "+esc(c.familia||""):""}</b><span>${ESTADO_CORTO(c)} · ${esc(totStr(totales(c))||"vacío")}</span></button>`).join("")).join("")}</div>`:""}</div>`; }
 function abrirEnMostrador(slug,id){ const c=(tableros[slug]||{}).pedidos&&tableros[slug].pedidos[id]; if(!c) return; bit("edicion","abrio","Abrió el pedido en Mostrador",{pedido:id,familia:c.familia,tablero:slug}); pos.card=JSON.parse(JSON.stringify(Object.assign({id},c,{personas:toArr(c.personas).map(p=>Object.assign(p,{gorditas:toArr(p.gorditas),bebidas:toArr(p.bebidas),postres:toArr(p.postres),chilaquiles:p.chilaquiles?Object.assign(p.chilaquiles,{extras:toArr(p.chilaquiles.extras)}):null}))}))); pos.slug=slug; pos.per=0; pos.masa=(pos.card.personas[0]||{}).masa||"harina"; pos.qtxt=""; pos.orig=JSON.parse(JSON.stringify(pos.card)); const cfg=(tableros[slug]||{}).config||{}; if(cfg.sucursal) pSuc=cfg.sucursal; vista="mostrador"; syncUrl(); render(); }
 async function guardarPos(silencio,extra){ const c=pos.card; if(!c) return null; const slug=pos.slug||await asegurarMostrador(pSuc); pos.slug=slug; c.actualizado=Date.now(); c._w=SID; if(!c.familia) c.familia=c.mostrador?"Pedido "+siguienteNumero(pSuc):"";
   const existe=!!(((tableros[slug]||{}).pedidos||{})[c.id]);
@@ -764,7 +790,7 @@ async function mandarCocina(){ const c=pos.card; if(!c) return; if(voz.on) parar
 function minimizarPos(){ if(!pos.card) return; const df=diffPedido(pos.orig,pos.card); if(df) bit("edicion","edito","Cambió: "+df,{pedido:pos.card.id,familia:pos.card.familia,tablero:pos.slug}); bit("pedido","minimizo","Minimizó el pedido",{pedido:pos.card.id,familia:pos.card.familia,tablero:pos.slug}); guardarPos(true).then(()=>{ toast("Minimizado · "+pos.card.familia); pos.card=null; pos.slug=null; render(); }); }
 function renderMostrador(){
   const sl=mostSlug(pSuc); const abiertos=Object.entries(((tableros[sl]||{}).pedidos)||{}).map(([id,c])=>Object.assign({id},c)).filter(c=>c.estado==="armando"||c.estado==="porpedir").sort((a,b)=>(a.creado||0)-(b.creado||0));
-  const chips=`<div class="abiertos"><button class="chip-ped nuevo" id="posNuevo">➕ Nuevo pedido <small>(N)</small></button>${abiertos.map(c=>`<button class="chip-ped${pos.card&&pos.card.id===c.id?" on":""}" data-abrir="${c.id}"><b>${esc(c.familia||"sin nombre")}</b><span>${esc(totStr(totales(c)))}</span></button>`).join("")}</div>`;
+  const chips=`<div class="abiertos"><button class="chip-ped nuevo" id="posNuevo">➕ Nuevo pedido <small>(N)</small></button>${abiertos.map(c=>`<button class="chip-ped${pos.card&&pos.card.id===c.id?" on":""}" data-abrir="${c.id}"><b>${esc(c.familia||"sin nombre")}</b><span>${esc(totStr(totales(c)))}</span></button>`).join("")}</div>${mesasPosHTML()}`;
   if(!pos.card){ $("#main").innerHTML=`<div class="top"><h1>🧾 Mostrador</h1>${sucSelect()}<div class="sub">Toma pedidos en la sucursal tecleando. Cada pedido tiene nombre; lo minimizas para atender otro y lo retomas cuando quieras. Atajos: <b>N</b> nuevo · escribe y <b>Enter</b> agrega · <b>H</b>/<b>M</b> masa · <b>+</b> persona.</div></div>${chips}<div class="empty" style="margin-top:30px">Elige un pedido abierto o crea uno nuevo.</div>`; return; }
   const c=pos.card; const p=c.personas[pos.per]||c.personas[0]; if(!c.personas[pos.per]) pos.per=0;
   const suc=c.sucursal||pSuc; const cat=catalogo[suc]||{}; const dispo=(k,masa)=>{ const v=cat[k]||{}; if(v.on===false) return false; if(masa==="harina"&&v.offH) return false; if(masa==="maiz"&&v.offM) return false; return true; };
@@ -804,6 +830,8 @@ function renderMostrador(){
 document.addEventListener("click",e=>{ if(vista!=="mostrador") return; const t=e.target;
   if(t.id==="posNuevo"||t.closest("#posNuevo")){ nuevoPedidoPos(); return; }
   const ab=t.closest("[data-abrir]"); if(ab){ if(pos.card) guardarPos(true); abrirEnMostrador(mostSlug(pSuc),ab.dataset.abrir); return; }
+  if(t.id==="posMesasTgl"||t.closest("#posMesasTgl")){ posMesasAbierto=!posMesasAbierto; localStorage.setItem("ranitas-pos-mesas",posMesasAbierto?"1":"0"); renderMostrador(); return; }
+  const am=t.closest("[data-abrirmesa]"); if(am){ const [sl,id]=am.dataset.abrirmesa.split(":"); if(pos.card&&pos.card.id!==id) guardarPos(true); abrirEnMostrador(sl,id); toast("🪑 Pedido de la mesa abierto · los cambios se ven en su celular al instante"); return; }
   const cp=t.closest("[data-copy]"); if(cp){ navigator.clipboard.writeText(cp.dataset.copy).then(()=>toast("Liga copiada")); return; }
   if(!pos.card) return; const c=pos.card; const p=c.personas[pos.per];
   if(t.id==="posMic"){ if(voz.on) pararVoz(); else iniciarVoz(); return; }
@@ -894,14 +922,14 @@ function renderCocina(){
   const dem={}; cola.forEach(c=>comalDe(c).forEach(x=>{ if(x.cat!=="g") return; const k=x.n+"|"+x.masa; dem[k]=dem[k]||{n:x.n,masa:x.masa,cant:0}; dem[k].cant+=x.cant; })); const demArr=Object.values(dem).sort((a,b)=>b.cant-a.cant);
   const hoy=new Date(); hoy.setHours(0,0,0,0); const hechosHoy=allCards().filter(c=>c.sucursal===suc&&c.listoCocinaEn>=hoy.getTime()); const porCoc={}; hechosHoy.forEach(c=>{ const id=(c.cocinero||{}).id||"?"; porCoc[id]=porCoc[id]||{n:0,t:0}; porCoc[id].n++; porCoc[id].t+=Math.max(0,(c.listoCocinaEn-(c.armadoEn||c.pedidoEn||c.listoCocinaEn))/60000); });
   const espera=t=>{ const m=mins(t); return `<span class="wait${m>=20?" late":m>=10?" warn":""}">⏱ ${m} min</span>`; };
-  const tarjetaCola=c=>`<article class="kc${c.mesa?" mesa":""}"><div class="kc-top"><b>${c.mesa?"🪑 ":""}${esc(c.familia||"sin nombre")}</b>${c.mesa?`<span class="b mesa">MESA · prioridad</span>`:""}${espera(c.pedidoEn)}</div><div class="kc-sub">${esc(c.tablero)} · ${toArr(c.personas).filter(p=>personLines(p).length).length} personas · ${esc(totStr(totales(c)))} · <span class="tag ${pagado(c)?"pagado":"porpagar"}" style="font-size:10.5px;padding:1px 7px">${pagado(c)?"💵 pagado":"💵 por pagar"}</span></div><div class="kc-lines">${comalDe(c).map(x=>`<span class="kl ${x.cat}">${x.cant} ${esc(x.n)}${x.masa?` <em class="${x.masa==="maiz"?"m":"h"}">${x.masa==="maiz"?"🌽 M":"🌾 H"}</em>`:""}</span>`).join("")}</div>${c.notas?`<div class="kc-nota">📝 ${esc(c.notas)}</div>`:""}<button class="kbtn take" data-tomar="${c.id}" data-s="${c.slug}" ${yo?"":"disabled"}>🔥 Lo tomo${yo?"":" · elige tu nombre"}</button></article>`;
+  const tarjetaCola=(c,i)=>`<article class="kc${c.mesa?" mesa":""}" data-id="${esc(c.id)}">${c.mesa&&i===0?`<div class="kprio">🪑 El comensal está esperando en la mesa · va primero</div>`:""}<div class="kc-top"><b>${c.mesa?"🪑 ":""}${esc(c.familia||"sin nombre")}</b>${c.mesa?`<span class="b mesa">MESA · prioridad</span>`:""}${espera(c.pedidoEn)}</div><div class="kc-sub">${esc(c.tablero)} · ${toArr(c.personas).filter(p=>personLines(p).length).length} personas · ${esc(totStr(totales(c)))} · <span class="tag ${pagado(c)?"pagado":"porpagar"}" style="font-size:10.5px;padding:1px 7px">${pagado(c)?"💵 pagado":"💵 por pagar"}</span></div><div class="kc-lines">${comalDe(c).map(x=>`<span class="kl ${x.cat}">${x.cant} ${esc(x.n)}${x.masa?` <em class="${x.masa==="maiz"?"m":"h"}">${x.masa==="maiz"?"🌽 M":"🌾 H"}</em>`:""}</span>`).join("")}</div>${c.notas?`<div class="kc-nota">📝 ${esc(c.notas)}</div>`:""}<button class="kbtn take" data-tomar="${c.id}" data-s="${c.slug}" ${yo?"":"disabled"}>🔥 Lo tomo${yo?"":" · elige tu nombre"}</button></article>`;
   const armadoHTML=c=>{ const av=c.avance||{}; const comal=comalDe(c); const listas=comal.filter(x=>x.keys.every(k=>av[k])).length; const pers=toArr(c.personas).filter(p=>personLines(p).length); const emp=c.empaque||{}; const empacados=pers.filter(p=>emp[p.id]).length; const todoComal=listas===comal.length, todoEmp=empacados===pers.length;
     return `<div class="karm${c.mesa?" mesa":""}"><div class="karm-top"><div><b>${c.mesa?"🪑 ":""}${esc(c.familia||"sin nombre")}</b> <span class="b tab">${esc(c.tablero)}</span>${c.mesa?`<span class="b mesa">MESA</span>`:""} ${espera(c.pedidoEn)} <span class="b">🔥 ${mins(c.armadoEn)} min armando</span></div><div><button class="kbtn ghost" data-soltar="${c.id}" data-s="${c.slug}">↩︎ Soltar</button></div></div>
     ${c.notas?`<div class="kc-nota big">📝 ${esc(c.notas)}</div>`:""}
     <div class="ksteps"><button class="kstep${kit.vista==="comal"?" on":""}" data-kv="comal">1 · Comal <span>${listas}/${comal.length}</span></button><button class="kstep${kit.vista==="empaque"?" on":""}${todoComal?" ready":""}" data-kv="empaque">2 · Empaque <span>${empacados}/${pers.length}</span></button></div>
     ${kit.vista==="comal"?`<div class="klist">${comal.map(x=>{ const fal=(c.faltas||{}); const nohubo=x.keys.every(k=>fal[k]); const done=nohubo||x.keys.every(k=>av[k]); return `<div class="krow"><button class="kitem ${x.cat}${done?" done":""}${nohubo?" nohubo":""}" data-check="${esc(x.keys.join(","))}" data-id="${c.id}" data-s="${c.slug}" data-done="${done?1:0}"><span class="kq">${x.cant}</span><span class="kn">${esc(x.n)}${x.masa?`<em class="${x.masa}">${x.masa==="maiz"?"🌽 MAÍZ":"🌾 HARINA"}</em>`:""}${nohubo?`<small style="color:var(--r)">⛔ no hubo · el cliente ya fue avisado</small>`:""}</span><span class="kchk">${nohubo?"✕":done?"✓":""}</span></button>${nohubo?`<button class="knh" data-sihubo="${esc(x.keys.join(","))}" data-id="${c.id}" data-s="${c.slug}">↩︎ sí hubo</button>`:done?"":`<button class="knh" data-nohubo="${esc(x.keys.join(","))}" data-id="${c.id}" data-s="${c.slug}" data-n="${esc(x.n)}">no hay</button>`}</div>`; }).join("")}</div>${todoComal?`<button class="kbtn next" data-kv="empaque">Todo en el comal listo → Empacar</button>`:""}`:
     `<div class="kemp-h">Una bolsa por persona. Revisa que vaya todo y toca la bolsa.</div><div class="klist">${pers.map((p,i)=>{ const done=!!emp[p.id]; const nh=(c.faltas||{}); const ln=lineasDe(c).filter(l=>l.pid===p.id); const falt=ln.filter(l=>nh[l.k]).map(l=>l.n); return `<button class="kitem per${done?" done":""}" data-emp="${p.id}" data-id="${c.id}" data-s="${c.slug}" data-done="${done?1:0}"><span class="kq bolsa">${done?"✅":"👜"}<small>${i+1}</small></span><span class="kn"><span class="kper">${ROLES[p.rol]||"🙂"} ${esc(nombreDe(p))}</span>${personaFilas(p)}${falt.length?`<small style="color:var(--r)">⛔ sin ${esc(falt.join(", "))}</small>`:""}</span><span class="kchk">${done?"✓":""}</span></button>`; }).join("")}</div>${todoEmp?`<button class="kbtn go" data-listo="${c.id}" data-s="${c.slug}">✅ Listo para repartir</button>`:`<button class="kbtn ghost" data-listo="${c.id}" data-s="${c.slug}">Marcar listo de todos modos</button>`}`}</div>`; };
-  $("#main").innerHTML=`${bannerAgot}<div class="top"><h1>🔥 Cocina</h1>${sucSelect()}<button class="btn ghost" id="fsBtn" title="Pantalla completa (monitor de cocina)">${document.fullscreenElement?"🗗 Salir":"⛶ Pantalla completa"}</button><span class="sp"></span><div class="cocs">Soy: ${cocs.map(x=>`<button class="coc${x.id===kit.miId?" on":""}" data-coc="${x.id}">${esc(x.nombre)}${porCoc[x.id]?`<span>${porCoc[x.id].n} hoy</span>`:""}</button>`).join("")}<button class="coc add" id="cocAdd">＋</button></div></div>
+  const antesK=flipAntes($("#main")); $("#main").innerHTML=`${bannerAgot}<div class="top"><h1>🔥 Cocina</h1>${sucSelect()}<button class="btn ghost" id="fsBtn" title="Pantalla completa (monitor de cocina)">${document.fullscreenElement?"🗗 Salir":"⛶ Pantalla completa"}</button><span class="sp"></span><div class="cocs">Soy: ${cocs.map(x=>`<button class="coc${x.id===kit.miId?" on":""}" data-coc="${x.id}">${esc(x.nombre)}${porCoc[x.id]?`<span>${porCoc[x.id].n} hoy</span>`:""}</button>`).join("")}<button class="coc add" id="cocAdd">＋</button></div></div>
   <div class="kgrid">
     <section class="kcol"><h2>🍳 En cola <span class="n">${cola.length}</span></h2>${demArr.length?`<div class="kdem"><b>Demanda en cola</b> — cocina en tandas: ${demArr.slice(0,8).map(d=>`<span class="kl g">${d.cant} ${esc(d.n)} <em class="${d.masa==="maiz"?"m":"h"}">${d.masa==="maiz"?"🌽 M":"🌾 H"}</em></span>`).join("")}</div>`:""}<div class="kcards">${cola.map(tarjetaCola).join("")||`<div class="empty">Sin pedidos en cola 🎉</div>`}</div></section>
     <section class="kmain">${abierto?armadoHTML(abierto):`<div class="empty big">${yo?"Toma un pedido de la cola para empezar":"Elige tu nombre arriba (o agrégalo con ＋) para tomar pedidos"}</div>`}
@@ -910,6 +938,7 @@ function renderCocina(){
       ${hechosHoy.length?`<div class="kotros">Hoy: ${hechosHoy.length} pedidos salidos de cocina · ${Object.entries(porCoc).map(([id,v])=>{ const nm=(cocs.find(x=>x.id===id)||{}).nombre||"?"; return esc(nm)+" "+v.n+" ("+Math.round(v.t/v.n)+" min prom.)"; }).join(" · ")}</div>`:""}
     </section>
   </div>`;
+  flipDespues($("#main"),antesK);
 }
 document.addEventListener("fullscreenchange",()=>{ document.body.classList.toggle("fs",!!document.fullscreenElement); render(); });
 document.addEventListener("click",e=>{ if(vista!=="cocina") return; const t=e.target; const suc=pSuc;

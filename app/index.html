@@ -108,8 +108,9 @@ button.tag.click:hover{border-style:dashed;border-color:var(--ink)}
 .fch.on{background:var(--ink);color:var(--y);border-color:var(--ink)}.fch.on span{background:rgba(255,214,10,.25)}
 .fch.porpagar.on{background:#92400E;color:#FEF3C7;border-color:#92400E}.fch.pagado.on,.fch.entregado.on{background:#166534;color:#DCFCE7;border-color:#166534}
 @media(min-width:760px){.filtros{padding:10px 14px 0}}
-.card.moved{animation:moved .9s ease-out}
-@keyframes moved{0%{transform:translateX(-18px);opacity:.3}100%{transform:none;opacity:1}}
+.card.moved{animation:moved .7s cubic-bezier(.2,.8,.2,1)}
+@keyframes moved{0%{transform:translateY(18px) scale(.97);opacity:0;box-shadow:0 0 0 4px var(--y)}70%{box-shadow:0 0 0 4px var(--y)}100%{transform:none;opacity:1}}
+.card.flip{transition:transform .55s cubic-bezier(.2,.8,.2,1)}
 .col[data-col="archivado"] .card{background:#FAF6E8;box-shadow:none;border:1px solid #E6DCB8;opacity:.9}
 .col[data-col="archivado"] .col-head{color:#5a4a1a}
 .col-head{display:flex;align-items:center;justify-content:space-between;padding:8px 4px 10px;font-weight:900;font-size:16px}
@@ -753,10 +754,14 @@ $("#sucSel").addEventListener("change",e=>{ config.sucursal=e.target.value; conf
 $("#sucTel").addEventListener("change",e=>{ if(e.target.id==="telSel"){ config.telIdx=+e.target.value; saveConfig(); } });
 
 /* ---------- tablero ---------- */
-const sorters={armando:(a,b)=>a.creado-b.creado,porpedir:(a,b)=>(a.listoEn||a.actualizado)-(b.listoEn||b.actualizado),pedido:(a,b)=>(b.pedidoEn||0)-(a.pedidoEn||0),cocina:(a,b)=>(b.armadoEn||0)-(a.armadoEn||0),camino:(a,b)=>(b.listoCocinaEn||0)-(a.listoCocinaEn||0),entregado:(a,b)=>(b.entregadoEn||0)-(a.entregadoEn||0),archivado:(a,b)=>(b.archivadoEn||0)-(a.archivadoEn||0)};
+const sorters={armando:(a,b)=>a.creado-b.creado,porpedir:(a,b)=>(a.listoEn||a.actualizado)-(b.listoEn||b.actualizado),pedido:(a,b)=>(a.pedidoEn||0)-(b.pedidoEn||0),cocina:(a,b)=>(a.armadoEn||0)-(b.armadoEn||0),camino:(a,b)=>(a.listoCocinaEn||0)-(b.listoCocinaEn||0),entregado:(a,b)=>(b.entregadoEn||0)-(a.entregadoEn||0),archivado:(a,b)=>(b.archivadoEn||0)-(a.archivadoEn||0)};
 function cardsIn(est,todas){ return Object.values(pedidos).filter(c=>colDe(c)===est&&(todas||filtroPasa(c))).sort(sorters[est]); }
 const activos=()=>Object.values(pedidos).filter(c=>c.estado==="pedido");   // todo lo que está en cocina o en camino
 let _rbPend=false; function renderBoard(){ if(_rbPend) return; _rbPend=true; setTimeout(()=>{ _rbPend=false; renderBoardNow(); },0); }   // agrupa ráfagas de eventos en un solo pintado (también en segundo plano) — RLR
+/* FLIP: las tarjetas que cambian de lugar se deslizan en vez de brincar — RLR */
+function flipAntes(root){ const m={}; if(!root) return m; root.querySelectorAll("[data-id]").forEach(el=>{ const r=el.getBoundingClientRect(); m[el.dataset.id]=[r.left,r.top]; }); return m; }
+function flipDespues(root,antes){ if(!root||matchMedia("(prefers-reduced-motion:reduce)").matches) return; const mov=[]; root.querySelectorAll("[data-id]").forEach(el=>{ const a=antes[el.dataset.id]; if(!a||el.classList.contains("moved")) return; const r=el.getBoundingClientRect(); const dx=a[0]-r.left, dy=a[1]-r.top; if(Math.abs(dx)<1&&Math.abs(dy)<1) return; el.style.transition="none"; el.style.transform=`translate(${dx}px,${dy}px)`; mov.push(el); });
+  if(!mov.length) return; void root.offsetHeight; mov.forEach(el=>{ el.classList.add("flip"); el.style.transition=""; el.style.transform=""; el.addEventListener("transitionend",()=>el.classList.remove("flip"),{once:true}); }); }
 function renderBoardNow(){
   // ¿Qué cambió desde el último render? (solo brillan los cambios que vienen de OTRA pantalla)
   const snap={}; const now=Date.now(); ui.flash=ui.flash||{};
@@ -780,6 +785,7 @@ function renderBoardNow(){
   { const T=Object.values(pedidos).filter(conTags); const nPP=T.filter(c=>!pagado(c)).length, nP=T.filter(pagado).length, nPE=T.filter(c=>!entregado(c)).length, nE=T.filter(entregado).length; const $f=$("#filtros");
     if(T.length){ $f.hidden=false; $f.innerHTML=[["","Todos",T.length],["porpagar","💵 Por pagar",nPP],["pagado","✅ Pagados",nP],["porentregar","📦 Por entregar",nPE],["entregado","🛵 Entregados",nE]].map(([k,l,nn])=>`<button class="fch${ui.filtro===k?" on":""} ${k}" data-a="filtro" data-v="${k}">${l}<span>${nn}</span></button>`).join(""); } else { $f.hidden=true; if(ui.filtro){ ui.filtro=""; } } }
   $("#tabs").innerHTML=EST.map(e=>`<button class="tab${ui.tab===e.id?" on":""}" data-a="tab" data-v="${e.id}">${e.e} ${e.n}<span class="n">${counts[e.id]}</span></button>`).join("");
+  const antes=flipAntes($("#board"));
   $("#board").innerHTML=EST.map(e=>{
     const cards=cardsIn(e.id);
     let tools="";
@@ -795,6 +801,7 @@ function renderBoardNow(){
       <div class="col-head"><span>${e.e} ${e.n}<span class="n">${cards.length}</span></span></div>${tools}
       <div class="cards">${cards.length?cards.map(cardHTML).join(""):emptyHTML(e.id)}</div></section>`;
   }).join("");
+  flipDespues($("#board"),antes);
 }
 function topGuisos(){ const m={}; Object.values(pedidos).filter(c=>c.estado==="archivado"||c.estado==="entregado").forEach(c=>c.personas.forEach(p=>p.gorditas.forEach(l=>{ m[l.guiso]=(m[l.guiso]||0)+l.cant; })));
   return Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,3); }
@@ -823,7 +830,7 @@ function cardHTML(c){
     archivado:`<button class="btn y" data-a="repetir" data-id="${c.id}">🔁 Repetir este pedido</button>${H?`<button class="btn r" data-a="del" data-id="${c.id}">🗑</button>`:""}`
   }[colDe(c)==="cocina"||colDe(c)==="camino"?"pedido":c.estado];
   const $c=costo(c);
-  return `<article class="card${mine.has(c.id)?" mine":""}${fl.card?" flash":""}${fl.moved?" moved":""}${typing.length?" typing":""}">
+  return `<article class="card${mine.has(c.id)?" mine":""}${fl.card?" flash":""}${fl.moved?" moved":""}${typing.length?" typing":""}" data-id="${esc(c.id)}">
     <div class="card-top"><h3>Familia ${esc(c.familia||"sin nombre")}${fl.card&&typing.length&&!Object.keys(fl.per).length?`<span class="caret">▍</span>`:""}</h3><span class="when">${typing.length?"en vivo":fmtRel(c.actualizado)}</span></div>
     <div class="badges">${badges.join("")}</div>
     ${tagsHTML(c,host&&!MESA())}
