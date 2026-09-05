@@ -198,6 +198,12 @@ body.is-home .suc,body.is-home #btnCall,body.is-home #btnShare,body.is-home #btn
 .conf-per ul{margin:4px 0 0;padding-left:18px;font-weight:700;font-size:14.5px;line-height:1.5}
 .conf-none{font-size:13px;color:var(--mut);font-weight:700;margin-top:2px}
 .conf-tot{margin-top:8px;font-weight:900;color:var(--g);font-size:14px}
+/* masa: harina ámbar 🌾 · maíz azul 🌽 — misma identidad en todo el sistema — RLR */
+.mt{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:1px 6px;margin-left:5px;vertical-align:middle;font-style:normal}
+.mt.m-h{background:#FFE3A0;color:#7a4f00}.mt.m-m{background:#DBEAFE;color:#1d4ed8}
+.cnt.mh{background:#c98a00!important}.cnt.mm{background:#1d4ed8!important}
+.seg button.on.sh{background:#7a4f00;color:#FFE9A8}.seg button.on.sm{background:#1d4ed8;color:#DBEAFE}
+.line.mh{border-left:4px solid #c98a00;padding-left:8px}.line.mm{border-left:4px solid #1d4ed8;padding-left:8px}
 .caret{display:inline-block;color:var(--r);font-weight:900;animation:blink .9s steps(2,start) infinite;margin-left:1px}
 @keyframes blink{to{visibility:hidden}}
 .persons{display:flex;flex-direction:column;gap:4px;font-size:13.5px}
@@ -649,13 +655,15 @@ function entrarTablero(){ const raw=($("#hEntrar").value||"").trim(); const sl=s
 
 /* ---------- cálculos ---------- */
 function personLines(p){ const L=[];
-  p.gorditas.forEach(l=>L.push(l.cant+" "+l.guiso+(l.detalle?" ("+l.detalle+")":"")+" · "+(l.masa==="maiz"?"maíz":"harina")));
+  p.gorditas.forEach(l=>L.push(l.cant+" "+l.guiso+(l.detalle?" ("+l.detalle+")":"")+" · "+(l.masa==="maiz"?"🌽 maíz":"🌾 harina")));
   if(p.chilaquiles){ const c=p.chilaquiles;
     const ex=(c.extras||[]).map(x=>x==="Guiso favorito"?(c.guiso?"guiso de "+c.guiso.toLowerCase():"guiso favorito"):x.toLowerCase());
     L.push((c.cant>1?c.cant+" ":"")+"Chilaquiles"+(c.salsa?" salsa "+c.salsa.toLowerCase():" (falta salsa)")+(c.queso?" · queso "+c.queso.toLowerCase():" · (falta queso)")+(ex.length?" + "+ex.join(" + "):"")); }
   p.bebidas.forEach(l=>L.push(l.cant+" "+l.nombre+(l.detalle?" ("+l.detalle+")":"")));
   p.postres.forEach(l=>L.push(l.cant+" "+l.nombre));
   return L; }
+const masaTag=m=>`<span class="mt ${m==="maiz"?"m-m":"m-h"}">${m==="maiz"?"🌽 Maíz":"🌾 Harina"}</span>`;
+const lineaHTML=t=>esc(t).replace(/ · (🌾 harina|🌽 maíz)$/,(_,x)=>" "+masaTag(x.includes("maíz")?"maiz":"harina"));
 function lineasDe(c){ const L=[]; toArr(c.personas).forEach((p,pi)=>{ const pid=p.id||("p"+pi); toArr(p.gorditas).forEach((l,i)=>L.push({k:pid+":g:"+i,per:nombreDe(p),n:l.guiso})); if(p.chilaquiles) L.push({k:pid+":ch:0",per:nombreDe(p),n:"Chilaquiles"}); toArr(p.bebidas).forEach((l,i)=>L.push({k:pid+":b:"+i,per:nombreDe(p),n:l.nombre})); toArr(p.postres).forEach((l,i)=>L.push({k:pid+":po:"+i,per:nombreDe(p),n:l.nombre})); }); return L; }
 function noHubo(c){ const f=c.faltas||{}; return lineasDe(c).filter(l=>f[l.k]).map(l=>l.n+" ("+l.per+")"); }
 function totales(c){ const t={g:0,h:0,m:0,ch:0,b:0,po:0,per:0};
@@ -663,7 +671,7 @@ function totales(c){ const t={g:0,h:0,m:0,ch:0,b:0,po:0,per:0};
     p.gorditas.forEach(l=>{ t.g+=l.cant; if(l.masa==="maiz") t.m+=l.cant; else t.h+=l.cant; });
     if(p.chilaquiles) t.ch+=p.chilaquiles.cant||1; p.bebidas.forEach(l=>t.b+=l.cant); p.postres.forEach(l=>t.po+=l.cant); });
   return t; }
-function totStr(t){ const s=[]; if(t.g) s.push("🫓 "+t.g+" gordita"+(t.g>1?"s":"")+" ("+t.h+"H · "+t.m+"M)");
+function totStr(t){ const s=[]; if(t.g) s.push("🫓 "+t.g+" gordita"+(t.g>1?"s":"")+" (🌾"+t.h+" · 🌽"+t.m+")");
   if(t.ch) s.push("🍳 "+t.ch); if(t.b) s.push("☕ "+t.b); if(t.po) s.push("🍰 "+t.po); return s.length?s.join("  ·  "):"Sin nada todavía"; }
 function totCorto(t){ const s=[]; if(t.g) s.push(t.g+" gordita"+(t.g>1?"s":"")); if(t.ch) s.push(t.ch+" chilaquiles"); if(t.b) s.push(t.b+" bebida"+(t.b>1?"s":"")); if(t.po) s.push(t.po+" postre"+(t.po>1?"s":"")); return s.join(" · "); }
 // Precios opcionales (⚙️): si Ricardo los captura, se estima cuánto es por familia y en total — RLR
@@ -706,8 +714,8 @@ function buildMessage(cards){
     L.push("");
   });
   L.push("🧮 *RESUMEN PARA COCINA*");
-  if(g) L.push("🫓 Gorditas: "+g+" ("+h+" harina · "+m+" maíz)");
-  Object.keys(kit).sort((a,b)=>(kit[b].h+kit[b].m)-(kit[a].h+kit[a].m)||a.localeCompare(b)).forEach(k=>{ const v=kit[k]; const parts=[]; if(v.h) parts.push(v.h+" harina"); if(v.m) parts.push(v.m+" maíz"); L.push("    · "+k+": "+parts.join(", ")); });
+  if(g) L.push("🫓 Gorditas: "+g+" (🌾 "+h+" harina · 🌽 "+m+" maíz)");
+  Object.keys(kit).sort((a,b)=>(kit[b].h+kit[b].m)-(kit[a].h+kit[a].m)||a.localeCompare(b)).forEach(k=>{ const v=kit[k]; const parts=[]; if(v.h) parts.push("🌾 "+v.h+" harina"); if(v.m) parts.push("🌽 "+v.m+" maíz"); L.push("    · "+k+": "+parts.join(", ")); });
   if(ch) L.push("🍳 Chilaquiles: "+ch);
   const bk=Object.keys(beb); if(bk.length) L.push("☕ Bebidas: "+bk.reduce((a,k)=>a+beb[k],0)+" ("+bk.map(k=>beb[k]+" "+k.toLowerCase()).join(", ")+")");
   const pk=Object.keys(pos); if(pk.length) L.push("🍰 Postres: "+pk.reduce((a,k)=>a+pos[k],0)+" ("+pk.map(k=>pos[k]+" "+k.toLowerCase()).join(", ")+")");
@@ -792,7 +800,7 @@ function cardHTML(c){
   if(mine.has(c.id)) badges.push(`<span class="b tuyo">tu pedido</span>`);
   const nh=noHubo(c); if(nh.length) badges.push(`<span class="b wip">⛔ Cocina no tuvo: ${esc([...new Set(nh)].join(", "))}${c.estado==="pedido"&&(!c.etapa||c.etapa==="proceso")?" · puedes cambiarlo":""}</span>`);
   const falt=(c.estado==="armando"||c.estado==="porpedir")?faltantes(c):[]; if(falt.length) badges.push(`<span class="b wip">⛔ Agotado: ${esc(falt.map(f=>f.split(": ")[1]).filter((x,i,a)=>a.indexOf(x)===i).join(", "))}</span>`);
-  const persons=c.personas.map(p=>{ const L=personLines(p); const f=fl.per[p.id]; return `<div class="pl${f?" flash":""}">${rolDe(p).e} <b>${esc(nombreDe(p))}</b>: ${L.length?`<span class="l">${esc(L.join(" · "))}</span>`:"<i>sin nada aún</i>"}${f&&typing.length?`<span class="caret">▍</span>`:""}</div>`; }).join("")||`<div class="pl"><i>Sin personas todavía</i></div>`;
+  const persons=c.personas.map(p=>{ const L=personLines(p); const f=fl.per[p.id]; return `<div class="pl${f?" flash":""}">${rolDe(p).e} <b>${esc(nombreDe(p))}</b>: ${L.length?`<span class="l">${L.map(lineaHTML).join(" · ")}</span>`:"<i>sin nada aún</i>"}${f&&typing.length?`<span class="caret">▍</span>`:""}</div>`; }).join("")||`<div class="pl"><i>Sin personas todavía</i></div>`;
   const H=host&&!MESA(), M=mine.has(c.id);
   const A={
     armando:`<button class="btn y" data-a="edit" data-id="${c.id}">✏️ Editar</button><button class="btn" data-a="ligaFam" data-id="${c.id}" title="Liga de esta familia">🔗</button>${H||M?`<button class="btn r" data-a="del" data-id="${c.id}">🗑</button>`:""}`,
@@ -853,7 +861,7 @@ function validarDraft(d){ const err=[]; const vacios=[];
 function openConfirm(d){ const v=validarDraft(d); const $c=costo(d);
   $("#confBody").innerHTML=`<div class="conf-fam">👨‍👩‍👧‍👦 Familia ${esc(d.familia||"sin nombre")}</div>
     ${v.err.length?`<div class="warn">⚠️ Falta resolver:<br>${v.err.map(esc).join("<br>")}</div>`:""}
-    ${d.personas.map(p=>{ const L=personLines(p); return `<div class="conf-per${L.length?"":" none"}"><div class="conf-nom">${rolDe(p).e} ${esc(nombreDe(p))}</div>${L.length?`<ul>${L.map(l=>`<li>${esc(l)}</li>`).join("")}</ul>`:`<div class="conf-none">Sin pedido esta vez</div>`}</div>`; }).join("")}
+    ${d.personas.map(p=>{ const L=personLines(p); return `<div class="conf-per${L.length?"":" none"}"><div class="conf-nom">${rolDe(p).e} ${esc(nombreDe(p))}</div>${L.length?`<ul>${L.map(l=>`<li>${lineaHTML(l)}</li>`).join("")}</ul>`:`<div class="conf-none">Sin pedido esta vez</div>`}</div>`; }).join("")}
     ${d.notas?`<div class="notas">📝 ${esc(d.notas)}</div>`:""}
     <div class="conf-tot">${esc(totStr(totales(d)))}${$c!=null?` · 💰 aprox. ${money($c)}`:""}</div>`;
   $("#confFoot").innerHTML=`<button class="btn ghost" data-a="close" data-v="mConf">✏️ Seguir editando</button><button class="btn p" data-a="confirmar" ${v.err.length?"disabled":""}>${MESA()?"🍳 Ordenar":d.estado==="pedido"?"💾 Guardar cambio":"✅ Confirmar pedido"}</button>`;
@@ -899,17 +907,17 @@ function checkDup(){ const d=ui.draft; const w=$("#dupWarn"); if(!d||!w) return;
   w.innerHTML=otro?`<div class="warn" style="margin-top:8px">⚠️ Ya hay un pedido de <b>Familia ${esc(otro.familia)}</b> armándose (${esc(totStr(totales(otro)))}). <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><button class="btn y" data-a="irDuplicado" data-id="${otro.id}">Abrir ese y no duplicar</button><button class="btn ghost" data-a="ignorarDup">Es otra familia</button></div></div>`:""; }
 function personaHTML(p,pi){
   const r=rolDe(p); const cnt={}; p.gorditas.forEach(l=>{ cnt[l.guiso]=cnt[l.guiso]||{harina:0,maiz:0}; cnt[l.guiso][l.masa]+=l.cant; });
-  const chips=GUISOS.map(g=>{ const c=cnt[g.n]; const b=c?[c.harina?c.harina+"H":"",c.maiz?c.maiz+"M":""].filter(Boolean).join("·"):"";
-    const off=!disponible("g",g.n,p.masa||"harina"), soloOtra=!off&&!disponible("g",g.n,p.masa==="maiz"?"harina":"maiz"); const pic=picDe(g.n); return `<button class="chip${c?" has":""}${off?" off":""}" data-a="${off?"agotado":"addG"}" data-p="${pi}" data-v="${esc(g.n)}">${esc(g.n)}${pic&&!off?`<span class="pic">${"🌶".repeat(pic)}</span>`:""}${off?`<span class="cnt no">sin ${p.masa==="maiz"?"maíz":"harina"}</span>`:b?`<span class="cnt">${b}</span>`:soloOtra?`<span class="cnt ok2">solo ${p.masa==="maiz"?"maíz":"harina"}</span>`:""}</button>`; }).join("");
-  const lines=p.gorditas.map((l,i)=>`<div class="line${disponible("g",l.guiso,l.masa)?"":" off"}"><span class="qty"><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="-1">−</button><span class="lq">${l.cant}</span><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="1">+</button></span><span class="ln">${esc(l.guiso)}<em>${l.masa==="maiz"?"maíz":"harina"}</em>${disponible("g",l.guiso,l.masa)?"":`<em class="no">⛔ agotado hoy</em>`}</span>
+  const chips=GUISOS.map(g=>{ const c=cnt[g.n]; const b=c?(c.harina?`<span class="cnt mh">🌾${c.harina}</span>`:"")+(c.maiz?`<span class="cnt mm">🌽${c.maiz}</span>`:""):"";
+    const off=!disponible("g",g.n,p.masa||"harina"), soloOtra=!off&&!disponible("g",g.n,p.masa==="maiz"?"harina":"maiz"); const pic=picDe(g.n); return `<button class="chip${c?" has":""}${off?" off":""}" data-a="${off?"agotado":"addG"}" data-p="${pi}" data-v="${esc(g.n)}">${esc(g.n)}${pic&&!off?`<span class="pic">${"🌶".repeat(pic)}</span>`:""}${off?`<span class="cnt no">sin ${p.masa==="maiz"?"maíz":"harina"}</span>`:b?b:soloOtra?`<span class="cnt ok2">solo ${p.masa==="maiz"?"maíz":"harina"}</span>`:""}</button>`; }).join("");
+  const lines=p.gorditas.map((l,i)=>`<div class="line ${l.masa==="maiz"?"mm":"mh"}${disponible("g",l.guiso,l.masa)?"":" off"}"><span class="qty"><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="-1">−</button><span class="lq">${l.cant}</span><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="1">+</button></span><span class="ln">${esc(l.guiso)}${masaTag(l.masa)}${disponible("g",l.guiso,l.masa)?"":`<em class="no">⛔ agotado hoy</em>`}</span>
     ${l.guiso==="Combinada"?`<input class="det" data-in="gdet" data-p="${pi}" data-i="${i}" value="${esc(l.detalle)}" placeholder="¿de qué?">`:""}</div>`).join("");
   const openB=ui.open[p.id+"b"]||p.bebidas.length, openP=ui.open[p.id+"p"]||p.postres.length;
   const col=!!ui.open[p.id+"c"]; const L=personLines(p);
-  if(col) return `<section class="persona col"><div class="p-head"><span class="p-emoji">${r.e}</span><div class="p-sum"><b>${esc(nombreDe(p))}</b><span>${L.length?esc(L.join(" · ")):"sin pedido"}</span></div><button class="ib" data-a="colPersona" data-p="${pi}" title="Abrir">▾</button></div></section>`;
+  if(col) return `<section class="persona col"><div class="p-head"><span class="p-emoji">${r.e}</span><div class="p-sum"><b>${esc(nombreDe(p))}</b><span>${L.length?L.map(lineaHTML).join(" · "):"sin pedido"}</span></div><button class="ib" data-a="colPersona" data-p="${pi}" title="Abrir">▾</button></div></section>`;
   return `<section class="persona">
     <div class="p-head"><span class="p-emoji">${r.e}</span><input class="p-name" data-in="nombre" data-p="${pi}" value="${esc(p.nombre)}" placeholder="Nombre (${r.n})" autocomplete="off">
       <button class="ib" data-a="colPersona" data-p="${pi}" title="Cerrar (queda en el pedido)">▴</button><button class="ib" data-a="dupPersona" data-p="${pi}" title="Duplicar pedido de esta persona">⧉</button><button class="ib" data-a="delPersona" data-p="${pi}" title="Quitar">✕</button></div>
-    <div class="sec-head"><span>🫓 Gorditas</span><div class="seg"><button class="${p.masa!=="maiz"?"on":""}" data-a="masa" data-p="${pi}" data-v="harina">Harina</button><button class="${p.masa==="maiz"?"on":""}" data-a="masa" data-p="${pi}" data-v="maiz">Maíz</button></div></div>
+    <div class="sec-head"><span>🫓 Gorditas</span><div class="seg"><button class="sh${p.masa!=="maiz"?" on":""}" data-a="masa" data-p="${pi}" data-v="harina">🌾 Harina</button><button class="sm${p.masa==="maiz"?" on":""}" data-a="masa" data-p="${pi}" data-v="maiz">🌽 Maíz</button></div></div>
     <div class="chips">${chips}</div>
     <div class="lines">${lines}</div>
     <div class="p-extras">
@@ -953,7 +961,7 @@ function openMessage(cards,markIds){
 function openReparto(cards){ cards=cards.filter(Boolean); ui.msgIds=null; $("#mMsg h2").textContent="📋 Lista de reparto";
   const T={g:0,h:0,m:0,ch:0,b:0,po:0}; cards.forEach(c=>{ const t=totales(c); Object.keys(T).forEach(k=>T[k]+=t[k]); });
   ui.msgText=cards.map(c=>"FAMILIA "+(c.familia||"sin nombre").toUpperCase()+"\n"+c.personas.map(p=>{ const L=personLines(p); return L.length?"• "+nombreDe(p)+": "+L.join(", "):""; }).filter(Boolean).join("\n")).join("\n\n");
-  $("#msgBody").innerHTML=`<div style="font-weight:800;color:var(--mut);font-size:13px;margin-bottom:8px">Toca cada renglón cuando ya lo entregaste. 📦 ${esc(totCorto(T)||"sin productos")}</div>`+cards.map(c=>`<div class="rep-fam"><h3>👨‍👩‍👧‍👦 Familia ${esc(c.familia||"sin nombre")}</h3>${c.personas.map(p=>{ const L=personLines(p); return L.length?`<div class="rep-per"><div class="rep-nom">${rolDe(p).e} ${esc(nombreDe(p))}</div>${L.map(l=>`<button class="rep-line" data-a="chk">${esc(l)}</button>`).join("")}</div>`:""; }).join("")}${c.notas?`<div class="notas">📝 ${esc(c.notas)}</div>`:""}</div>`).join("")||`<div class="empty">Nada que repartir.</div>`;
+  $("#msgBody").innerHTML=`<div style="font-weight:800;color:var(--mut);font-size:13px;margin-bottom:8px">Toca cada renglón cuando ya lo entregaste. 📦 ${esc(totCorto(T)||"sin productos")}</div>`+cards.map(c=>`<div class="rep-fam"><h3>👨‍👩‍👧‍👦 Familia ${esc(c.familia||"sin nombre")}</h3>${c.personas.map(p=>{ const L=personLines(p); return L.length?`<div class="rep-per"><div class="rep-nom">${rolDe(p).e} ${esc(nombreDe(p))}</div>${L.map(l=>`<button class="rep-line" data-a="chk">${lineaHTML(l)}</button>`).join("")}</div>`:""; }).join("")}${c.notas?`<div class="notas">📝 ${esc(c.notas)}</div>`:""}</div>`).join("")||`<div class="empty">Nada que repartir.</div>`;
   $("#msgFoot").innerHTML=`<div class="sum">Solo se marca en esta pantalla.</div><button class="btn" data-a="copiar">📋 Copiar lista</button><button class="btn p" data-a="close" data-v="mMsg">Cerrar</button>`;
   show("mMsg"); }
 function marcar(id,estado){ const c=pedidos[id]; if(!c) return; const antes=c.estado; const P={estado,listo:true};
