@@ -194,6 +194,17 @@ tr.tot td{font-weight:900;background:var(--y3)}
 .mini{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:3px 9px;font-size:12px;font-weight:800}
 .mini.on{background:var(--ink);color:var(--y);border-color:var(--ink)}
 .pos-tot{margin-top:10px;font-weight:800;color:var(--mut);font-size:13px}
+.origen{background:var(--y3);border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:12px;font-size:13px;font-weight:700}
+.o-h{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:15px;margin-bottom:6px}
+.o-row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:4px 0;border-top:1px dashed var(--line)}
+.o-link{color:var(--b);font-weight:800;word-break:break-all;text-decoration:none}
+.o-acts{display:inline-flex;gap:4px}
+.o-acts .btn{padding:5px 9px;font-size:12px}
+.btn.wa{background:#25D366;color:#fff}
+.o-meta{gap:10px;color:var(--mut);justify-content:flex-start}
+.mut{color:var(--mut)}
+.notas.contacto{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.notas.contacto .o-acts .btn{padding:3px 7px;font-size:11.5px}
 .pos-borrar{margin-top:14px;padding-top:10px;border-top:1px dashed var(--line);text-align:right}
 .pos-borrar .btn{color:var(--r);border-color:#f3b8b4}
 .qrow{display:flex;gap:6px;align-items:stretch}
@@ -681,9 +692,21 @@ function cardHTML(c){
     <div class="badges">${c.mesa?`<span class="b mesa">🪑 MESA · prioridad</span>`:""}${Object.keys(c.faltas||{}).length?`<span class="b wip">⛔ no hubo: ${esc([...new Set(lineasDe(c).filter(l=>(c.faltas||{})[l.k]).map(l=>l.n))].join(", "))}</span>`:""}<span class="b tab">🏠 ${esc(c.tablero)}</span>${suc?`<span class="b suc">📍 ${esc(suc.n)}</span>`:""}${c.estado==="pedido"?`<span class="b">📲 ${fmtFecha(c.pedidoEn)}</span>`:""}${c.estado==="entregado"?`<span class="b ok">🛵 ${fmtFecha(c.entregadoEn)}</span>`:""}${cfg.entrega?`<span class="b">⏰ ${esc(cfg.entrega)}</span>`:""}</div>
     ${tagsHTML(c,c.slug,true)}
     <div>${persons}</div>${c.notas?`<div class="notas">📝 ${esc(c.notas)}</div>`:""}
-    ${c.estado!=="armando"&&cfg.direccion?`<div class="notas">🏠 ${esc(cfg.direccion)}${cfg.telAnfitrion?" · 📞 "+esc(cfg.telAnfitrion):""}</div>`:""}
+    ${c.estado!=="armando"&&(cfg.direccion||cfg.telAnfitrion)?`<div class="notas contacto">${cfg.direccion?`🏠 ${esc(cfg.direccion)}`:""}${cfg.telAnfitrion?`<span> · 📱 ${telFmt(cfg.telAnfitrion)}</span>`:""}<span class="o-acts">${contactoHTML(c,c.slug,true)}</span></div>`:""}
     <div class="tot">${esc(totStr(totales(c)))}${costo(c)!=null?` · <b>💰 ${money(costo(c))}</b>`:""}</div><div class="acts">${A}${c.estado!=="archivado"?`<button class="btn y" data-a="editar" data-id="${c.id}" data-s="${c.slug}">✏️ Editar</button>`:""}</div></article>`;
 }
+// Contacto y origen de un pedido: liga del tablero, celular del anfitrión (llamar / WhatsApp), dirección, hora, pago — RLR
+const telFmt=t=>String(t||"").replace(/\D/g,"").slice(-10).replace(/(\d{3})(\d{3})(\d{2})(\d{2})/,"$1 $2 $3 $4");
+const waMsg=(c,slug)=>{ const sn=(SUCURSALES.find(x=>x.id===c.sucursal)||{}).n||""; return "Hola 👋 Le escribimos de Gorditas Ranitas"+(sn?" (Suc. "+sn+")":"")+" sobre el pedido de Familia "+(c.familia||"")+". "; };
+function contactoHTML(c,slug,compacto){ const a=anfitriones[slug]||{}; const cfg=(tableros[slug]||{}).config||{}; const tel=String(cfg.telAnfitrion||a.tel||"").replace(/\D/g,"").slice(-10); if(!tel&&compacto) return "";
+  const btns=tel?`<a class="btn" href="tel:+52${tel}" title="Llamar">📞 ${compacto?"":telFmt(tel)}</a><a class="btn wa" href="https://api.whatsapp.com/send?phone=52${tel}&text=${encodeURIComponent(waMsg(c,slug))}" target="_blank" rel="noopener" title="WhatsApp">💬${compacto?"":" WhatsApp"}</a>`:""; if(compacto) return btns;
+  const url=APP_URL+slug+(c.id?"?f="+c.id:""); const et={proceso:"🍳 En cola de cocina",armado:"🔥 Armando en cocina"+(c.cocinero?" · "+c.cocinero.nombre:""),espera:"⏳ Espera repartidor",repartiendo:"🛵 Repartiendo",entregado:"✅ Entregado"}[c.etapa||(c.estado==="pedido"?"proceso":"")]||({armando:"✏️ Armando",porpedir:"📋 Por pedir",entregado:"✅ Entregado",archivado:"📚 Historial"}[c.estado]||c.estado);
+  return `<div class="origen"><div class="o-h"><b>${a.mesa?"🪑":a.mostrador?"🧾":"🏠"} ${esc(a.nombre||slug)}</b><span class="b">${esc(et)}</span></div>
+    <div class="o-row"><a class="o-link" href="${esc(url)}" target="_blank" rel="noopener">🔗 ${esc(url.replace("https://",""))}</a><button class="btn ghost" data-copy="${esc(url)}" title="Copiar liga">📋</button></div>
+    ${tel?`<div class="o-row"><span>📱 ${esc((cfg.anfitrion||a.nombre||"Anfitrión"))} · <b>${telFmt(tel)}</b></span><span class="o-acts">${btns}</span></div>`:`<div class="o-row"><span class="mut">Sin celular registrado</span></div>`}
+    ${cfg.direccion?`<div class="o-row"><span>🏠 ${esc(cfg.direccion)}</span><a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cfg.direccion)}" target="_blank" rel="noopener">🗺 Mapa</a></div>`:""}
+    <div class="o-row o-meta">${cfg.entrega?`<span>⏰ Para: <b>${esc(cfg.entrega)}</b></span>`:""}${cfg.pago?`<span>💵 ${esc(cfg.pago)}${cfg.pagoCon?" · pago con $"+esc(cfg.pagoCon):""}</span>`:""}${c.pedidoEn?`<span>📲 Pedido ${fmtFecha(c.pedidoEn)}</span>`:""}${c.listoCocinaEn?`<span>🍳 Salió de cocina ${fmtFecha(c.listoCocinaEn)}</span>`:""}${c.entregadoEn?`<span>✅ ${fmtFecha(c.entregadoEn)}</span>`:""}</div>
+    ${Object.keys(c.faltas||{}).length?`<div class="o-row" style="color:var(--r)">⛔ No hubo: ${esc([...new Set(lineasDe(c).filter(l=>(c.faltas||{})[l.k]).map(l=>l.n))].join(", "))}</div>`:""}</div>`; }
 function upd(slug,id,patch){ patch.actualizado=Date.now(); patch._w=SID; db.ref(ROOT+"/tableros/"+slug+"/pedidos/"+id).update(patch).catch(()=>toast("No se pudo guardar")); }
 
 /* ---------- 2b. MOSTRADOR: pedidos en sucursal a toda velocidad; también edita cualquier pedido del kanban — RLR ---------- */
@@ -734,6 +757,7 @@ function renderMostrador(){
       </div>
     </div>
     <div class="pos-right card">
+      ${pos.slug&&!pos.slug.startsWith("mostrador-")?contactoHTML(Object.assign({},c,{sucursal:suc}),pos.slug):""}
       <h3 style="margin-bottom:6px">${esc(nombreDe(p))}</h3>
       <div class="lines">${lineas.join("")||`<div class="empty">Escribe y da Enter para agregar</div>`}</div>
       <label style="display:block;margin-top:10px;font-size:12px;font-weight:800;color:var(--mut)">Notas del pedido<input id="posNotas" value="${esc(c.notas||"")}" placeholder="sin cebolla, salsa aparte…" style="margin-top:4px"></label>
@@ -747,6 +771,7 @@ function renderMostrador(){
 document.addEventListener("click",e=>{ if(vista!=="mostrador") return; const t=e.target;
   if(t.id==="posNuevo"||t.closest("#posNuevo")){ nuevoPedidoPos(); return; }
   const ab=t.closest("[data-abrir]"); if(ab){ if(pos.card) guardarPos(true); abrirEnMostrador(mostSlug(pSuc),ab.dataset.abrir); return; }
+  const cp=t.closest("[data-copy]"); if(cp){ navigator.clipboard.writeText(cp.dataset.copy).then(()=>toast("Liga copiada")); return; }
   if(!pos.card) return; const c=pos.card; const p=c.personas[pos.per];
   if(t.id==="posMic"){ if(voz.on) pararVoz(); else iniciarVoz(); return; }
   if(t.id==="posMin"){ pararVoz(); minimizarPos(); return; } if(t.id==="posCocina"){ mandarCocina(); return; } if(t.id==="posGuardar"){ const live=((tableros[pos.slug]||{}).pedidos||{})[c.id]; if(live&&live.estado==="pedido"&&live.etapa&&live.etapa!=="proceso"&&diffPedido(pos.orig,c)&&!confirm("La cocina ya tomó este pedido ("+(live.cocinero||{}).nombre+"). ¿Guardar el cambio de todos modos? Avísale a cocina.")) return; const df=diffPedido(pos.orig,c); bit("edicion","edito",df?"Cambió: "+df:"Guardó sin cambios",{pedido:c.id,familia:c.familia,tablero:pos.slug}); guardarPos().then(()=>{ pos.card=null; pos.slug=null; vista="pedidos"; syncUrl(); render(); }); return; }
