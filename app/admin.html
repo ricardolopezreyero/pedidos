@@ -508,7 +508,7 @@ const ROOT="ranitas", CLAVE_MAESTRA="123";   // usuario maestro (provisional)
 const SUC_BASE=[{id:"sanatorio",n:"Sanatorio Español",tels:["8717189478","8715093598"]},{id:"vinedos",n:"Viñedos",tels:["8712036783","8714189903"]},{id:"juarez",n:"Juárez",tels:["8719432960","8713326391"]},{id:"ibero",n:"Villas de la Ibero",tels:["8719757123","8714334785"]},{id:"independencia",n:"Independencia",tels:["8717240720"]}];
 let SUCURSALES=SUC_BASE.slice(), SUC_TODAS={};
 function aplicarSucursales(v){ SUC_TODAS=v||{}; const arr=Object.entries(SUC_TODAS).filter(([k,x])=>x&&x.activa!==false).map(([k,x])=>({id:k,n:x.n||k,tels:Array.isArray(x.tels)?x.tels:Object.values(x.tels||{}),direccion:x.direccion||"",orden:x.orden||0,creado:x.creado||0})).sort((a,b)=>(a.orden-b.orden)||(a.creado-b.creado)); if(arr.length) SUCURSALES=arr; }
-const ROLES={papa:"👨",mama:"👩",hijo:"👦",hija:"👧",otro:"🙂"};
+const ROLES={papa:"👨",mama:"👩",hijo:"👦",hija:"👧",familiar:"🧑",amigo:"🙋‍♂️",amiga:"🙋‍♀️",companero:"👔",otro:"🙂"};
 const VISTAS=[{id:"panorama",n:"Panorama",e:"📊"},{id:"pedidos",n:"Pedidos",e:"📋"},{id:"mostrador",n:"Mostrador",e:"🧾"},{id:"cocina",n:"Cocina",e:"🔥"},{id:"reparto",n:"Reparto",e:"🛵"},{id:"mesas",n:"Mesas",e:"🪑"},{id:"productos",n:"Productos",e:"🏪"},{id:"precios",n:"Precios",e:"💲"},{id:"recetas",n:"Recetas",e:"📖"},{id:"compras",n:"Compras",e:"🛒"},{id:"usuarios",n:"Usuarios",e:"👥"},{id:"sucursales",n:"Sucursales",e:"🏬",solo:"maestro"},{id:"bitacora",n:"Bitácora",e:"📜"},{id:"manual",n:"Manuales",e:"📖"}];   // Manuales lo ven todos
 const GUISOS_PIC={"Chicharrón prensado":2,"Chicharrón pella":2,"Carne con chile":2,"Guiso verde":1,"Huevo verde":1,"Huevo rojo":1,"Asado":1};   // picor de fábrica (editable en Productos → ranitas/menu)
 const SALSAS=["Verde cremosa","Roja","Verde tomatillo","Chipotle con crema","La más picosa"], QUESOS=["Asadero","Chihuahua"], EXTRAS=["Huevo estrellado","Huevo revuelto","Guiso favorito"];
@@ -545,7 +545,7 @@ function bit(cat,accion,det,x){ if(typeof db==="undefined"||!db) return; x=x||{}
   db.ref(ROOT+"/bitacora").push({ts:firebase.database.ServerValue.TIMESTAMP,cat,accion,det:String(det||"").slice(0,600),actor:{tipo,nombre:(coc&&coc.nombre)||(yo&&yo.nombre)||"",usuario:yo?yo.id:"",sid:SID},tablero:x.tablero||"",tableroNombre:x.tablero?((anfitriones[x.tablero]||{}).nombre||x.tablero):"",sucursal:x.sucursal||pSuc||"",pedido:x.pedido||null,familia:x.familia||"",app:"admin"}).catch(()=>{}); }catch(e){} }
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const toArr=v=>Array.isArray(v)?v:(v&&typeof v==="object"?Object.values(v):[]);
-const nombreDe=p=>(p.nombre||"").trim()||({papa:"Papá",mama:"Mamá",hijo:"Hijo",hija:"Hija"}[p.rol]||"Otro");
+const nombreDe=p=>(p.nombre||"").trim()||({papa:"Papá",mama:"Mamá",hijo:"Hijo",hija:"Hija",familiar:"Familiar",amigo:"Amigo",amiga:"Amiga",companero:"Compañero"}[p.rol]||"Otro");
 const pct=(a,b)=>b?Math.round(a*100/b):0;
 function fmtFecha(ts){ return ts?new Date(ts).toLocaleString("es-MX",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"}).replace(/\./g,""):""; }
 function fmtRel(ts){ if(!ts) return ""; const d=(Date.now()-ts)/1000; if(d<60) return "ahora"; if(d<3600) return "hace "+Math.floor(d/60)+" min"; if(d<86400) return "hace "+Math.floor(d/3600)+" h"; return fmtFecha(ts); }

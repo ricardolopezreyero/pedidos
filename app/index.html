@@ -272,7 +272,19 @@ body.is-home .suc,body.is-home #btnCall,body.is-home #btnShare,body.is-home #btn
 #mEditor .foot .btn{flex:1}
 @media(min-width:760px){#mEditor .foot .sum{width:auto;flex:1}#mEditor .foot .btn{flex:none}}
 @media(max-width:759px){#mEditor .sheet{height:100dvh;max-height:100dvh;border-radius:0}#mEditor .head{padding-top:calc(14px + env(safe-area-inset-top))}}
-@media(min-width:760px){.modal{align-items:center;padding:20px}.sheet{border-radius:22px;max-height:90vh}}
+@media(min-width:760px){.modal{align-items:center;padding:20px}.sheet{border-radius:22px;max-height:90vh}#mEditor .sheet{max-width:1180px}#mEditor .chips .chip{font-size:14.5px;padding:9px 14px}}
+/* switch harina / maíz: grande, con relieve, color por masa — RLR */
+.msw{display:inline-flex;background:#E7DDBD;border-radius:16px;padding:4px;gap:4px;box-shadow:inset 0 2px 4px rgba(0,0,0,.18)}
+.msw button{border:0;background:transparent;padding:9px 16px;border-radius:12px;font-weight:900;font-size:15px;color:#7a6a3a;display:inline-flex;align-items:center;gap:6px;transition:all .15s;opacity:.75}
+.msw button i{font-style:normal;font-size:18px}
+.msw button.on{opacity:1;color:#fff;transform:translateY(-1px);box-shadow:0 3px 0 rgba(0,0,0,.25),0 6px 14px rgba(0,0,0,.18)}
+.msw.harina button.on{background:linear-gradient(#b57a12,#7a4f00)}.msw.maiz button.on{background:linear-gradient(#3b6cf0,#1d4ed8)}
+.p-tools{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.pt{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:7px 11px;font-weight:800;font-size:12.5px;color:var(--ink)}
+.pt.dup{background:#eef3ff;border-color:#c7d6ff;color:#1d4ed8}.pt.del{background:var(--r2);border-color:#f3b9b4;color:var(--r)}
+.x-del{width:32px;height:32px;border-radius:10px;border:1.5px solid #f3b9b4;background:var(--r2);color:var(--r);font-weight:900;font-size:15px;margin-left:10px;line-height:1;padding:0}
+.edtot{color:var(--g);font-size:16px;margin-left:10px;white-space:nowrap}
+.f.fam small{display:block;font-weight:700;color:var(--mut);font-size:12px;margin:-2px 0 4px}
 .x{width:36px;height:36px;border-radius:50%;border:0;background:#f2ecd6;font-size:16px;font-weight:900}
 /* Bienvenida: 5 pantallas que explican el sistema en un minuto — RLR */
 .modal.intro{align-items:center;background:rgba(35,31,26,.72);z-index:70}
@@ -512,7 +524,8 @@ let SUCURSALES=[
 function aplicarSucursales(v){ const arr=Object.entries(v||{}).filter(([k,x])=>x&&x.activa!==false).map(([k,x])=>({id:k,n:x.n||k,tels:(Array.isArray(x.tels)?x.tels:Object.values(x.tels||{})).filter(Boolean),orden:x.orden||0,creado:x.creado||0})).sort((a,b)=>(a.orden-b.orden)||(a.creado-b.creado)); if(arr.length) SUCURSALES=arr; }
 const ROLES=[
   {id:"papa",n:"Papá",e:"👨"},{id:"mama",n:"Mamá",e:"👩"},
-  {id:"hijo",n:"Hijo",e:"👦"},{id:"hija",n:"Hija",e:"👧"},{id:"otro",n:"Otro",e:"🙂"}
+  {id:"hijo",n:"Hijo",e:"👦"},{id:"hija",n:"Hija",e:"👧"},
+  {id:"familiar",n:"Familiar",e:"🧑"},{id:"amigo",n:"Amigo",e:"🙋‍♂️"},{id:"amiga",n:"Amiga",e:"🙋‍♀️"},{id:"companero",n:"Compañero",e:"👔"},{id:"otro",n:"Otro",e:"🙂"}
 ];
 const GUISOS=[
   ["Chicharrón prensado",2],["Chicharrón pella",2],["Carne con chile",2],["Picadillo",0],
@@ -595,7 +608,7 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const clone=o=>JSON.parse(JSON.stringify(o));
 const toArr=v=>Array.isArray(v)?v:(v&&typeof v==="object"?Object.values(v):[]);
-const rolDe=p=>ROLES.find(r=>r.id===p.rol)||ROLES[4];
+const rolDe=p=>ROLES.find(r=>r.id===p.rol)||ROLES[ROLES.length-1];
 const nombreDe=p=>(p.nombre||"").trim()||rolDe(p).n;
 const cap=s=>s?s.charAt(0).toUpperCase()+s.slice(1):s;
 function fmtRel(ts){ if(!ts) return ""; const d=(Date.now()-ts)/1000;
@@ -1008,7 +1021,7 @@ function renderEditor(){
   const d=ui.draft; const body=$("#edBody"); const st=body.scrollTop; const bl=$("#btnListo"); if(bl) bl.textContent=MESA()?"🍳 Ordenar":d.estado==="pedido"?"💾 Guardar cambio":"✅ Listo, ya quedó";
   // Recordar dónde estaba el cursor para no perder el foco si el render viene de otra pantalla — RLR
   const ae=document.activeElement; const fk=(ae&&ae.dataset&&ae.dataset.in&&body.contains(ae))?{in:ae.dataset.in,p:ae.dataset.p,i:ae.dataset.i,s:ae.selectionStart,e:ae.selectionEnd}:null;
-  body.innerHTML=`<label class="f fam">Familia<input data-in="familia" value="${esc(d.familia)}" placeholder="Apellido (ej. Garza)" autocomplete="off" enterkeyhint="next"></label><div id="dupWarn"></div>
+  body.innerHTML=`<label class="f fam">Nombre del grupo <small>familia · pareja · amigos · oficina</small><input data-in="familia" value="${esc(d.familia)}" placeholder="Ej. Garza, Los Cruz, Oficina, Pareja" autocomplete="off" enterkeyhint="next"></label><div id="dupWarn"></div>
     ${d.personas.map((p,pi)=>personaHTML(p,pi)).join("")}
     <div class="addp">Agregar: ${ROLES.map(r=>`<button class="btn" data-a="addPersona" data-v="${r.id}">${r.e} ${r.n}</button>`).join("")}</div>
     <label class="f">Notas para el pedido<input data-in="notas" value="${esc(d.notas)}" placeholder="Ej. sin cebolla, salsa aparte…" autocomplete="off"></label>
@@ -1017,8 +1030,8 @@ function renderEditor(){
   if(fk){ let sel=`[data-in="${fk.in}"]`; if(fk.p!=null) sel+=`[data-p="${fk.p}"]`; if(fk.i!=null) sel+=`[data-i="${fk.i}"]`;
     const el=body.querySelector(sel); if(el){ el.focus({preventScroll:true}); try{ el.setSelectionRange(fk.s,fk.e); }catch(e){} } }
 }
-function updateSum(){ if(ui.draft) $("#edSum").textContent=totStr(totales(ui.draft)); }
-const NOTAS_RAPIDAS=["Sin cebolla","Salsa aparte","Salsa extra 🌶","Sin picante","Cubiertos y servilletas"];
+function updateSum(){ if(!ui.draft) return; const $c=costo(ui.draft); $("#edSum").innerHTML=`<span>${esc(totStr(totales(ui.draft))||"Sin nada todavía")}</span>${$c?`<b class="edtot">💰 Total ${money($c)}</b>`:""}`; }
+const NOTAS_RAPIDAS=["Sin cebolla","Salsa aparte","Salsa extra 🌶","Sin picante","Bien doraditas","Cubiertos y servilletas"];
 function tieneNota(d,x){ return (d.notas||"").toLowerCase().includes(x.toLowerCase()); }
 // Dos personas de la misma familia abrieron "+ Pedido": avisar para no mandar la familia dos veces — RLR
 function checkDup(){ const d=ui.draft; const w=$("#dupWarn"); if(!d||!w) return; const k=(d.familia||"").trim().toLowerCase();
@@ -1031,11 +1044,11 @@ function personaHTML(p,pi){
   const lines=p.gorditas.map((l,i)=>`<div class="line ${l.masa==="maiz"?"mm":"mh"}${disponible("g",l.guiso,l.masa)?"":" off"}"><span class="qty"><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="-1">−</button><span class="lq">${l.cant}</span><button data-a="gQty" data-p="${pi}" data-i="${i}" data-v="1">+</button></span><span class="ln">${esc(l.guiso)}${masaTag(l.masa)}${disponible("g",l.guiso,l.masa)?"":`<em class="no">⛔ agotado hoy</em>`}</span>
     ${l.guiso==="Combinada"?`<input class="det" data-in="gdet" data-p="${pi}" data-i="${i}" value="${esc(l.detalle)}" placeholder="¿de qué?">`:""}</div>`).join("");
   const col=!!ui.open[p.id+"c"]; const L=personLines(p);
-  if(col) return `<section class="persona col"><div class="p-head"><span class="p-emoji">${r.e}</span><div class="p-sum"><b>${esc(nombreDe(p))}</b><span>${L.length?L.map(lineaHTML).join(" · "):"sin pedido"}</span></div><button class="ib" data-a="colPersona" data-p="${pi}" title="Abrir">▾</button></div></section>`;
+  if(col) return `<section class="persona col"><div class="p-head"><span class="p-emoji">${r.e}</span><div class="p-sum"><b>${esc(nombreDe(p))}</b><span>${L.length?L.map(lineaHTML).join(" · "):"sin pedido"}</span></div><button class="pt" data-a="colPersona" data-p="${pi}" title="Mostrar">▾ Mostrar</button></div></section>`;
   return `<section class="persona">
     <div class="p-head"><span class="p-emoji">${r.e}</span><input class="p-name" data-in="nombre" data-p="${pi}" value="${esc(p.nombre)}" placeholder="Nombre (${r.n})" autocomplete="off">
-      <button class="ib" data-a="colPersona" data-p="${pi}" title="Cerrar (queda en el pedido)">▴</button><button class="ib" data-a="dupPersona" data-p="${pi}" title="Duplicar pedido de esta persona">⧉</button><button class="ib" data-a="delPersona" data-p="${pi}" title="Quitar">✕</button></div>
-    <div class="sec-head"><span>🫓 Gorditas</span><div class="seg"><button class="sh${p.masa!=="maiz"?" on":""}" data-a="masa" data-p="${pi}" data-v="harina">🌾 Harina</button><button class="sm${p.masa==="maiz"?" on":""}" data-a="masa" data-p="${pi}" data-v="maiz">🌽 Maíz</button></div></div>
+      </div><div class="p-tools"><button class="pt" data-a="colPersona" data-p="${pi}" title="Ocultar esta persona (su pedido se queda)">▴ Ocultar</button><button class="pt dup" data-a="dupPersona" data-p="${pi}" title="Agregar otra persona con el mismo pedido">⧉ Copiar pedido</button><button class="pt del" data-a="delPersona" data-p="${pi}" title="Quitar a esta persona del pedido">✕ Quitar</button></div>
+    <div class="sec-head"><span>🫓 Gorditas <small class="mut">¿de qué masa?</small></span><div class="msw ${p.masa==="maiz"?"maiz":"harina"}"><button class="sh${p.masa!=="maiz"?" on":""}" data-a="masa" data-p="${pi}" data-v="harina"><i>🌾</i>Harina</button><button class="sm${p.masa==="maiz"?" on":""}" data-a="masa" data-p="${pi}" data-v="maiz"><i>🌽</i>Maíz</button></div></div>
     <div class="chips">${chips}</div>
     <div class="lines">${lines}</div>
     <div class="sec-head sec-mini"><span>🍳 Chilaquiles</span></div>
@@ -1052,7 +1065,7 @@ function subHTML(p,pi,key,items,title,addA,qtyA,detIn){
       ${detIn&&it&&it.det?`<input class="det" data-in="${detIn}" data-p="${pi}" data-i="${i}" value="${esc(l.detalle)}" placeholder="${esc(it.det)}">`:""}</div>`; }).join("")}</div></div>`;
 }
 function chilHTML(p,pi){ const c=p.chilaquiles;
-  return `<div class="sub"><div class="t"><span class="qty" style="margin-right:8px"><button data-a="chQty" data-p="${pi}" data-v="-1">−</button><span class="lq">${c.cant}</span><button data-a="chQty" data-p="${pi}" data-v="1">+</button></span><button data-a="togChil" data-p="${pi}">quitar</button></div>
+  return `<div class="sub"><div class="t"><span class="qty" style="margin-right:8px"><button data-a="chQty" data-p="${pi}" data-v="-1">−</button><span class="lq">${c.cant}</span><button data-a="chQty" data-p="${pi}" data-v="1">+</button><button class="x-del" data-a="togChil" data-p="${pi}" title="Quitar los chilaquiles">✕</button></span></div>
     ${disponible("ch","chilaquiles")?"":`<div class="warn">⛔ Hoy no hay chilaquiles en Suc. ${esc(getSuc().n)}. Quítalos del pedido.</div>`}
     <div class="row"><span class="lbl">1 · Salsa</span>${SALSAS.map(s=>{ const off=!disponible("sal",s); return `<button class="chip${normSalsa(c.salsa)===s?" on":""}${off?" off":""}" data-a="${off?"agotado":"chSet"}" data-p="${pi}" data-k="salsa" data-v="${esc(s)}">${esc(s)}<span class="pic">${picTxt(s,"sal")}</span>${off?`<span class="cnt no">agotada</span>`:""}</button>`; }).join("")}</div>
     <div class="row"><span class="lbl">2 · Queso</span>${QUESOS.map(s=>{ const off=!disponible("q",s); return `<button class="chip${c.queso===s?" on":""}${off?" off":""}" data-a="${off?"agotado":"chSet"}" data-p="${pi}" data-k="queso" data-v="${esc(s)}">${esc(s)}${off?`<span class="cnt no">agotado</span>`:""}</button>`; }).join("")}</div>
@@ -1205,7 +1218,7 @@ document.addEventListener("click",e=>{
     case "togChil": if(p.chilaquiles) p.chilaquiles=null; else p.chilaquiles={salsa:"",queso:"",extras:[],guiso:"",cant:1}; R(); break;
     case "chSet": p.chilaquiles[el.dataset.k]=(p.chilaquiles[el.dataset.k]===v?"":v); R(); break;
     case "chExtra": { const ex=p.chilaquiles.extras; const k=ex.indexOf(v); if(k>=0) ex.splice(k,1); else ex.push(v); R(); break; }
-    case "chQty": p.chilaquiles.cant=Math.max(1,p.chilaquiles.cant+(+v)); R(); break;
+    case "chQty": p.chilaquiles.cant=(p.chilaquiles.cant||1)+(+v); if(p.chilaquiles.cant<=0) p.chilaquiles=null; R(); break;
     case "togSec": { const key=v==="b"?"bebidas":"postres"; const k=p.id+v; if(el.dataset.x||ui.open[k]||p[key].length){ ui.open[k]=false; p[key]=[]; } else ui.open[k]=true; R(); break; }
     case "addB": { const l=p.bebidas.find(x=>x.nombre===v); if(l) l.cant++; else p.bebidas.push({nombre:v,cant:1,detalle:""}); R(); break; }
     case "bQty": p.bebidas[i].cant+=+v; if(p.bebidas[i].cant<=0) p.bebidas.splice(i,1); R(); break;
