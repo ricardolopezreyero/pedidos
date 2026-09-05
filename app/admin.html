@@ -187,6 +187,8 @@ tr.tot td{font-weight:900;background:var(--y3)}
 .posrep{margin:-4px 0 12px;border:1.5px dashed #b9a7e6;border-radius:12px;background:#f6f2ff}
 /* reparto */
 .b.rep{background:#ede4ff;color:#5b21b6}
+.anfbar{flex:1 1 100%;display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;margin-top:2px}
+.anfbar .anfnom{margin-right:auto;font-weight:800;font-size:14px}.anfbar .btn{font-size:14px;padding:9px 14px}
 .rz{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin:10px 0 4px;display:flex;align-items:center;gap:6px}.rz:first-child{margin-top:0}
 .rz .n{background:#fff;border-radius:999px;padding:0 8px;color:var(--ink)}
 .kc.rep{border-left-color:var(--v)}.kc.rep.sel{background:#f3edff;box-shadow:0 0 0 3px var(--v),var(--sh)}
@@ -763,7 +765,7 @@ function renderPedidos(){
   const colPrev=prevCol; prevCol={}; cards.forEach(c=>{ snap[c.id]=JSON.stringify(c); const col=colDeAdmin(c); prevCol[c.id]=col; if(!first&&c._w!==SID&&prev[c.id]!==snap[c.id]) flash[c.id]=now; if(!first&&colPrev[c.id]&&colPrev[c.id]!==col) moved[c.id]=now; }); prev=snap; first=false; Object.keys(moved).forEach(k=>{ if(now-moved[k]>900) delete moved[k]; });
   const antes=flipAntes($("#main"));
   const Tc=sumT(cards.filter(ETAPAS[2].f));
-  $("#main").innerHTML=`<div class="top"><h1>📋 Pedidos</h1><input class="buscar" id="q" value="${esc(q)}" placeholder="🔎 Buscar familia, persona, guiso, tablero…"><span class="sp"></span>${filtrosHTML()}<div class="sub">🍳 En cocina ahora: ${esc(totStr(Tc))} · toca los botones para avanzar cada pedido; las familias lo ven al instante.${q?` · <b>${cards.length}</b> resultado${cards.length===1?"":"s"} para "${esc(q)}"`:""}</div></div>
+  $("#main").innerHTML=`<div class="top"><h1>📋 Pedidos</h1><input class="buscar" id="q" value="${esc(q)}" placeholder="🔎 Buscar familia, persona, guiso, tablero…"><span class="sp"></span>${filtrosHTML()}${anfBarHTML()}<div class="sub">🍳 En cocina ahora: ${esc(totStr(Tc))} · toca los botones para avanzar cada pedido; las familias lo ven al instante.${q?` · <b>${cards.length}</b> resultado${cards.length===1?"":"s"} para "${esc(q)}"`:""}</div></div>
   ${filtroPagoHTML(cardsAll)}
   <div class="board">${ETAPAS.map(e=>{ const cs=cards.filter(e.f).sort(e.k===3?(a,b)=>(b.entregadoEn||b.archivadoEn||b.actualizado||0)-(a.entregadoEn||a.archivadoEn||a.actualizado||0):(a,b)=>(turno(a)-turno(b))); /* por turnos: el más antiguo arriba, el nuevo entra abajo; Historial al revés — RLR */ return `<section class="col k${e.k}"><div class="col-head"><span>${e.n}</span><span class="n">${cs.length}</span></div><div class="cards">${cs.length?cs.map(cardHTML).join(""):`<div class="empty">Nada por aquí</div>`}</div></section>`; }).join("")}</div>`;
   flipDespues($("#main"),antes);
@@ -774,6 +776,9 @@ let prevCol={}, moved={};
 let flipKey=""; function flipAntes(root){ const m={}; if(!root) return m; if(flipKey!==vista+"|"+pSuc){ flipKey=vista+"|"+pSuc; return m; } /* solo dentro de la misma vista — RLR */ root.querySelectorAll("[data-id]").forEach(el=>{ const r=el.getBoundingClientRect(); m[el.dataset.id]=[r.left,r.top]; }); return m; }
 function flipDespues(root,antes){ if(!root||matchMedia("(prefers-reduced-motion:reduce)").matches) return; const mov=[]; root.querySelectorAll("[data-id]").forEach(el=>{ const a=antes[el.dataset.id]; if(!a||el.classList.contains("moved")) return; const r=el.getBoundingClientRect(); const dx=a[0]-r.left, dy=a[1]-r.top; if(Math.abs(dx)<1&&Math.abs(dy)<1) return; el.style.transition="none"; el.style.transform=`translate(${dx}px,${dy}px)`; mov.push(el); });
   if(!mov.length) return; void root.offsetHeight; mov.forEach(el=>{ el.classList.add("flip"); el.style.transition=""; el.style.transform=""; el.addEventListener("transitionend",()=>el.classList.remove("flip"),{once:true}); }); }
+/* Con el filtro en un anfitrión: su celular a la mano, un clic para marcar o para WhatsApp — RLR */
+function anfBarHTML(){ if(!fTab) return ""; const a=anfitriones[fTab]||{}; const cfg=(tableros[fTab]||{}).config||{}; const tel=String(cfg.telAnfitrion||a.tel||"").replace(/\D/g,"").slice(-10); const nom=cfg.anfitrion||a.nombre||fTab; const msg="Hola "+nom+" 👋 Le escribimos de Gorditas Ranitas sobre su pedido. ";
+  return `<div class="anfbar"><span class="anfnom">${a.mesa?"🪑":a.mostrador?"🧾":"🏠"} <b>${esc(nom)}</b>${tel?` · 📱 ${telFmt(tel)}`:` · <i class="mut">sin celular</i>`}</span>${tel?`<a class="btn bl" href="tel:+52${tel}">📞 Llamar</a><a class="btn wa" href="https://api.whatsapp.com/send?phone=52${tel}&text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">💬 WhatsApp</a>`:""}<button class="btn ghost" data-copy="${esc(APP_URL+fTab)}" title="Copiar liga del tablero">🔗</button></div>`; }
 function cardHTML(c){
   const suc=SUCURSALES.find(s=>s.id===c.sucursal); const cfg=(tableros[c.slug]||{}).config||{};
   const persons=c.personas.map(p=>{ const L=personLines(p); return L.length?`<div class="pl"><span class="pn">${ROLES[p.rol]||"🙂"} ${esc(nombreDe(p))}</span>${personaFilas(p)}</div>`:""; }).join("")||`<div class="pl"><i>sin productos</i></div>`;
@@ -1161,7 +1166,7 @@ document.addEventListener("click",e=>{
 document.addEventListener("change",e=>{ const cb=e.target; if(!cb.dataset||!cb.dataset.uid) return; const u=usuarios[cb.dataset.uid]; const vs=new Set(toArr(u.vistas)); if(cb.checked) vs.add(cb.dataset.vista); else vs.delete(cb.dataset.vista); db.ref(ROOT+"/admin/usuarios/"+cb.dataset.uid+"/vistas").set([...vs]); bit("usuario","vistas",(cb.checked?"Dio":"Quitó")+" la vista "+cb.dataset.vista+" a "+(u.nombre||"")); });
 
 /* ---------- acciones del kanban ---------- */
-document.addEventListener("click",e=>{ const fp=e.target.closest("[data-fp]"); if(fp){ fPago=fp.dataset.fp; render(); return; } const el=e.target.closest("[data-a]"); if(!el) return; const {a,v,id,s}=el.dataset;
+document.addEventListener("click",e=>{ const fp=e.target.closest("[data-fp]"); if(fp){ fPago=fp.dataset.fp; render(); return; } if(vista==="pedidos"){ const cp=e.target.closest("[data-copy]"); if(cp){ navigator.clipboard.writeText(cp.dataset.copy).then(()=>toast("Liga copiada")); return; } } const el=e.target.closest("[data-a]"); if(!el) return; const {a,v,id,s}=el.dataset;
   if(a==="pagoMenu"){ pagoMenu=pagoMenu===id||!id?null:id; render(); if(vista==="mostrador") renderMostrador(); return; }
   if(a==="pagar"||a==="despagar"){ const c=((tableros[s]||{}).pedidos||{})[id]||(pos.card&&pos.card.id===id?pos.card:null); const pago=a==="pagar"?{estado:"pagado",metodo:v,ts:Date.now(),por:(yo&&yo.nombre)||"admin"}:{estado:"pendiente",ts:Date.now()}; pagoMenu=null;
     if(pos.card&&pos.card.id===id){ pos.card.pago=pago; guardarPos(true); renderMostrador(); } else if(s){ upd(s,id,{pago}); }
