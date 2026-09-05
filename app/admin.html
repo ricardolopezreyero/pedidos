@@ -814,7 +814,7 @@ const pos={card:null,slug:null,per:0,masa:"harina",qtxt:"",abiertos:{}};
 const mostSlug=suc=>"mostrador-"+suc;
 async function asegurarMostrador(suc){ const sl=mostSlug(suc); if(!anfitriones[sl]){ const nom="Mostrador "+(SUCURSALES.find(s=>s.id===suc)||{}).n; await db.ref(ROOT+"/anfitriones/"+sl).set({nombre:nom,tel:"",slug:sl,mostrador:true,creado:Date.now()}); await db.ref(ROOT+"/tableros/"+sl+"/config").set({sucursal:suc,telIdx:0,anfitrion:nom,telAnfitrion:"",direccion:"En sucursal",entrega:"",pago:"efectivo",pagoCon:"",sms:false}); } return sl; }
 const nuevaPersona=(i)=>({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),rol:"otro",nombre:"Persona "+i,masa:"harina",gorditas:[],bebidas:[],postres:[],chilaquiles:null});
-function siguienteNumero(suc){ const hoy=new Date(); hoy.setHours(0,0,0,0); const nums=Object.values(((tableros[mostSlug(suc)]||{}).pedidos)||{}).filter(c=>c&&(c.creado||0)>=hoy.getTime()).map(c=>+((/^Pedido (\d+)/.exec(c.familia||"")||[])[1]||0)); return Math.max(0,...nums)+1; }
+function siguienteNumero(suc){ const hoy=new Date(); hoy.setHours(0,0,0,0); const nums=Object.values(((tableros[mostSlug(suc)]||{}).pedidos)||{}).filter(c=>c&&(c.creado||0)>=hoy.getTime()).map(c=>+((/(\d+)\s*$/.exec(String(c.familia||"").trim())||[])[1]||0)); return Math.max(0,...nums)+1; } // cuenta "Pedido 18", "18" o "0018": el que sigue es 19 — RLR
 function nuevoPedidoPos(){ const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6); pos.orig=null; bit("pedido","creo","Abrió un pedido nuevo en Mostrador",{pedido:id,sucursal:pSuc}); pos.card={id,familia:"Pedido "+siguienteNumero(pSuc),estado:"armando",listo:false,mostrador:true,creado:Date.now(),actualizado:Date.now(),sucursal:pSuc,personas:[nuevaPersona(1)],notas:""}; pos.slug=null; pos.per=0; pos.masa="harina"; pos.qtxt=""; renderMostrador(); setTimeout(()=>{ const i=$("#posNombre"); if(i) i.focus(); },50); }
 function diffPedido(a,b){ const out=[]; a=a||{personas:[]}; b=b||{personas:[]};
   if((a.familia||"")!==(b.familia||"")) out.push("nombre: "+(a.familia||"—")+" → "+(b.familia||"—")); if((a.notas||"")!==(b.notas||"")) out.push("notas: "+(b.notas||"(sin notas)"));
@@ -860,6 +860,7 @@ function renderMostrador(){
   p.postres.forEach((l,i)=>lineas.push(`<div class="line${dispo(catKey("po",l.nombre))?"":" off"}"><span class="qty"><button data-q="po:${i}:-1">−</button><b>${l.cant}</b><button data-q="po:${i}:1">+</button></span><span class="ln">🍰 ${esc(l.nombre)}</span></div>`));
   p.bebidas.forEach((l,i)=>lineas.push(`<div class="line${dispo(catKey("b",l.nombre))?"":" off"}"><span class="qty"><button data-q="b:${i}:-1">−</button><b>${l.cant}</b><button data-q="b:${i}:1">+</button></span><span class="ln">☕ ${esc(l.nombre)}${l.nombre==="Refresco"?`<input class="det" data-det="b:${i}" value="${esc(l.detalle||"")}" placeholder="¿cuál?">`:""}</span></div>`));
   const $c=costo(Object.assign({},c,{sucursal:suc})); const t=totales(c); const origen=pos.slug&&!pos.slug.startsWith("mostrador-")?`<span class="b tab">🏠 ${esc((anfitriones[pos.slug]||{}).nombre||pos.slug)}</span> <span class="b">${esc(c.estado)}</span>`:`<span class="b suc">📍 ${esc((SUCURSALES.find(s=>s.id===suc)||{}).n||suc)}</span>`;
+  const ae=document.activeElement; const keep=ae&&ae.id&&/^pos/.test(ae.id)&&/INPUT|TEXTAREA/.test(ae.tagName)?{id:ae.id,s:ae.selectionStart,e:ae.selectionEnd,v:ae.value}:null; /* el eco de Firebase no debe robar el cursor mientras se teclea — RLR */
   $("#main").innerHTML=`<div class="top"><h1>🧾 Mostrador</h1>${sucSelect()}<span class="sp"></span><button class="btn ghost" id="posMin">🗕 Minimizar</button>${c.estado==="armando"||c.estado==="porpedir"?`<button class="btn p" id="posCocina">🍳 Mandar a cocina</button>`:`<button class="btn p" id="posGuardar">💾 Guardar cambios</button>`}</div>${chips}
   <div class="pos">
     <div class="pos-left">
@@ -883,6 +884,7 @@ function renderMostrador(){
     </div>
   </div>`;
   pos._items=filt;
+  if(keep){ const el=document.getElementById(keep.id); if(el){ if(el.value!==keep.v) el.value=keep.v; el.focus({preventScroll:true}); try{ el.setSelectionRange(keep.s,keep.e); }catch(e){} } }
 }
 document.addEventListener("click",e=>{ if(vista!=="mostrador") return; const t=e.target;
   if(t.id==="posNuevo"||t.closest("#posNuevo")){ nuevoPedidoPos(); return; }
