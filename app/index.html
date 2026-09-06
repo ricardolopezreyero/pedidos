@@ -130,6 +130,11 @@ button.tag.click:hover{border-style:dashed;border-color:var(--ink)}
 .empty{background:#fff;border:1.5px dashed var(--line);border-radius:var(--rad);padding:22px 16px;text-align:center;color:var(--mut);font-weight:700}
 .empty span{font-size:28px;display:block;margin-bottom:6px}
 
+/* QR de pantalla completa — RLR */
+#qrFull{position:fixed;inset:0;background:#fff;z-index:10000;display:none;align-items:center;justify-content:center;padding:20px;cursor:pointer}#qrFull.on{display:flex}
+#qrFull .qrbox{text-align:center;display:grid;gap:10px;justify-items:center}#qrFull .qrcode img,#qrFull .qrcode canvas{display:block;image-rendering:pixelated}#qrFull .qrt{font-size:22px;font-weight:900}#qrFull .qru{font-weight:800;color:#6b5a00;word-break:break-all;max-width:90vw}
+.linkbtn.qrbtn{flex:none;margin-left:6px}
+
 /* arrastre de tarjetas — RLR */
 body.dragging{cursor:grabbing!important;-webkit-user-select:none;user-select:none}
 body.dragging *{cursor:grabbing!important}
@@ -442,7 +447,7 @@ textarea.msg{width:100%;min-height:46vh;font-family:ui-monospace,SFMono-Regular,
 <!-- Editor -->
 <div class="modal" id="mEditor">
   <div class="sheet">
-    <div class="head"><h2>✏️ Pedido de familia</h2><button class="btn y" data-a="ligaFam" title="Compartir la liga de esta familia">🔗 <span class="long">Liga de mi familia</span><span class="short">Mi liga</span></button><button class="x" data-a="closeEditor" data-v="0">✕</button></div>
+    <div class="head"><h2>✏️ Pedido de familia</h2><button class="btn" data-a="qrFam" title="QR de esta familia">▦</button><button class="btn y" data-a="ligaFam" title="Compartir la liga de esta familia">🔗 <span class="long">Liga de mi familia</span><span class="short">Mi liga</span></button><button class="x" data-a="closeEditor" data-v="0">✕</button></div>
     <div class="body" id="edBody"></div>
     <div class="foot">
       <div class="sum" id="edSum"></div>
@@ -505,6 +510,7 @@ textarea.msg{width:100%;min-height:46vh;font-family:ui-monospace,SFMono-Regular,
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 /* ============================================================
    Ranitas · Pedidos — Ricardo López Reyero (RLR)
@@ -872,7 +878,7 @@ function renderHeader(){
   $("#dot").className="dot"+(online?" on":""); $("#dot").title=online?"Sincronizado en vivo":"Sin conexión (guardado local)";
   if(MESA()){ document.body.classList.add("is-mesa"); if(ui.anf.activa===false&&!ui._mesaOff){ ui._mesaOff=1; toast("Esta mesa ya no está activa. Pide en caja 🙏"); } }
   if(SLUG&&ui.anf&&!MESA()&&!ui._introDone){ ui._introDone=1; let visto=false; try{ visto=!!localStorage.getItem("ranitas-intro"); }catch(e){} if(!visto&&!FAM&&!FAMLIGA) setTimeout(abrirIntro,600); }
-  if(SLUG&&ui.anf){ $("#bar").hidden=false; $("#bar").innerHTML=`<span>${MESA()?"🪑":"🏠"} ${MESA()?"":"Tablero de "}<b>${esc(ui.anf.nombre)}</b>${host?` <span class="b tuyo">anfitrión</span>`:""}</span><button class="linkbtn" data-a="copiarLiga" title="Copiar liga">🔗 ${esc(APP_URL.replace("https://",""))}${esc(SLUG)}</button>${MESA()?"":`<div class="modo" title="¿Cómo llega el pedido?"><button class="mb${aDomicilio()?"":" on"}" data-a="modo" data-v="recoger">🏪 Yo paso por el pedido</button><button class="mb${aDomicilio()?" on":""}" data-a="modo" data-v="domicilio">🛵 A mi casa <small>+${money(envioPrecio())}</small></button></div>${aDomicilio()&&!(config.direccion||"").trim()?`<button class="btn r sm" data-a="abrirCfg">⚠️ Falta tu dirección · ponla aquí</button>`:""}`}`; }
+  if(SLUG&&ui.anf){ $("#bar").hidden=false; $("#bar").innerHTML=`<span>${MESA()?"🪑":"🏠"} ${MESA()?"":"Tablero de "}<b>${esc(ui.anf.nombre)}</b>${host?` <span class="b tuyo">anfitrión</span>`:""}</span><button class="linkbtn" data-a="copiarLiga" title="Copiar liga">🔗 ${esc(APP_URL.replace("https://",""))}${esc(SLUG)}</button><button class="linkbtn qrbtn" data-a="qr" title="QR para escanear">▦ QR</button>${MESA()?"":`<div class="modo" title="¿Cómo llega el pedido?"><button class="mb${aDomicilio()?"":" on"}" data-a="modo" data-v="recoger">🏪 Yo paso por el pedido</button><button class="mb${aDomicilio()?" on":""}" data-a="modo" data-v="domicilio">🛵 A mi casa <small>+${money(envioPrecio())}</small></button></div>${aDomicilio()&&!(config.direccion||"").trim()?`<button class="btn r sm" data-a="abrirCfg">⚠️ Falta tu dirección · ponla aquí</button>`:""}`}`; }
   const n=onlineCount(); $("#online").innerHTML=online?(n>1?"👀 "+n+"<span class=\"long\"> en línea</span>":"👀<span class=\"long\"> solo tú</span>"):"<span class=\"long\">sin conexión</span>";
   $("#sucSel").innerHTML=SUCURSALES.map(s=>`<option value="${s.id}"${s.id===config.sucursal?" selected":""}>📍 ${s.n}</option>`).join("");
   const s=getSuc(); const idx=Math.min(config.telIdx||0,s.tels.length-1);
@@ -1044,6 +1050,9 @@ const dragFam=dragKanban({ activo:()=>!document.querySelector(".modal.open")&&!d
   vecino:(id,from,dir)=>{ const o=tabsOrden(); const i=o.indexOf(from); return i<0?null:(o[i+dir]||null); }, marcarPaso:(to,listo)=>{ document.querySelectorAll("#tabs .tab.dest").forEach(t=>t.classList.remove("dest","listo")); if(to){ const t=document.querySelector('#tabs .tab[data-v="'+to+'"]'); if(t){ t.classList.add("dest"); if(listo) t.classList.add("listo"); } } },
   alTerminar:()=>{ if(ui.renderPend){ ui.renderPend=false; renderBoard(); } } });
 
+function mostrarQR(url,titulo){ let m=$("#qrFull"); if(!m){ m=document.createElement("div"); m.id="qrFull"; m.innerHTML=`<div class="qrbox"><div class="qrcode"></div><div class="qrt"></div><div class="qru"></div><div class="mut">Acércale la cámara · toca fuera para cerrar</div></div>`; document.body.appendChild(m); m.addEventListener("click",()=>m.classList.remove("on")); }
+  const box=m.querySelector(".qrcode"); box.innerHTML=""; const size=Math.round(Math.min(innerWidth,innerHeight)*.62); try{ new QRCode(box,{text:url,width:size,height:size,correctLevel:QRCode.CorrectLevel.M}); }catch(e){ box.innerHTML=`<div class="mut">No se pudo generar el QR. Liga: ${esc(url)}</div>`; } m.querySelector(".qrt").textContent=titulo||""; m.querySelector(".qru").textContent=url.replace("https://",""); m.classList.add("on"); }
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ const m=$("#qrFull"); if(m) m.classList.remove("on"); } });
 function reconcileBoard(root,html){ const tpl=document.createElement("div"); tpl.innerHTML=html; const nuevas=[...tpl.children], viejas=[...root.children];
   if(viejas.length!==nuevas.length||viejas.some((v,i)=>v.dataset.col!==nuevas[i].dataset.col)){ root.innerHTML=html; return; }
   const mapaG={}; root.querySelectorAll("article[data-id]").forEach(a=>mapaG[a.dataset.id]=a);
@@ -1075,8 +1084,8 @@ function cardHTML(c){
   const persons=c.personas.map(p=>{ const L=personLines(p); const f=fl.per[p.id]; return `<div class="pl${f?" flash":""}"><span class="pn">${rolDe(p).e} ${esc(nombreDe(p))}${f&&typing.length?`<span class="caret">▍</span>`:""}${L.length?"":' <i style="font-weight:600;color:var(--mut)">· sin nada aún</i>'}</span>${personaFilas(p)}</div>`; }).join("")||`<div class="pl"><i>Sin personas todavía</i></div>`;
   const H=host&&!MESA(), M=mine.has(c.id);
   const A={
-    armando:`<button class="btn y" data-a="edit" data-id="${c.id}">✏️ Editar</button><button class="btn" data-a="ligaFam" data-id="${c.id}" title="Liga de esta familia">🔗</button><button class="btn" data-a="repetir" data-id="${c.id}" title="Duplicar este pedido como uno nuevo">🔁</button>${H||M?`<button class="btn r" data-a="del" data-id="${c.id}">🗑</button>`:""}`,
-    porpedir:`<button class="btn y" data-a="edit" data-id="${c.id}">✏️ Editar</button><button class="btn" data-a="ligaFam" data-id="${c.id}" title="Liga de esta familia">🔗</button><button class="btn" data-a="repetir" data-id="${c.id}" title="Duplicar este pedido como uno nuevo">🔁</button><button class="btn wa" data-a="enviarUno" data-id="${c.id}" title="Manda este pedido por WhatsApp a la sucursal">💬 WhatsApp</button><button class="btn p" data-a="marcar" data-id="${c.id}" data-v="pedido">📲 Ya lo pedí</button>${H||M?`<button class="btn r" data-a="del" data-id="${c.id}">🗑</button>`:""}`,
+    armando:`<button class="btn y" data-a="edit" data-id="${c.id}">✏️ Editar</button><button class="btn" data-a="ligaFam" data-id="${c.id}" title="Liga de esta familia">🔗</button><button class="btn" data-a="qrFam" data-id="${c.id}" title="QR de esta familia">▦</button><button class="btn" data-a="repetir" data-id="${c.id}" title="Duplicar este pedido como uno nuevo">🔁</button>${H||M?`<button class="btn r" data-a="del" data-id="${c.id}">🗑</button>`:""}`,
+    porpedir:`<button class="btn y" data-a="edit" data-id="${c.id}">✏️ Editar</button><button class="btn" data-a="ligaFam" data-id="${c.id}" title="Liga de esta familia">🔗</button><button class="btn" data-a="qrFam" data-id="${c.id}" title="QR de esta familia">▦</button><button class="btn" data-a="repetir" data-id="${c.id}" title="Duplicar este pedido como uno nuevo">🔁</button><button class="btn wa" data-a="enviarUno" data-id="${c.id}" title="Manda este pedido por WhatsApp a la sucursal">💬 WhatsApp</button><button class="btn p" data-a="marcar" data-id="${c.id}" data-v="pedido">📲 Ya lo pedí</button>${H||M?`<button class="btn r" data-a="del" data-id="${c.id}">🗑</button>`:""}`,
     pedido:`${(!c.etapa||c.etapa==="proceso")&&(H||M)?`<button class="btn y" data-a="edit" data-id="${c.id}" title="La cocina aún no lo toma: puedes cambiarlo">✏️ Cambiar</button>`:""}${MESA()?"":`<button class="btn" data-a="reparto" data-id="${c.id}">📋 Reparto</button>`}<button class="btn" data-a="repetir" data-id="${c.id}" title="Duplicar este pedido como uno nuevo">🔁</button>${H&&!MESA()?`<button class="btn" data-a="verMsg" data-id="${c.id}">📄</button><button class="btn p" data-a="marcar" data-id="${c.id}" data-v="entregado">🛵 Entregado</button><button class="btn ghost" data-a="marcar" data-id="${c.id}" data-v="porpedir" title="Regresar a Por pedir">↩︎</button>`:(M&&(!c.etapa||c.etapa==="proceso")?`<button class="btn ghost" data-a="marcar" data-id="${c.id}" data-v="porpedir" title="Regresar a Por pedir">↩︎</button>`:"")}`,
     entregado:`<button class="btn" data-a="reparto" data-id="${c.id}">📋 Reparto</button><button class="btn y" data-a="repetir" data-id="${c.id}">🔁 Duplicar</button>${H?`<button class="btn p" data-a="marcar" data-id="${c.id}" data-v="archivado">📦 Archivar</button><button class="btn ghost" data-a="marcar" data-id="${c.id}" data-v="pedido">↩︎</button>`:""}`,
     archivado:`<button class="btn y" data-a="repetir" data-id="${c.id}">🔁 Duplicar este pedido</button>${H?`<button class="btn r" data-a="del" data-id="${c.id}">🗑</button>`:""}`
@@ -1342,6 +1351,8 @@ document.addEventListener("click",e=>{
     case "llegoTodo": { const cs=activos(); if(!cs.length) break; if(confirm("¿Marcar "+cs.length+" pedido"+(cs.length===1?"":"s")+" como entregado"+(cs.length===1?"":"s")+"?")){ cs.forEach(c=>marcar(c.id,"entregado")); ui.tab="entregado"; renderBoard(); toast("¡Buen provecho! 🛵"); } break; }
     case "hostToggle": { if(el.checked){ const t=digits(prompt("Celular del anfitrión (para confirmar que eres tú):")||""); if(ui.anf&&t&&t===digits(ui.anf.tel)){ activarHost(); toast("Modo anfitrión activado"); } else { el.checked=false; toast("Ese celular no coincide"); } } else { host=false; localStorage.setItem(HOST_KEY,"0"); toast("Modo anfitrión desactivado"); } renderHeader(); renderBoard(); break; }
     case "ligaFam": { const fid=id||ui.editing; const c=pedidos[fid]||ui.draft; if(!c) break; if(pedidos[fid]&&!pedidos[fid].familia&&ui.draft&&ui.editing===fid) pedidos[fid].familia=ui.draft.familia; asegurarLiga(fid); compartirFamilia(fid,c.familia); break; }
+    case "qr": mostrarQR(boardUrl(SLUG),"Tablero de "+((ui.anf||{}).nombre||"")); break;
+    case "qrFam": { const fid=id||ui.editing; if(!fid) break; if(pedidos[fid]) asegurarLiga(fid); mostrarQR(famUrl(fid),"Liga de "+((pedidos[fid]||ui.draft||{}).familia||"la familia")); break; }
     case "copiarLiga": navigator.clipboard.writeText(boardUrl(SLUG)).then(()=>toast("Liga copiada 🔗"),()=>toast(boardUrl(SLUG))); break;
     case "ir": if(v) goTo(v); else location.href=LOCAL?location.pathname:"/"; break;
     case "irHost": localStorage.setItem("ranitas-host-"+v,"1"); goTo(v); break;

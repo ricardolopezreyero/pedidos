@@ -104,7 +104,7 @@ function mxWire(abiertas){ const E=document.getElementById("estado"), C=document
 /* RLR */
 firebase.initializeApp({apiKey:"AIzaSyDSAFxL2E_S1iHiRfSHGbbuHiR_-2j-HP4",authDomain:"notion-casa.firebaseapp.com",databaseURL:"https://notion-casa-default-rtdb.firebaseio.com",projectId:"notion-casa"});
 const db=firebase.database(); const ROOT="ranitas";
-const RUBROS=["Carnes de cerdo","Carnes de res","Chicharrón y tocinería","Abarrotes","Chiles secos y especias","Frutas y verduras","Masa de maíz y tortilla","Harina de trigo","Manteca y aceites","Lácteos y quesos","Huevo","Café y bebidas","Refrescos","Piloncillo y dulces","Desechables y empaque","Gas LP","Otro"];
+const RUBROS=["Carnes de cerdo","Carnes de res","Chicharrón y tocinería","Abarrotes","Chiles secos y especias","Frutas y verduras","Masa de maíz y tortilla","Harina de trigo","Manteca y aceites","Lácteos y quesos","Huevo","Café y bebidas","Refrescos","Piloncillo y dulces","Desechables y empaque","Gas LP","Uniformes y ropa de trabajo","Otro"];
 const $=s=>document.querySelector(s);
 $("#rubros").innerHTML=RUBROS.map(r=>`<label><input type="checkbox" name="rubro" value="${r}">${r}</label>`).join("");
 const ORDEN={carnes:"Carnes",lacteos:"Lácteos y huevo",verduras:"Frutas y verduras",abarrotes:"Abarrotes y especias",masa:"Masa y harina",bebidas:"Café y bebidas",otro:"Otros"};
