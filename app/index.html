@@ -129,6 +129,34 @@ button.tag.click:hover{border-style:dashed;border-color:var(--ink)}
 .cards{display:flex;flex-direction:column;gap:10px}
 .empty{background:#fff;border:1.5px dashed var(--line);border-radius:var(--rad);padding:22px 16px;text-align:center;color:var(--mut);font-weight:700}
 .empty span{font-size:28px;display:block;margin-bottom:6px}
+
+/* arrastre de tarjetas — RLR */
+body.dragging{cursor:grabbing!important;-webkit-user-select:none;user-select:none}
+body.dragging *{cursor:grabbing!important}
+body.dragging .board{scroll-snap-type:none}
+.drag-src{opacity:.35!important;box-shadow:none!important;transform:scale(.98);outline:2px dashed rgba(0,0,0,.25);outline-offset:-2px}
+.drag-ghost{position:fixed;z-index:999;margin:0;pointer-events:none;box-shadow:0 22px 44px rgba(0,0,0,.28),0 4px 10px rgba(0,0,0,.14)!important;will-change:transform;transform-origin:50% 50%;opacity:.98;animation:none!important}
+.drag-ghost.landing{box-shadow:0 2px 8px rgba(0,0,0,.12)!important}
+.col.drop-can{outline:2px dashed rgba(0,0,0,.2);outline-offset:-2px;transition:background .15s,opacity .15s}
+.col.drop-dim{opacity:.5;transition:opacity .15s}
+.col.drop-ok{outline:3px solid #2D9D4A;outline-offset:-3px;background:rgba(45,157,74,.14)!important}
+.col.drop-no{outline:3px solid #E4322B;outline-offset:-3px;background:rgba(228,50,43,.08)!important}
+.drop-slot{border:2px dashed #2D9D4A;border-radius:14px;background:rgba(45,157,74,.1);height:0;opacity:0;transition:opacity .18s,height .18s ease-out;box-sizing:border-box}
+.drop-slot.in{opacity:1}
+.empty.drop-hid{display:none}
+#dragLbl,#swipeLbl{position:fixed;z-index:1000;pointer-events:none;color:#fff;font-weight:900;font-size:13px;padding:7px 12px;border-radius:999px;box-shadow:0 6px 18px rgba(0,0,0,.25);white-space:nowrap;max-width:82vw;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .12s,background .12s;background:#231F1A}
+#dragLbl.ok,#swipeLbl.ok{background:#2D9D4A;opacity:1}
+#dragLbl.no,#swipeLbl.no{background:#E4322B;opacity:1}
+#swipeLbl{transform:translateY(-50%);font-size:14px}
+#swipeLbl.listo{transform:translateY(-50%) scale(1.1)}
+body.swiping{-webkit-user-select:none;user-select:none}
+.swiping{will-change:transform;position:relative;z-index:5}
+@media(pointer:coarse){ .board article{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none} }
+@media(prefers-reduced-motion:reduce){ .drop-slot{transition:none} }
+
+@media(min-width:760px){ .card{cursor:grab} .col[data-col="archivado"] .card,.col[data-col="cocina"] .card,.col[data-col="camino"] .card{cursor:default} }
+.tab.dest .ic{box-shadow:0 0 0 4px #2D9D4A;transform:scale(1.14);border-color:#2D9D4A}
+.tab.dest.listo .ic{background:#2D9D4A;color:#fff}
 @media(min-width:760px){
   .tabs{display:none}
   .board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(270px,300px);gap:10px;padding:12px 14px 18px;align-items:start;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
@@ -861,10 +889,11 @@ const activos=()=>Object.values(pedidos).filter(c=>c.estado==="pedido");   // to
 let _rbPend=false; function renderBoard(){ if(_rbPend) return; _rbPend=true; setTimeout(()=>{ _rbPend=false; renderBoardNow(); },0); }   // agrupa ráfagas de eventos en un solo pintado (también en segundo plano) — RLR
 /* FLIP: las tarjetas que cambian de lugar se deslizan en vez de brincar — RLR */
 let flipCtx="";
-function flipAntes(root){ const m={}; if(!root||document.querySelector(".modal.open")) { flipCtx=""; return m; } flipCtx=ui.tab+"|"+Math.round(scrollY); root.querySelectorAll("article[data-id],.rstop[data-id]").forEach(el=>{ const r=el.getBoundingClientRect(); m[el.dataset.id]=[r.left,r.top]; }); return m; }
+function flipAntes(root){ const m={}; if(!root||document.querySelector(".modal.open")) { flipCtx=""; return m; } flipCtx=ui.tab+"|"+Math.round(scrollY); root.querySelectorAll("article[data-id],.rstop[data-id]").forEach(el=>{ const r=el.getBoundingClientRect(); if(!r.width&&!r.height) return; /* oculta (otra pestaña): no animar desde (0,0) — RLR */ m[el.dataset.id]=[r.left,r.top]; }); return m; }
 function flipDespues(root,antes){ if(!root||!flipCtx||flipCtx!==ui.tab+"|"+Math.round(scrollY)||document.querySelector(".modal.open")||matchMedia("(prefers-reduced-motion:reduce)").matches) return; const mov=[]; root.querySelectorAll("article[data-id],.rstop[data-id]").forEach(el=>{ const a=antes[el.dataset.id]; if(!a) return; const r=el.getBoundingClientRect(); const dx=a[0]-r.left, dy=a[1]-r.top; if(Math.abs(dx)<1&&Math.abs(dy)<1||Math.abs(dy)>900) return; el.style.transition="none"; el.style.transform=`translate(${dx}px,${dy}px)`; mov.push(el); });
   if(!mov.length) return; void root.offsetHeight; mov.forEach(el=>{ el.classList.add("flip"); el.style.transition=""; el.style.transform=""; el.addEventListener("transitionend",()=>{ el.classList.remove("flip"); el.removeAttribute("style"); },{once:true}); }); }
 function renderBoardNow(){
+  if(document.body.dataset.drag){ ui.renderPend=true; return; } /* mientras arrastras o deslizas, el tablero no se repinta — RLR */
   // ¿Qué cambió desde el último render? (solo brillan los cambios que vienen de OTRA pantalla)
   const snap={}; const now=Date.now(); ui.flash=ui.flash||{};
   Object.keys(ui.flash).forEach(k=>{ if(now-ui.flash[k].ts>1800) delete ui.flash[k]; });   // el destello dura 1.8 s aunque haya otros renders
@@ -907,6 +936,114 @@ function renderBoardNow(){
   flipDespues($("#board"),antes);
 }
 /* Redibuja SOLO lo que cambió: las tarjetas iguales se quedan tal cual (sin parpadeo, sin reiniciar animaciones, sin brincos de scroll) — RLR */
+
+/* ===== Arrastre de tarjetas entre columnas: mouse, pluma o dedo — Ricardo López Reyero (RLR) · build eye · rev 181218 =====
+   Mouse/pluma: agarras y a los 6 px se levanta. Dedo en tablero de columnas: mantienes ~300 ms quieto y se levanta (si mueves antes, es scroll).
+   Dedo en una columna a la vez (celular familias): deslizas la tarjeta a la derecha o izquierda → paso siguiente o anterior.
+   La tarjeta levantada es un fantasma fijo que sigue al puntero; la original queda como hueco. Las columnas válidas se marcan y aparece
+   el espacio donde va a caer; la de abajo se pone verde o roja con el motivo junto al puntero. Al soltar, el fantasma viaja solo a su lugar
+   y se asienta; si no se puede, regresa con resorte. Cerca de los bordes, el tablero y la página se desplazan solos. Escape cancela. */
+window.dragKanban=function(cfg){
+  const HOLD=300, MOVE_MOUSE=6, CANCEL_TOUCH=10, EDGE=70;
+  let st=null, raf=0, lbl=null;
+  const reduce=()=>matchMedia("(prefers-reduced-motion:reduce)").matches;
+  const vibra=ms=>{ try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} };
+  const colId=el=>el?el.dataset.col:null;
+  const cols=()=>[...document.querySelectorAll(cfg.colSel)];
+  const nombre=to=>cfg.nombre?cfg.nombre(to):to;
+  function cardAt(e){ const t=e.target; if(!(t instanceof Element)) return null; if(t.closest("button,a,input,select,textarea,label,[contenteditable],.drag-ghost,.pmenu")) return null; const card=t.closest(cfg.cardSel); if(!card||!card.dataset.id) return null; const col=card.closest(cfg.colSel); if(!col) return null; return {card,col}; }
+  function limpiarCols(){ cols().forEach(c=>c.classList.remove("drop-can","drop-dim","drop-ok","drop-no")); }
+  function quitarSlot(){ if(st&&st.slot){ st.slot.remove(); st.slot=null; } document.querySelectorAll(".drop-slot").forEach(x=>x.remove()); document.querySelectorAll(".empty.drop-hid").forEach(x=>x.classList.remove("drop-hid")); }
+  function quitar(){ document.removeEventListener("touchmove",onTouchMove); if(st&&st.timer) clearTimeout(st.timer); cancelAnimationFrame(raf); raf=0; document.body.classList.remove("dragging","swiping"); delete document.body.dataset.drag; limpiarCols(); quitarSlot();
+    if(st&&st.ghost) st.ghost.remove(); if(st&&st.card){ st.card.classList.remove("drag-src","swiping"); if(!st.commit){ st.card.style.transform=""; st.card.style.transition=""; st.card.style.opacity=""; } }
+    if(lbl){ lbl.remove(); lbl=null; } if(cfg.marcarPaso) cfg.marcarPaso(null,false); st=null; if(cfg.alTerminar) cfg.alTerminar(); }
+  function onTouchMove(e){ if(st&&(st.lifted||st.swiping)) e.preventDefault(); }
+  document.addEventListener("pointerdown",e=>{ if(st||e.button!==0||!cfg.activo()) return; const c=cardAt(e); if(!c) return; const from=colId(c.col), id=c.card.dataset.id; const pm=cfg.puedeMover?cfg.puedeMover(id,from):true; if(pm!==true) return;
+    const inmediato=e.pointerType==="mouse"||e.pointerType==="pen"; const rect=c.card.getBoundingClientRect();
+    st={card:c.card,col:c.col,id,from,x0:e.clientX,y0:e.clientY,x:e.clientX,y:e.clientY,rect,lifted:false,swiping:false,inmediato,pid:e.pointerId,mode:(cfg.modoSwipe&&cfg.modoSwipe())?"swipe":"drag",over:null,ok:false,dx:0,dy:0,commit:false,slot:null};
+    document.body.dataset.drag=id;
+    if(!inmediato&&st.mode==="drag") st.timer=setTimeout(()=>{ if(st&&!st.lifted&&Math.hypot(st.dx,st.dy)<=CANCEL_TOUCH) lift(); },HOLD);
+    if(!inmediato) document.addEventListener("touchmove",onTouchMove,{passive:false}); });
+  document.addEventListener("pointermove",e=>{ if(!st||e.pointerId!==st.pid) return; if(e.pointerType==="mouse"&&e.buttons===0){ if(st.lifted) soltar(); else quitar(); return; } /* se perdió el mouseup (fuera de la ventana): cerrar limpio — RLR */ st.x=e.clientX; st.y=e.clientY; st.dx=e.clientX-st.x0; st.dy=e.clientY-st.y0;
+    if(st.mode==="swipe"){ if(!st.swiping){ if(Math.abs(st.dx)>12&&Math.abs(st.dx)>Math.abs(st.dy)*1.4) startSwipe(); else if(Math.abs(st.dy)>14) quitar(); return; } moveSwipe(); return; }
+    if(!st.lifted){ if(!st.inmediato){ if(Math.hypot(st.dx,st.dy)>CANCEL_TOUCH) quitar(); return; } if(Math.hypot(st.dx,st.dy)>MOVE_MOUSE) lift(); else return; }
+    moverFantasma(); },{passive:true});
+  document.addEventListener("pointerup",e=>{ if(!st||e.pointerId!==st.pid) return; if(st.mode==="swipe"){ if(st.swiping) endSwipe(); else quitar(); return; } if(!st.lifted){ quitar(); return; } soltar(); });
+  document.addEventListener("pointercancel",e=>{ if(!st||e.pointerId!==st.pid) return; if(st.lifted) regresar(); else quitar(); });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&st){ if(st.lifted) regresar(); else quitar(); } });
+  document.addEventListener("contextmenu",e=>{ if(st&&!st.inmediato) e.preventDefault(); });
+  document.addEventListener("visibilitychange",()=>{ if(document.hidden&&st) quitar(); });
+  window.addEventListener("blur",()=>{ if(st) quitar(); });
+  /* ----- levantar ----- */
+  function lift(){ if(!st||st.lifted) return; st.lifted=true; clearTimeout(st.timer); const r=st.card.getBoundingClientRect(); st.rect=r;
+    const g=st.card.cloneNode(true); g.classList.add("drag-ghost"); g.classList.remove("flash","moved","flip","drag-src","mine","typing"); g.removeAttribute("data-id"); g.style.cssText=`left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;`; document.body.appendChild(g); st.ghost=g;
+    lbl=document.createElement("div"); lbl.id="dragLbl"; document.body.appendChild(lbl);
+    st.card.classList.add("drag-src"); document.body.classList.add("dragging"); vibra(12);
+    cols().forEach(c=>{ const to=colId(c); if(to===st.from) return; const ok=cfg.puede(st.id,st.from,to); c.classList.add(ok===true?"drop-can":"drop-dim"); });
+    if(cfg.toast){ let n=0; try{ n=+localStorage.getItem("ranitas-drag-hint")||0; }catch(e){} if(n<2){ try{ localStorage.setItem("ranitas-drag-hint",String(n+1)); }catch(e){} cfg.toast("Suéltala en la columna donde va 👇"); } }
+    moverFantasma(); if(!raf) raf=requestAnimationFrame(bucle); }
+  function ponerSlot(col){ quitarSlot(); const cont=col.querySelector(cfg.cardsSel||".cards"); if(!cont) return; const vacio=cont.querySelector(".empty"); if(vacio) vacio.classList.add("drop-hid"); const s=document.createElement("div"); s.className="drop-slot"; const h=st.rect.height; if(cfg.alInicio&&cfg.alInicio(colId(col))) cont.prepend(s); else cont.appendChild(s); st.slot=s; if(!reduce()) void s.offsetHeight; s.classList.add("in"); s.style.height=h+"px"; }
+  function etiqueta(){ if(!lbl||!st) return; const to=st.over; if(!to||to===st.from){ lbl.className=""; return; } if(st.ok){ lbl.textContent="✓ "+nombre(to); lbl.className="ok"; } else { const r=cfg.puede(st.id,st.from,to); lbl.textContent="✗ "+(typeof r==="string"?r:"Aquí no"); lbl.className="no"; }
+    if(st.inmediato){ lbl.style.left=(st.x+16)+"px"; lbl.style.top=(st.y+22)+"px"; lbl.style.transform="none"; } else { lbl.style.left=Math.max(10,Math.min(innerWidth-10,st.x))+"px"; lbl.style.top=Math.max(48,st.y-70)+"px"; lbl.style.transform="translate(-50%,-50%)"; } }
+  function moverFantasma(){ if(!st||!st.ghost) return; const g=st.ghost; g.style.transform=`translate(${st.dx}px,${st.dy}px) scale(${st.inmediato?1.035:.88}) rotate(${Math.max(-2.5,Math.min(2.5,st.dx/140))}deg)`; /* con el dedo se encoge un poco para que se vea la columna de abajo — RLR */
+    const el=document.elementFromPoint(st.x,st.y); const col=el?el.closest(cfg.colSel):null; const to=colId(col);
+    if(to!==st.over){ cols().forEach(c=>c.classList.remove("drop-ok","drop-no")); quitarSlot(); st.over=to; st.ok=false;
+      if(col&&to!==st.from){ const r=cfg.puede(st.id,st.from,to); if(r===true){ col.classList.add("drop-ok"); st.ok=true; ponerSlot(col); if(!st.inmediato) vibra(6); } else col.classList.add("drop-no"); } }
+    etiqueta(); }
+  function bucle(){ if(!st||!st.lifted){ raf=0; return; } const b=cfg.board?cfg.board():null; let movio=false;
+    if(b&&b.scrollWidth>b.clientWidth+2){ const br=b.getBoundingClientRect(); const dir=st.x<br.left+EDGE?-1:st.x>br.right-EDGE?1:0; const col1=b.querySelector(cfg.colSel); const paginado=col1&&col1.getBoundingClientRect().width>b.clientWidth*.6; /* columnas de una en una (celular): corre UNA columna por vez, suave — RLR */
+      if(!dir) st.paged=0; else if(paginado){ if(!st.paged||Date.now()-st.paged>1400){ st.paged=Date.now(); const cs=[...b.querySelectorAll(cfg.colSel)]; const cur=cs.reduce((m,c)=>Math.abs(c.getBoundingClientRect().left-br.left)<Math.abs(m.getBoundingClientRect().left-br.left)?c:m,cs[0]); const i=cs.indexOf(cur)+dir; const dest=cs[i]; if(dest){ const left=b.scrollLeft+dest.getBoundingClientRect().left-br.left-4; try{ b.scrollTo({left,behavior:reduce()?"auto":"smooth"}); }catch(e){ b.scrollLeft=left; } } } movio=true; }
+      else if(dir<0&&b.scrollLeft>0){ b.scrollLeft-=Math.min(14,(EDGE-(st.x-br.left))*.3); movio=true; } else if(dir>0&&b.scrollLeft<b.scrollWidth-b.clientWidth-1){ b.scrollLeft+=Math.min(14,(EDGE-(br.right-st.x))*.3); movio=true; } }
+    const top=cfg.topMin?cfg.topMin():0; if(st.y<top+EDGE&&scrollY>0){ scrollBy(0,-Math.min(16,(top+EDGE-st.y)*.3)); movio=true; } else if(st.y>innerHeight-EDGE&&scrollY+innerHeight<document.documentElement.scrollHeight-1){ scrollBy(0,Math.min(16,(st.y-(innerHeight-EDGE))*.3)); movio=true; }
+    if(movio) moverFantasma(); raf=requestAnimationFrame(bucle); }
+  /* ----- soltar ----- */
+  function soltar(){ if(!st) return; if(!(st.over&&st.ok)){ regresar(); return; } const to=st.over; const col=cols().find(c=>colId(c)===to); const cont=col&&col.querySelector(cfg.cardsSel||".cards"); if(!cont){ regresar(); return; }
+    const card=st.card, g=st.ghost, id=st.id, from=st.from; st.commit=true; vibra(10); limpiarCols(); if(lbl) lbl.className="";
+    if(st.slot&&st.slot.isConnected){ st.slot.replaceWith(card); st.slot=null; } else { const vacio=cont.querySelector(".empty"); if(vacio) vacio.remove(); if(cfg.alInicio&&cfg.alInicio(to)) cont.prepend(card); else cont.appendChild(card); }
+    quitarSlot(); card.classList.remove("drag-src"); card.style.visibility="hidden";
+    const r2=card.getBoundingClientRect(); const r=st.rect; const fuera=r2.bottom<0||r2.top>innerHeight; /* si cae fuera de la vista, el fantasma se va hacia allá y se desvanece — RLR */ const ty=fuera?(r2.top>innerHeight?innerHeight-r.height*.4:-r.height*.6):r2.top;
+    const fin=()=>{ card.style.visibility=""; card.classList.add("moved"); setTimeout(()=>card.classList.remove("moved"),1300); try{ cfg.aplicar(id,from,to); }catch(e){ console.error(e); } quitar(); };
+    if(reduce()){ fin(); return; }
+    g.style.transition="transform .34s cubic-bezier(.2,.8,.2,1),box-shadow .34s,opacity .3s"; g.classList.add("landing"); if(fuera) g.style.opacity="0"; g.style.transform=`translate(${r2.left-r.left}px,${ty-r.top}px) scale(${fuera?.9:1}) rotate(0deg)`;
+    let done=false; g.addEventListener("transitionend",ev=>{ if(ev.propertyName==="transform"&&!done){ done=true; fin(); } }); setTimeout(()=>{ if(!done){ done=true; fin(); } },420); }
+  function regresar(){ if(!st||!st.ghost){ quitar(); return; } const g=st.ghost; limpiarCols(); quitarSlot(); if(lbl) lbl.className="";
+    if(!st.inmediato&&cfg.toast&&st.over&&st.over!==st.from&&!st.ok){ const r=cfg.puede(st.id,st.from,st.over); if(typeof r==="string") cfg.toast(r); }
+    if(reduce()){ quitar(); return; } g.style.transition="transform .38s cubic-bezier(.34,1.4,.4,1),box-shadow .3s"; g.style.transform="translate(0,0) scale(1) rotate(0deg)"; let done=false; const fin=()=>{ if(done) return; done=true; quitar(); }; g.addEventListener("transitionend",ev=>{ if(ev.propertyName==="transform") fin(); }); setTimeout(fin,460); }
+  /* ----- deslizar en una columna (celular) ----- */
+  function startSwipe(){ st.swiping=true; st.card.classList.add("swiping"); st.card.style.transition="none"; document.body.classList.add("swiping"); vibra(8); lbl=document.createElement("div"); lbl.id="swipeLbl"; document.body.appendChild(lbl); moveSwipe(); }
+  function moveSwipe(){ const dir=st.dx>0?1:-1; const to=cfg.vecino?cfg.vecino(st.id,st.from,dir):null; const r=to?cfg.puede(st.id,st.from,to):(dir>0?"Ya es el último paso":"Ya es el primer paso"); st.ok=r===true; st.over=to;
+    const lim=Math.min(Math.abs(st.dx),st.rect.width*.85); const x=dir*(st.ok?lim:lim*.25); st.card.style.transform=`translateX(${x}px) rotate(${x/70}deg)`; st.card.style.opacity=st.ok?String(Math.max(.5,1-Math.abs(x)/(st.rect.width*1.5))):"";
+    const listo=st.ok&&Math.abs(st.dx)>Math.max(80,st.rect.width*.3); lbl.textContent=(dir>0?"→ ":"← ")+(to?nombre(to):"")+(st.ok?(listo?" · suelta":""):" · "+(typeof r==="string"?r:"no se puede")); lbl.className=st.ok?(listo?"ok listo":"ok"):"no";
+    lbl.style.top=Math.min(innerHeight-60,Math.max(70,st.rect.top+st.rect.height/2))+"px"; if(dir>0){ lbl.style.left="12px"; lbl.style.right="auto"; } else { lbl.style.right="12px"; lbl.style.left="auto"; }
+    if(cfg.marcarPaso) cfg.marcarPaso(st.ok?to:null,listo); }
+  function endSwipe(){ const dir=st.dx>0?1:-1; const listo=st.ok&&Math.abs(st.dx)>Math.max(80,st.rect.width*.3); const card=st.card;
+    if(listo){ const id=st.id, from=st.from, to=st.over; st.commit=true; vibra(12); card.style.transition="transform .22s ease-in,opacity .22s ease-in"; card.style.transform=`translateX(${dir*(st.rect.width+80)}px) rotate(${dir*4}deg)`; card.style.opacity="0";
+      setTimeout(()=>{ try{ cfg.aplicar(id,from,to); }catch(e){ console.error(e); } card.style.transition=""; card.style.transform=""; card.style.opacity=""; quitar(); },230); }
+    else { card.style.transition="transform .4s cubic-bezier(.34,1.4,.4,1),opacity .3s"; card.style.transform="translateX(0) rotate(0)"; card.style.opacity=""; setTimeout(()=>{ card.style.transition=""; },420); quitar(); } }
+  return { activo:()=>!!st, id:()=>st?st.id:null, cancelar:()=>{ if(st){ if(st.lifted) regresar(); else quitar(); } } };
+};
+/* RLR · eye/181218 */
+
+/* ---------- Familias: arrastrar (escritorio) o deslizar (celular) una tarjeta hace lo mismo que sus botones — RLR ---------- */
+const tabsOrden=()=>[...document.querySelectorAll("#tabs .tab")].map(t=>t.dataset.v);
+function nombrePaso(to){ const t=document.querySelector('#tabs .tab[data-v="'+to+'"]'); if(t) return (t.querySelector(".ic")||{}).textContent+" "+t.title; const e=ESTADOS.find(x=>x.id===to); return e?e.e+" "+e.n:to; }
+function puedeDragFam(id,from,to){ const c=pedidos[id]; if(!c) return "No encontré el pedido"; const H=host&&!MESA(), M=mine.has(c.id); const tiene=c.personas.some(p=>personLines(p).length); const enCola=c.estado==="pedido"&&(!c.etapa||c.etapa==="proceso");
+  if(from==="archivado") return "Del historial no se mueve · usa 🔁 Duplicar";
+  if(to==="cocina"||to==="camino") return from==="entregado"&&to==="camino"?(H?true:"Eso lo cambia el anfitrión"):"Eso lo marca el restaurante 🍳";
+  if(to==="armando") return from==="porpedir"?true:"Ya está pedido · usa ✏️ Cambiar";
+  if(to==="porpedir") return from==="armando"?(tiene?true:"Ponle algo al pedido primero"):(from==="pedido"&&enCola)?(H||M?true:"Solo el anfitrión o el dueño del pedido"):"La cocina ya lo tiene 🔥";
+  if(to==="pedido"){ if(from==="porpedir") return faltantes(c).length?"⛔ Trae productos agotados: "+faltantes(c).join(", "):true; if(from==="armando"&&MESA()) return tiene?true:"Ponle algo al pedido primero"; if(from==="armando") return "Primero pásalo a Por pedir 📋"; return "Por aquí no hay regreso"; }
+  if(to==="entregado") return (from==="pedido"||from==="cocina"||from==="camino")?(H||MESA()?true:"Eso lo marca el repartidor 🛵"):"Primero debe estar pedido 📲";
+  if(to==="archivado") return from==="entregado"?(H?true:"Eso lo hace el anfitrión"):"Primero debe llegar ✅";
+  return "Aquí no"; }
+function aplicarDragFam(id,from,to){ const c=pedidos[id]; if(!c) return; const est=to==="camino"?"pedido":to; marcar(id,est);
+  toast({porpedir:from==="armando"?"📋 Listo · por pedir":"De vuelta a Por pedir",armando:"De vuelta a Armando",pedido:"Marcado como pedido 📲",camino:"De vuelta a En camino 🛵",entregado:"¡Buen provecho! 🛵",archivado:"Archivado · lo puedes repetir cuando quieras 🔁"}[to]||"Listo");
+  const t=document.querySelector('#tabs .tab[data-v="'+to+'"]'); if(t){ t.classList.add("dest","listo"); setTimeout(()=>t.classList.remove("dest","listo"),900); } renderBoardNow(); }
+const dragFam=dragKanban({ activo:()=>!document.querySelector(".modal.open")&&!document.body.classList.contains("is-home"), modoSwipe:()=>!matchMedia("(min-width:760px)").matches, cardSel:"article.card", colSel:".board .col", cardsSel:".cards", board:()=>document.querySelector(".board"), topMin:()=>{ const h=document.querySelector("header"); return h?h.getBoundingClientRect().bottom:0; }, nombre:nombrePaso,
+  puedeMover:(id,from)=>from==="archivado"?"Del historial no se mueve · usa 🔁 Duplicar":true, puede:puedeDragFam, aplicar:aplicarDragFam, alInicio:to=>to==="entregado"||to==="archivado", toast:t=>toast(t),
+  vecino:(id,from,dir)=>{ const o=tabsOrden(); const i=o.indexOf(from); return i<0?null:(o[i+dir]||null); }, marcarPaso:(to,listo)=>{ document.querySelectorAll("#tabs .tab.dest").forEach(t=>t.classList.remove("dest","listo")); if(to){ const t=document.querySelector('#tabs .tab[data-v="'+to+'"]'); if(t){ t.classList.add("dest"); if(listo) t.classList.add("listo"); } } },
+  alTerminar:()=>{ if(ui.renderPend){ ui.renderPend=false; renderBoard(); } } });
+
 function reconcileBoard(root,html){ const tpl=document.createElement("div"); tpl.innerHTML=html; const nuevas=[...tpl.children], viejas=[...root.children];
   if(viejas.length!==nuevas.length||viejas.some((v,i)=>v.dataset.col!==nuevas[i].dataset.col)){ root.innerHTML=html; return; }
   const mapaG={}; root.querySelectorAll("article[data-id]").forEach(a=>mapaG[a.dataset.id]=a);

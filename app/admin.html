@@ -110,6 +110,33 @@ tr.tot td{font-weight:900;background:var(--y3)}
 .acts2 .btn:not(.ghost){flex:1;font-size:14px;padding:11px 12px;border-radius:12px}
 .acts2 .btn.ghost{padding:8px 10px}
 .acts2 .b.wip{align-self:center}
+
+/* arrastre de tarjetas — RLR */
+body.dragging{cursor:grabbing!important;-webkit-user-select:none;user-select:none}
+body.dragging *{cursor:grabbing!important}
+body.dragging .board{scroll-snap-type:none}
+.drag-src{opacity:.35!important;box-shadow:none!important;transform:scale(.98);outline:2px dashed rgba(0,0,0,.25);outline-offset:-2px}
+.drag-ghost{position:fixed;z-index:999;margin:0;pointer-events:none;box-shadow:0 22px 44px rgba(0,0,0,.28),0 4px 10px rgba(0,0,0,.14)!important;will-change:transform;transform-origin:50% 50%;opacity:.98;animation:none!important}
+.drag-ghost.landing{box-shadow:0 2px 8px rgba(0,0,0,.12)!important}
+.col.drop-can{outline:2px dashed rgba(0,0,0,.2);outline-offset:-2px;transition:background .15s,opacity .15s}
+.col.drop-dim{opacity:.5;transition:opacity .15s}
+.col.drop-ok{outline:3px solid #2D9D4A;outline-offset:-3px;background:rgba(45,157,74,.14)!important}
+.col.drop-no{outline:3px solid #E4322B;outline-offset:-3px;background:rgba(228,50,43,.08)!important}
+.drop-slot{border:2px dashed #2D9D4A;border-radius:14px;background:rgba(45,157,74,.1);height:0;opacity:0;transition:opacity .18s,height .18s ease-out;box-sizing:border-box}
+.drop-slot.in{opacity:1}
+.empty.drop-hid{display:none}
+#dragLbl,#swipeLbl{position:fixed;z-index:1000;pointer-events:none;color:#fff;font-weight:900;font-size:13px;padding:7px 12px;border-radius:999px;box-shadow:0 6px 18px rgba(0,0,0,.25);white-space:nowrap;max-width:82vw;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .12s,background .12s;background:#231F1A}
+#dragLbl.ok,#swipeLbl.ok{background:#2D9D4A;opacity:1}
+#dragLbl.no,#swipeLbl.no{background:#E4322B;opacity:1}
+#swipeLbl{transform:translateY(-50%);font-size:14px}
+#swipeLbl.listo{transform:translateY(-50%) scale(1.1)}
+body.swiping{-webkit-user-select:none;user-select:none}
+.swiping{will-change:transform;position:relative;z-index:5}
+@media(pointer:coarse){ .board article{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none} }
+@media(prefers-reduced-motion:reduce){ .drop-slot{transition:none} }
+
+.pc{cursor:grab}
+.col[data-col="archivado"] .pc{cursor:default}
 @keyframes fl{0%{background:#FFF3B0}100%{background:#fff}}
 .pc-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
 .pc-top h3{font-size:15px;font-weight:900}
@@ -876,14 +903,15 @@ function renderPanorama(){
 /* ---------- 2. PEDIDOS (kanban del negocio) ---------- */
 function coincide(c,q){ if(!q) return true; const t=(c.familia+" "+c.tablero+" "+c.id+" "+toArr(c.personas).map(p=>nombreDe(p)+" "+personLines(p).join(" ")).join(" ")+" "+(c.notas||"")).toLowerCase(); return q.toLowerCase().split(/\s+/).filter(Boolean).every(w=>t.includes(w)); }
 function renderPedidos(){
+  if(document.body.dataset.drag){ renderPend=true; return; } /* mientras alguien arrastra, el tablero se queda quieto y se pinta al soltar — RLR */
   const cardsAll=filtradas().filter(c=>coincide(c,q)); const cards=cardsAll.filter(pasaPago); const snap={}; const now=Date.now(); Object.keys(flash).forEach(k=>{ if(now-flash[k]>1600) delete flash[k]; });
   const colPrev=prevCol; prevCol={}; cards.forEach(c=>{ snap[c.id]=JSON.stringify(c); const col=colDeAdmin(c); prevCol[c.id]=col; if(!first&&c._w!==SID&&prev[c.id]!==snap[c.id]) flash[c.id]=now; if(!first&&colPrev[c.id]&&colPrev[c.id]!==col) moved[c.id]=now; }); prev=snap; first=false; Object.keys(moved).forEach(k=>{ if(now-moved[k]>900) delete moved[k]; });
   const antes=flipAntes($("#main"));
   const Tc=sumT(cards.filter(c=>c.estado==="pedido"&&(!c.etapa||c.etapa==="proceso"||c.etapa==="armado")));
   const aeP=document.activeElement; const keepP=aeP&&aeP.id==="q"?{s:aeP.selectionStart,e:aeP.selectionEnd}:null;
-  pintarPedidos(`<div class="top"><h1>📋 Pedidos</h1><input class="buscar" id="q" value="${esc(q)}" placeholder="🔎 Buscar familia, persona, guiso, tablero…"><span class="sp"></span>${filtrosHTML()}${anfBarHTML()}<div class="sub">🍳 En cocina ahora: ${esc(totStr(Tc))} · toca los botones para avanzar cada pedido; las familias lo ven al instante.${q?` · <b>${cards.length}</b> resultado${cards.length===1?"":"s"} para "${esc(q)}"`:""}</div></div>
+  pintarPedidos(`<div class="top"><h1>📋 Pedidos</h1><input class="buscar" id="q" value="${esc(q)}" placeholder="🔎 Buscar familia, persona, guiso, tablero…"><span class="sp"></span>${filtrosHTML()}${anfBarHTML()}<div class="sub">🍳 En cocina ahora: ${esc(totStr(Tc))} · toca el botón de abajo o arrastra la tarjeta a su siguiente columna (con el mouse o con el dedo); las familias lo ven al instante.${q?` · <b>${cards.length}</b> resultado${cards.length===1?"":"s"} para "${esc(q)}"`:""}</div></div>
   ${filtroPagoHTML(cardsAll)}
-  <div class="board">${ETAPAS.map(e=>{ const cs=cards.filter(e.f).sort(e.k>=5?(a,b)=>(b.entregadoEn||b.archivadoEn||b.actualizado||0)-(a.entregadoEn||a.archivadoEn||a.actualizado||0):(a,b)=>(turno(a)-turno(b))); /* por turnos: el más antiguo arriba, el nuevo entra abajo; Historial al revés — RLR */ return `<section class="col k${e.k}" data-col="${e.id}"><div class="col-head"><span>${e.n}</span><span class="n">${cs.length}</span></div>${e.id==="armando"&&fTab&&!(anfitriones[fTab]||{}).mostrador?`<button class="btn p otrafam" data-otrafam="${esc(fTab)}">➕ Otra familia en este tablero</button>`:""}<div class="cards">${cs.length?cs.map(cardHTML).join(""):`<div class="empty">Nada por aquí</div>`}</div></section>`; }).join("")}</div>`);
+  <div class="board">${ETAPAS.map(e=>{ const cs=cards.filter(c=>enCol(c,e)).sort(e.k>=5?(a,b)=>(b.entregadoEn||b.archivadoEn||b.actualizado||0)-(a.entregadoEn||a.archivadoEn||a.actualizado||0):(a,b)=>(turno(a)-turno(b))); /* por turnos: el más antiguo arriba, el nuevo entra abajo; Historial al revés — RLR */ return `<section class="col k${e.k}" data-col="${e.id}"><div class="col-head"><span>${e.n}</span><span class="n">${cs.length}</span></div>${e.id==="armando"&&fTab&&!(anfitriones[fTab]||{}).mostrador?`<button class="btn p otrafam" data-otrafam="${esc(fTab)}">➕ Otra familia en este tablero</button>`:""}<div class="cards">${cs.length?cs.map(cardHTML).join(""):`<div class="empty">Nada por aquí</div>`}</div></section>`; }).join("")}</div>`);
   flipDespues($("#main"),antes); if(keepP){ const el=$("#q"); if(el){ el.focus({preventScroll:true}); try{ el.setSelectionRange(keepP.s,keepP.e); }catch(x){} } }
 }
 /* Pinta el tablero sin destruirlo: las tarjetas que no cambiaron se quedan; las que cambian de columna se MUEVEN (mismo nodo) y el FLIP las desliza — RLR */
@@ -902,7 +930,7 @@ function pintarPedidos(html){ const main=$("#main"); const viejo=main.querySelec
 const turno=c=>({armando:c.creado,porpedir:c.listoEn||c.actualizado,pedido:c.pedidoEn,entregado:c.entregadoEn,archivado:c.archivadoEn}[c.estado])||c.creado||c.actualizado||0;
 function colDeAdmin(c){ const e=ETAPAS.find(e=>e.f(c)); return e?e.id:""; }
 let prevCol={}, moved={};
-let flipKey=""; function flipAntes(root){ const m={}; if(!root) return m; if(flipKey!==vista+"|"+pSuc){ flipKey=vista+"|"+pSuc; return m; } /* solo dentro de la misma vista — RLR */ root.querySelectorAll("article[data-id],.rstop[data-id]").forEach(el=>{ const r=el.getBoundingClientRect(); m[el.dataset.id]=[r.left,r.top]; }); return m; }
+let flipKey=""; function flipAntes(root){ const m={}; if(!root) return m; if(flipKey!==vista+"|"+pSuc){ flipKey=vista+"|"+pSuc; return m; } /* solo dentro de la misma vista — RLR */ root.querySelectorAll("article[data-id],.rstop[data-id]").forEach(el=>{ const r=el.getBoundingClientRect(); if(!r.width&&!r.height) return; /* oculta (otra pestaña): no animar desde (0,0) — RLR */ m[el.dataset.id]=[r.left,r.top]; }); return m; }
 function flipDespues(root,antes){ if(!root||matchMedia("(prefers-reduced-motion:reduce)").matches) return; const mov=[]; root.querySelectorAll("article[data-id],.rstop[data-id]").forEach(el=>{ const a=antes[el.dataset.id]; if(!a) return; const r=el.getBoundingClientRect(); const dx=a[0]-r.left, dy=a[1]-r.top; if(Math.abs(dx)<1&&Math.abs(dy)<1) return; el.style.transition="none"; el.style.transform=`translate(${dx}px,${dy}px)`; mov.push(el); });
   if(!mov.length) return; void root.offsetHeight; mov.forEach(el=>{ el.classList.add("flip"); el.style.transition=""; el.style.transform=""; el.addEventListener("transitionend",()=>{ el.classList.remove("flip"); el.removeAttribute("style"); },{once:true}); }); }
 /* Con el filtro en un anfitrión: su celular a la mano, un clic para marcar o para WhatsApp — RLR */
@@ -1685,6 +1713,124 @@ document.addEventListener("click",e=>{ const fp=e.target.closest("[data-fp]"); i
   if(a==="ticket"){ const c=((tableros[s]||{}).pedidos||{})[id]; if(c) imprimirComanda(c); }
   if(a==="repetir"){ repetirPedido(s,id); }
 });
+
+/* ===== Arrastre de tarjetas entre columnas: mouse, pluma o dedo — Ricardo López Reyero (RLR) · build eye · rev 181218 =====
+   Mouse/pluma: agarras y a los 6 px se levanta. Dedo en tablero de columnas: mantienes ~300 ms quieto y se levanta (si mueves antes, es scroll).
+   Dedo en una columna a la vez (celular familias): deslizas la tarjeta a la derecha o izquierda → paso siguiente o anterior.
+   La tarjeta levantada es un fantasma fijo que sigue al puntero; la original queda como hueco. Las columnas válidas se marcan y aparece
+   el espacio donde va a caer; la de abajo se pone verde o roja con el motivo junto al puntero. Al soltar, el fantasma viaja solo a su lugar
+   y se asienta; si no se puede, regresa con resorte. Cerca de los bordes, el tablero y la página se desplazan solos. Escape cancela. */
+window.dragKanban=function(cfg){
+  const HOLD=300, MOVE_MOUSE=6, CANCEL_TOUCH=10, EDGE=70;
+  let st=null, raf=0, lbl=null;
+  const reduce=()=>matchMedia("(prefers-reduced-motion:reduce)").matches;
+  const vibra=ms=>{ try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} };
+  const colId=el=>el?el.dataset.col:null;
+  const cols=()=>[...document.querySelectorAll(cfg.colSel)];
+  const nombre=to=>cfg.nombre?cfg.nombre(to):to;
+  function cardAt(e){ const t=e.target; if(!(t instanceof Element)) return null; if(t.closest("button,a,input,select,textarea,label,[contenteditable],.drag-ghost,.pmenu")) return null; const card=t.closest(cfg.cardSel); if(!card||!card.dataset.id) return null; const col=card.closest(cfg.colSel); if(!col) return null; return {card,col}; }
+  function limpiarCols(){ cols().forEach(c=>c.classList.remove("drop-can","drop-dim","drop-ok","drop-no")); }
+  function quitarSlot(){ if(st&&st.slot){ st.slot.remove(); st.slot=null; } document.querySelectorAll(".drop-slot").forEach(x=>x.remove()); document.querySelectorAll(".empty.drop-hid").forEach(x=>x.classList.remove("drop-hid")); }
+  function quitar(){ document.removeEventListener("touchmove",onTouchMove); if(st&&st.timer) clearTimeout(st.timer); cancelAnimationFrame(raf); raf=0; document.body.classList.remove("dragging","swiping"); delete document.body.dataset.drag; limpiarCols(); quitarSlot();
+    if(st&&st.ghost) st.ghost.remove(); if(st&&st.card){ st.card.classList.remove("drag-src","swiping"); if(!st.commit){ st.card.style.transform=""; st.card.style.transition=""; st.card.style.opacity=""; } }
+    if(lbl){ lbl.remove(); lbl=null; } if(cfg.marcarPaso) cfg.marcarPaso(null,false); st=null; if(cfg.alTerminar) cfg.alTerminar(); }
+  function onTouchMove(e){ if(st&&(st.lifted||st.swiping)) e.preventDefault(); }
+  document.addEventListener("pointerdown",e=>{ if(st||e.button!==0||!cfg.activo()) return; const c=cardAt(e); if(!c) return; const from=colId(c.col), id=c.card.dataset.id; const pm=cfg.puedeMover?cfg.puedeMover(id,from):true; if(pm!==true) return;
+    const inmediato=e.pointerType==="mouse"||e.pointerType==="pen"; const rect=c.card.getBoundingClientRect();
+    st={card:c.card,col:c.col,id,from,x0:e.clientX,y0:e.clientY,x:e.clientX,y:e.clientY,rect,lifted:false,swiping:false,inmediato,pid:e.pointerId,mode:(cfg.modoSwipe&&cfg.modoSwipe())?"swipe":"drag",over:null,ok:false,dx:0,dy:0,commit:false,slot:null};
+    document.body.dataset.drag=id;
+    if(!inmediato&&st.mode==="drag") st.timer=setTimeout(()=>{ if(st&&!st.lifted&&Math.hypot(st.dx,st.dy)<=CANCEL_TOUCH) lift(); },HOLD);
+    if(!inmediato) document.addEventListener("touchmove",onTouchMove,{passive:false}); });
+  document.addEventListener("pointermove",e=>{ if(!st||e.pointerId!==st.pid) return; if(e.pointerType==="mouse"&&e.buttons===0){ if(st.lifted) soltar(); else quitar(); return; } /* se perdió el mouseup (fuera de la ventana): cerrar limpio — RLR */ st.x=e.clientX; st.y=e.clientY; st.dx=e.clientX-st.x0; st.dy=e.clientY-st.y0;
+    if(st.mode==="swipe"){ if(!st.swiping){ if(Math.abs(st.dx)>12&&Math.abs(st.dx)>Math.abs(st.dy)*1.4) startSwipe(); else if(Math.abs(st.dy)>14) quitar(); return; } moveSwipe(); return; }
+    if(!st.lifted){ if(!st.inmediato){ if(Math.hypot(st.dx,st.dy)>CANCEL_TOUCH) quitar(); return; } if(Math.hypot(st.dx,st.dy)>MOVE_MOUSE) lift(); else return; }
+    moverFantasma(); },{passive:true});
+  document.addEventListener("pointerup",e=>{ if(!st||e.pointerId!==st.pid) return; if(st.mode==="swipe"){ if(st.swiping) endSwipe(); else quitar(); return; } if(!st.lifted){ quitar(); return; } soltar(); });
+  document.addEventListener("pointercancel",e=>{ if(!st||e.pointerId!==st.pid) return; if(st.lifted) regresar(); else quitar(); });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&st){ if(st.lifted) regresar(); else quitar(); } });
+  document.addEventListener("contextmenu",e=>{ if(st&&!st.inmediato) e.preventDefault(); });
+  document.addEventListener("visibilitychange",()=>{ if(document.hidden&&st) quitar(); });
+  window.addEventListener("blur",()=>{ if(st) quitar(); });
+  /* ----- levantar ----- */
+  function lift(){ if(!st||st.lifted) return; st.lifted=true; clearTimeout(st.timer); const r=st.card.getBoundingClientRect(); st.rect=r;
+    const g=st.card.cloneNode(true); g.classList.add("drag-ghost"); g.classList.remove("flash","moved","flip","drag-src","mine","typing"); g.removeAttribute("data-id"); g.style.cssText=`left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;`; document.body.appendChild(g); st.ghost=g;
+    lbl=document.createElement("div"); lbl.id="dragLbl"; document.body.appendChild(lbl);
+    st.card.classList.add("drag-src"); document.body.classList.add("dragging"); vibra(12);
+    cols().forEach(c=>{ const to=colId(c); if(to===st.from) return; const ok=cfg.puede(st.id,st.from,to); c.classList.add(ok===true?"drop-can":"drop-dim"); });
+    if(cfg.toast){ let n=0; try{ n=+localStorage.getItem("ranitas-drag-hint")||0; }catch(e){} if(n<2){ try{ localStorage.setItem("ranitas-drag-hint",String(n+1)); }catch(e){} cfg.toast("Suéltala en la columna donde va 👇"); } }
+    moverFantasma(); if(!raf) raf=requestAnimationFrame(bucle); }
+  function ponerSlot(col){ quitarSlot(); const cont=col.querySelector(cfg.cardsSel||".cards"); if(!cont) return; const vacio=cont.querySelector(".empty"); if(vacio) vacio.classList.add("drop-hid"); const s=document.createElement("div"); s.className="drop-slot"; const h=st.rect.height; if(cfg.alInicio&&cfg.alInicio(colId(col))) cont.prepend(s); else cont.appendChild(s); st.slot=s; if(!reduce()) void s.offsetHeight; s.classList.add("in"); s.style.height=h+"px"; }
+  function etiqueta(){ if(!lbl||!st) return; const to=st.over; if(!to||to===st.from){ lbl.className=""; return; } if(st.ok){ lbl.textContent="✓ "+nombre(to); lbl.className="ok"; } else { const r=cfg.puede(st.id,st.from,to); lbl.textContent="✗ "+(typeof r==="string"?r:"Aquí no"); lbl.className="no"; }
+    if(st.inmediato){ lbl.style.left=(st.x+16)+"px"; lbl.style.top=(st.y+22)+"px"; lbl.style.transform="none"; } else { lbl.style.left=Math.max(10,Math.min(innerWidth-10,st.x))+"px"; lbl.style.top=Math.max(48,st.y-70)+"px"; lbl.style.transform="translate(-50%,-50%)"; } }
+  function moverFantasma(){ if(!st||!st.ghost) return; const g=st.ghost; g.style.transform=`translate(${st.dx}px,${st.dy}px) scale(${st.inmediato?1.035:.88}) rotate(${Math.max(-2.5,Math.min(2.5,st.dx/140))}deg)`; /* con el dedo se encoge un poco para que se vea la columna de abajo — RLR */
+    const el=document.elementFromPoint(st.x,st.y); const col=el?el.closest(cfg.colSel):null; const to=colId(col);
+    if(to!==st.over){ cols().forEach(c=>c.classList.remove("drop-ok","drop-no")); quitarSlot(); st.over=to; st.ok=false;
+      if(col&&to!==st.from){ const r=cfg.puede(st.id,st.from,to); if(r===true){ col.classList.add("drop-ok"); st.ok=true; ponerSlot(col); if(!st.inmediato) vibra(6); } else col.classList.add("drop-no"); } }
+    etiqueta(); }
+  function bucle(){ if(!st||!st.lifted){ raf=0; return; } const b=cfg.board?cfg.board():null; let movio=false;
+    if(b&&b.scrollWidth>b.clientWidth+2){ const br=b.getBoundingClientRect(); const dir=st.x<br.left+EDGE?-1:st.x>br.right-EDGE?1:0; const col1=b.querySelector(cfg.colSel); const paginado=col1&&col1.getBoundingClientRect().width>b.clientWidth*.6; /* columnas de una en una (celular): corre UNA columna por vez, suave — RLR */
+      if(!dir) st.paged=0; else if(paginado){ if(!st.paged||Date.now()-st.paged>1400){ st.paged=Date.now(); const cs=[...b.querySelectorAll(cfg.colSel)]; const cur=cs.reduce((m,c)=>Math.abs(c.getBoundingClientRect().left-br.left)<Math.abs(m.getBoundingClientRect().left-br.left)?c:m,cs[0]); const i=cs.indexOf(cur)+dir; const dest=cs[i]; if(dest){ const left=b.scrollLeft+dest.getBoundingClientRect().left-br.left-4; try{ b.scrollTo({left,behavior:reduce()?"auto":"smooth"}); }catch(e){ b.scrollLeft=left; } } } movio=true; }
+      else if(dir<0&&b.scrollLeft>0){ b.scrollLeft-=Math.min(14,(EDGE-(st.x-br.left))*.3); movio=true; } else if(dir>0&&b.scrollLeft<b.scrollWidth-b.clientWidth-1){ b.scrollLeft+=Math.min(14,(EDGE-(br.right-st.x))*.3); movio=true; } }
+    const top=cfg.topMin?cfg.topMin():0; if(st.y<top+EDGE&&scrollY>0){ scrollBy(0,-Math.min(16,(top+EDGE-st.y)*.3)); movio=true; } else if(st.y>innerHeight-EDGE&&scrollY+innerHeight<document.documentElement.scrollHeight-1){ scrollBy(0,Math.min(16,(st.y-(innerHeight-EDGE))*.3)); movio=true; }
+    if(movio) moverFantasma(); raf=requestAnimationFrame(bucle); }
+  /* ----- soltar ----- */
+  function soltar(){ if(!st) return; if(!(st.over&&st.ok)){ regresar(); return; } const to=st.over; const col=cols().find(c=>colId(c)===to); const cont=col&&col.querySelector(cfg.cardsSel||".cards"); if(!cont){ regresar(); return; }
+    const card=st.card, g=st.ghost, id=st.id, from=st.from; st.commit=true; vibra(10); limpiarCols(); if(lbl) lbl.className="";
+    if(st.slot&&st.slot.isConnected){ st.slot.replaceWith(card); st.slot=null; } else { const vacio=cont.querySelector(".empty"); if(vacio) vacio.remove(); if(cfg.alInicio&&cfg.alInicio(to)) cont.prepend(card); else cont.appendChild(card); }
+    quitarSlot(); card.classList.remove("drag-src"); card.style.visibility="hidden";
+    const r2=card.getBoundingClientRect(); const r=st.rect; const fuera=r2.bottom<0||r2.top>innerHeight; /* si cae fuera de la vista, el fantasma se va hacia allá y se desvanece — RLR */ const ty=fuera?(r2.top>innerHeight?innerHeight-r.height*.4:-r.height*.6):r2.top;
+    const fin=()=>{ card.style.visibility=""; card.classList.add("moved"); setTimeout(()=>card.classList.remove("moved"),1300); try{ cfg.aplicar(id,from,to); }catch(e){ console.error(e); } quitar(); };
+    if(reduce()){ fin(); return; }
+    g.style.transition="transform .34s cubic-bezier(.2,.8,.2,1),box-shadow .34s,opacity .3s"; g.classList.add("landing"); if(fuera) g.style.opacity="0"; g.style.transform=`translate(${r2.left-r.left}px,${ty-r.top}px) scale(${fuera?.9:1}) rotate(0deg)`;
+    let done=false; g.addEventListener("transitionend",ev=>{ if(ev.propertyName==="transform"&&!done){ done=true; fin(); } }); setTimeout(()=>{ if(!done){ done=true; fin(); } },420); }
+  function regresar(){ if(!st||!st.ghost){ quitar(); return; } const g=st.ghost; limpiarCols(); quitarSlot(); if(lbl) lbl.className="";
+    if(!st.inmediato&&cfg.toast&&st.over&&st.over!==st.from&&!st.ok){ const r=cfg.puede(st.id,st.from,st.over); if(typeof r==="string") cfg.toast(r); }
+    if(reduce()){ quitar(); return; } g.style.transition="transform .38s cubic-bezier(.34,1.4,.4,1),box-shadow .3s"; g.style.transform="translate(0,0) scale(1) rotate(0deg)"; let done=false; const fin=()=>{ if(done) return; done=true; quitar(); }; g.addEventListener("transitionend",ev=>{ if(ev.propertyName==="transform") fin(); }); setTimeout(fin,460); }
+  /* ----- deslizar en una columna (celular) ----- */
+  function startSwipe(){ st.swiping=true; st.card.classList.add("swiping"); st.card.style.transition="none"; document.body.classList.add("swiping"); vibra(8); lbl=document.createElement("div"); lbl.id="swipeLbl"; document.body.appendChild(lbl); moveSwipe(); }
+  function moveSwipe(){ const dir=st.dx>0?1:-1; const to=cfg.vecino?cfg.vecino(st.id,st.from,dir):null; const r=to?cfg.puede(st.id,st.from,to):(dir>0?"Ya es el último paso":"Ya es el primer paso"); st.ok=r===true; st.over=to;
+    const lim=Math.min(Math.abs(st.dx),st.rect.width*.85); const x=dir*(st.ok?lim:lim*.25); st.card.style.transform=`translateX(${x}px) rotate(${x/70}deg)`; st.card.style.opacity=st.ok?String(Math.max(.5,1-Math.abs(x)/(st.rect.width*1.5))):"";
+    const listo=st.ok&&Math.abs(st.dx)>Math.max(80,st.rect.width*.3); lbl.textContent=(dir>0?"→ ":"← ")+(to?nombre(to):"")+(st.ok?(listo?" · suelta":""):" · "+(typeof r==="string"?r:"no se puede")); lbl.className=st.ok?(listo?"ok listo":"ok"):"no";
+    lbl.style.top=Math.min(innerHeight-60,Math.max(70,st.rect.top+st.rect.height/2))+"px"; if(dir>0){ lbl.style.left="12px"; lbl.style.right="auto"; } else { lbl.style.right="12px"; lbl.style.left="auto"; }
+    if(cfg.marcarPaso) cfg.marcarPaso(st.ok?to:null,listo); }
+  function endSwipe(){ const dir=st.dx>0?1:-1; const listo=st.ok&&Math.abs(st.dx)>Math.max(80,st.rect.width*.3); const card=st.card;
+    if(listo){ const id=st.id, from=st.from, to=st.over; st.commit=true; vibra(12); card.style.transition="transform .22s ease-in,opacity .22s ease-in"; card.style.transform=`translateX(${dir*(st.rect.width+80)}px) rotate(${dir*4}deg)`; card.style.opacity="0";
+      setTimeout(()=>{ try{ cfg.aplicar(id,from,to); }catch(e){ console.error(e); } card.style.transition=""; card.style.transform=""; card.style.opacity=""; quitar(); },230); }
+    else { card.style.transition="transform .4s cubic-bezier(.34,1.4,.4,1),opacity .3s"; card.style.transform="translateX(0) rotate(0)"; card.style.opacity=""; setTimeout(()=>{ card.style.transition=""; },420); quitar(); } }
+  return { activo:()=>!!st, id:()=>st?st.id:null, cancelar:()=>{ if(st){ if(st.lifted) regresar(); else quitar(); } } };
+};
+/* RLR · eye/181218 */
+
+/* ---------- Pedidos: arrastrar una tarjeta a otra columna hace lo MISMO que su botón de abajo (con Deshacer) — RLR ---------- */
+let dropPend={}, renderPend=false;
+function enCol(c,e){ const p=dropPend[c.id]; if(p){ if(colDeAdmin(c)===p.to||Date.now()-p.ts>5000){ delete dropPend[c.id]; return e.f(c); } return e.id===p.to; } return e.f(c); }
+const ETAPA_N=Object.fromEntries(ETAPAS.map(e=>[e.id,e.n]));
+function puedeDrop(id,from,to){ const c=allCards().find(x=>x.id===id); if(!c) return "No encontré el pedido"; const vacia=!lineasDe(c).length; const local=!esDomicilio(c); const enCocina=from==="proceso"||from==="armado";
+  if(from==="archivado") return "Del Historial no se mueve · usa 🔁 Repetir";
+  if(to==="proceso"||to==="armado") return "Eso lo marca la cocina 🍳";
+  if(to==="archivado") return from==="entregado"?true:"Primero entrégalo ✅";
+  if(to==="armando") return from==="porpedir"?true:"Ya está pedido · cámbialo con ✏️ Editar";
+  if(to==="porpedir") return from==="armando"?(vacia?"Ponle productos antes de moverla":true):from==="pedido"?true:enCocina?"La cocina ya lo tiene 🔥":"Por aquí no hay regreso";
+  if(to==="pedido") return from==="armando"?(vacia?"Ponle productos antes de moverla":true):from==="porpedir"||from==="espera"?true:enCocina?"La cocina ya lo tiene 🔥":"Por aquí no hay regreso";
+  if(to==="espera") return (from==="pedido"||enCocina||from==="repartiendo")?true:from==="entregado"?(local?true:"Regresa primero a Repartiendo"):"Primero debe estar pedido 📲";
+  if(to==="repartiendo") return local?"Este se entrega aquí, no sale a reparto 🏪":(from==="pedido"||enCocina||from==="espera"||from==="entregado")?true:"Primero debe estar pedido 📲";
+  if(to==="entregado") return (from==="pedido"||enCocina||from==="espera"||from==="repartiendo")?true:"Primero debe estar pedido 📲";
+  return "Aquí no"; }
+function aplicarDrop(id,from,to){ const c=allCards().find(x=>x.id===id); if(!c) return; const s=c.slug, fam=c.familia||"", cfg=(tableros[s]||{}).config||{}, now=Date.now(); let patch=null, msg="", det="", cat="pedido";
+  if(to==="porpedir"){ if(from==="armando"){ patch={estado:"porpedir",listo:true,listoEn:now}; msg="📋 Listo · por pedir"; det="Marcó Listo → Por pedir"; } else { patch={estado:"porpedir",etapa:null,pedidoEn:null}; msg="De vuelta a Por pedir"; det="Regresó de Pedido a Por pedir"; } }
+  else if(to==="armando"){ patch={estado:"armando",listo:false}; msg="De vuelta a Armando"; det="Regresó a Armando"; }
+  else if(to==="pedido"){ if(from==="espera"){ patch={etapa:"proceso"}; msg="De vuelta a cocina 🍳"; det="Regresó a En proceso"; } else { patch={estado:"pedido",etapa:"proceso",pedidoEn:now,listo:true,sucursal:c.sucursal||cfg.sucursal||pSuc||null}; if(from==="armando") patch.listoEn=now; msg="📲 Pedido · ya lo ve la cocina"; det="Tomó el pedido (la familia pidió por fuera)"+(from==="armando"?" directo desde Armando":"")+": "+totStr(totales(c)); } }
+  else if(to==="espera"){ patch={estado:"pedido",etapa:"espera",entregadoEn:null}; if(from!=="repartiendo"&&from!=="entregado") patch.listoCocinaEn=now; msg=(from==="repartiendo"||from==="entregado")?"De vuelta a Espera ⏳":"Esperando repartidor ⏳"; det=from==="repartiendo"?"Regresó a Espera":from==="entregado"?"Regresó de Entregado a Espera":"Marcó listo, espera repartidor"; }
+  else if(to==="repartiendo"){ patch={estado:"pedido",etapa:"repartiendo",entregadoEn:null}; if(!c.listoCocinaEn) patch.listoCocinaEn=now; msg="En camino 🛵"; det=from==="entregado"?"Regresó de Entregado a Repartiendo":"Salió a repartir"; cat="reparto"; }
+  else if(to==="entregado"){ patch={estado:"entregado",etapa:"entregado",entregadoEn:now}; if(!c.listoCocinaEn) patch.listoCocinaEn=now; msg="✅ Entregado "+fam; det=c.mesa?"Entregó en la mesa":c.mostrador?"Entregó en mostrador":c.repartidor?"Entregó en la puerta del cliente":"Marcó entregado al cliente"; cat="reparto"; }
+  else if(to==="archivado"){ patch={estado:"archivado",archivadoEn:now}; msg="Archivado 📚"; det="Archivó"; }
+  if(!patch) return; const antes={}; Object.keys(patch).forEach(k=>antes[k]=c[k]===undefined?null:c[k]);
+  dropPend[id]={to,ts:now}; upd(s,id,patch); bit(cat,to,det+" · arrastró "+(ETAPA_N[from]||from)+" → "+(ETAPA_N[to]||to),{pedido:id,familia:fam,tablero:s});
+  let extra=""; if(to==="entregado"){ const hoy0=new Date(); hoy0.setHours(0,0,0,0); const repId=(c.repartidor||{}).id; const nRep=repId?allCards().filter(x=>(x.repartidor||{}).id===repId&&(x.estado==="entregado"||x.estado==="archivado")&&x.entregadoEn>=hoy0.getTime()).length+1:0; if(nRep){ extra=" · "+nRep+" hoy"; hito(nRep,(c.repartidor||{}).nombre,"entregas"); } }
+  toastAcciones(msg+extra,[{l:"↩︎ Deshacer",fn:()=>{ delete dropPend[id]; upd(s,id,antes); toast("Regresó a "+(ETAPA_N[from]||from)); bit("pedido","deshizo","Deshizo el movimiento a "+(ETAPA_N[to]||to),{pedido:id,familia:fam,tablero:s}); }}],6000); }
+const dragPedidos=dragKanban({ activo:()=>vista==="pedidos"&&!pos.card, cardSel:"article.pc", colSel:".board .col", cardsSel:".cards", board:()=>document.querySelector("#main .board"), topMin:()=>{ const a=document.querySelector("aside"); const r=a&&a.getBoundingClientRect(); return r&&r.height<160?r.bottom:0; }, nombre:to=>ETAPA_N[to]||to,
+  puedeMover:(id,from)=>from==="archivado"?"Del Historial no se mueve · usa 🔁 Repetir":true, puede:puedeDrop, aplicar:aplicarDrop, alInicio:to=>to==="entregado"||to==="archivado", toast:t=>toast(t), alTerminar:()=>{ if(renderPend){ renderPend=false; render(); } } });
+
 /* Repetir: clona el pedido en Armando con la MISMA liga (la familia sigue entrando por su liga de siempre); el anterior se va al Historial — RLR */
 function repetirPedido(slug,id){ const old=((tableros[slug]||{}).pedidos||{})[id]; if(!old) return; const c=JSON.parse(JSON.stringify(old)); const nid=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
   ["pedidoEn","entregadoEn","archivadoEn","mensaje","tel","pago","faltas","avance","empaque","cocinero","repartidor","viaje","salioEn","regresoEn","etapa","listoEn","listoCocinaEn","armadoEn","_w"].forEach(k=>delete c[k]);

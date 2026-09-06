@@ -58,6 +58,7 @@ Es **la misma tarjeta** en todos lados: lo que la familia teclea lo ve la caja a
 - **Tablero**: Kanban Armando → Por pedir → Pedido → Cocina → En camino → Entregado → Historial. Cada familia es una tarjeta; dentro, cada persona con sus gorditas (🌾 harina ámbar / 🌽 maíz azul), chilaquiles (salsa con su picor, queso, agregados), postres y bebidas.
 - **Modo anfitrión**: se activa con el celular del anfitrión (`?host=<tel>`). Solo él manda el WhatsApp consolidado a la sucursal, ve quién está escribiendo, y recibe avisos cuando una familia da Listo.
 - **Repetir pedido**: cualquier pedido del historial se clona con un toque.
+- **Mover tarjetas con la mano**: en celular se desliza la tarjeta a la derecha (siguiente paso) o a la izquierda (regresar); en computadora se arrastra con el mouse a la columna. Hace lo mismo que los botones y respeta las mismas reglas (el restaurante mueve Cocinando / En camino).
 - **Agotados**: si Productos apaga algo, sale en rojo y no deja mandar hasta ajustar. Si la cocina marca "no hubo" después de pedido, la familia ve el aviso.
 - **Mesas**: una liga `mesa-<sucursal>-<n>` abre el tablero de esa mesa; el comensal ordena solo y la cocina lo recibe con prioridad.
 
@@ -68,7 +69,7 @@ Es **la misma tarjeta** en todos lados: lo que la familia teclea lo ve la caja a
 | Vista | Para qué | Quién |
 |---|---|---|
 | 📊 **Panorama** | Data room: pedidos de hoy, gorditas por guiso y masa, tiempos de cocina y reparto, hora pico, historial de 14 días, línea de tiempo de un pedido. | Dueño |
-| 📋 **Pedidos** | Kanban de todo el negocio con búsqueda, filtros por sucursal y tablero, etiquetas Pagado / Por entregar, botones para avanzar cada pedido, comanda imprimible 🖨, "Otra familia en este tablero" y barra del anfitrión con Llamar y WhatsApp. | Caja, dueño |
+| 📋 **Pedidos** | Kanban de todo el negocio con búsqueda, filtros por sucursal y tablero, etiquetas Pagado / Por entregar, botón grande al pie de cada tarjeta para avanzarla **o arrastre con mouse / pluma / dedo** entre columnas (fantasma que sigue al puntero, columnas válidas marcadas, hueco donde cae, rojo con motivo si no puede, auto-scroll en los bordes, ↩︎ Deshacer), comanda imprimible 🖨, "Otra familia en este tablero" y barra del anfitrión con Llamar y WhatsApp. | Caja, dueño |
 | 🧾 **Mostrador** | POS: pedidos en sucursal tecleando o dictando (🎤), varios pedidos abiertos a la vez, número secuencial, atajos a mesas con pedido, anfitriones con pedido (buscador) y reparto. Al editar el pedido de un anfitrión se ven todas sus familias y se puede agregar otra. | Caja |
 | 🔥 **Cocina** | Cola con prioridad de mesa, "Lo tomo", paso 1 Comal (palomear guisos, "no hay" discreto), paso 2 Empaque (una bolsa por persona), demanda en tandas, pantalla completa. | Cocineros |
 | 🛵 **Reparto** | La segunda cocina: listos para salir agrupados por colonia, el repartidor arma su viaje con varios pedidos, ruta completa en Maps, entrega parada por parada, cobra, "Regresa" si no estaba el cliente. | Repartidores |
